@@ -96,13 +96,10 @@ def populate_buy_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
     return dataframe
 ```
 ## Tips for Working with Indicators
-Always check for NaN values at the start of datasets.
-
-Normalize values if comparing across indicators.
-
-Use multiple timeframes for confirmation (advanced).
-
-Don’t overfit! Simpler often works better.
+- Always check for `NaN` values at the start of datasets.
+- Normalize values if comparing across indicators.
+- Use multiple timeframes for confirmation (advanced).
+- Do **NOT** overfit! Simpler often works better.
 
 ## Summary
 |Indicator	|Purpose	                        |Buy Signal Example                  |
