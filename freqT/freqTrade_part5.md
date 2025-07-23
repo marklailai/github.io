@@ -1,4 +1,4 @@
-# Episode 5: Using Technical Indicators Effectively in Freqtrade
+# Part 5: Using Technical Indicators Effectively in Freqtrade
 
 Welcome to Episode 5 of the Freqtrade series! Now that you've built your first custom strategy, it's time to level up your strategy logic with **technical indicators**. Indicators help you understand price trends, volatility, and momentum—and they're the foundation of most algorithmic strategies.
 
