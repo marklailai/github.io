@@ -16,53 +16,53 @@ It differs from classic Schnorr in key ways: lattice-based operations replace mo
 ---
 
 ## Why is the commitment $w = A \cdot y$ rounded to $w_1$?
-The matrix$A$is public, so$w = A \cdot y$may leak information about$y$. Rounding$w$to$w_1$removes low bits and acts as a hiding function:
-- It makes recovering$y$from$w_1$hard,
+The matrix $A$ is public, so $w = A \cdot y$ may leak information about $y$. Rounding $w$ to $w_1$ removes low bits and acts as a hiding function:
+- It makes recovering $y$ from $w_1$ hard,
 - Yet keeps enough structure to enable correct verification later.
 
 ---
 
-## Is solving$w = A \cdot y$easy if$y$is small?
-Yes — smaller$y$makes this system more vulnerable, as it reduces the solution space. That’s why Dilithium uses both:
-- **Rejection sampling** to ensure$y$is uniformly random within a bounded domain,
-- **Rounding** to hide the output of$A \cdot y$.
+## Is solving $w = A \cdot y$ easy if $y$ is small?
+Yes — smaller $y$ makes this system more vulnerable, as it reduces the solution space. That’s why Dilithium uses both:
+- **Rejection sampling** to ensure $y$ is uniformly random within a bounded domain,
+- **Rounding** to hide the output of $A \cdot y$.
 
 ---
 
-## Is solving$t = A \cdot s_1$easy if$s_2 = 0$?
-Yes. If$s_2 = 0$, then$t = A \cdot s_1$, and with$s_1$being small, this resembles a bounded-solution SIS problem — which is much easier than LWE. The presence of$s_2$(noise term) is crucial to ensure hardness.
+## Is solving $t = A \cdot s_1$ easy if $s_2 = 0$?
+Yes. If $s_2 = 0$, then $t = A \cdot s_1$, and with $s_1$ being small, this resembles a bounded-solution SIS problem — which is much easier than LWE. The presence of $s_2$ (noise term) is crucial to ensure hardness.
 
 ---
 
-## Why isn’t$s_1$’s small size still a problem?
-It *would* be, if$t = A \cdot s_1 + s_2$were published directly. Instead,$t$is rounded using a "high bits" operation before publication:
+## Why isn’t $s_1$ ’s small size still a problem?
+It *would* be, if $t = A \cdot s_1 + s_2$ were published directly. Instead, $t$ is rounded using a "high bits" operation before publication:
 - This ensures that attackers only get coarse information,
-- Prevents them from solving for$s_1$or$s_2$easily.
+- Prevents them from solving for $s_1$ or $s_2$ easily.
 
 ---
 
-## If$y$and$s_1$have the same bound, is solving$w = A \cdot y$as hard as$t = A \cdot s_1$?
+## If $y$ and $s_1$ have the same bound, is solving $w = A \cdot y$ as hard as $t = A \cdot s_1$?
 Mathematically, yes — if both are small and unrounded, solving either is about equally hard. However:
--$y$is ephemeral and never published directly,
--$w$is rounded to$w_1$,
--$s_1$is protected by noise$s_2$and public key rounding.
+-$y$ is ephemeral and never published directly,
+-$w$ is rounded to $w_1$,
+-$s_1$ is protected by noise$s_2$and public key rounding.
 
 The scheme exploits these differences to balance security and efficiency.
 
 ---
 
-## Why is the response$z = y + c \cdot s_1$?
-Inspired by Schnorr: instead of revealing$y$directly (which would leak info), we hide it with a multiple of$s_1$. The response$z$is:
-- Verified by checking$A \cdot z - c \cdot t pprox w_1$,
-- Small due to prior rejection sampling on$y$and$s_1$,
+## Why is the response $z = y + c \cdot s_1$?
+Inspired by Schnorr: instead of revealing $y$ directly (which would leak info), we hide it with a multiple of $s_1$. The response $z$ is:
+- Verified by checking $A \cdot z - c \cdot t pprox w_1$,
+- Small due to prior rejection sampling on $y$ and $s_1$,
 - Subject to rejection if it violates size bounds.
 
 ---
 
 ## Why does key generation use rejection sampling?
 To ensure:
--$s_1, s_2$are short enough to prevent leaking info through$t = A \cdot s_1 + s_2$,
-- Later responses$z = y + c \cdot s_1$stay within bounds,
+-$s_1, s_2$ are short enough to prevent leaking info through $t = A \cdot s_1 + s_2$,
+- Later responses $z = y + c \cdot s_1$ stay within bounds,
 - Verification rounding and bounds-checks work reliably.
 
 Fast key generation variants are under research but must maintain these constraints.
