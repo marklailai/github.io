@@ -1,4 +1,4 @@
-# Episode 4: Writing Your First Custom Strategy in Freqtrade
+# Part 4: Writing Your First Custom Strategy in Freqtrade
 
 Welcome to Episode 4! Now that you’ve successfully run backtests using the built-in strategy, it’s time to write your **own custom strategy** using Python.
 
