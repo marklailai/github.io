@@ -1,5 +1,5 @@
 
-# Episode 1: What Is Freqtrade? Why Use a Crypto Trading Bot?
+# Part 1: What Is Freqtrade? Why Use a Crypto Trading Bot?
 
 In the fast-moving world of crypto trading, emotions and timing can make or break your portfolio. While most people buy and sell manually on exchanges like Binance or Bybit, others rely on algorithmic trading bots to automate their strategies, optimize timing, and reduce risk. One powerful open-source option is **Freqtrade**.
 
