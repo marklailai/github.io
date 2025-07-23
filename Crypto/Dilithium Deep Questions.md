@@ -7,7 +7,7 @@ The Dilithium signature scheme, part of the CRYSTALS suite selected in the NIST 
 
 ## Why is Dilithium called a "Schnorr-like" signature?
 Because the high-level structure mimics Schnorr: 
-1. **Commitment**: Sample a short random vector $y$, compute $ w = A \cdot y $.
+1. **Commitment**: Sample a short random vector $y$, compute $w=A\cdot y$.
 2. **Challenge**: Compute $ c = H(\mu, w_1) $.
 3. **Response**: Reveal $ z = y + c \cdot s_1 $.
 
