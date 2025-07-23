@@ -53,7 +53,7 @@ The scheme exploits these differences to balance security and efficiency.
 
 ## Why is the response $z = y + c \cdot s_1$?
 Inspired by Schnorr: instead of revealing $y$ directly (which would leak info), we hide it with a multiple of $s_1$. The response $z$ is:
-- Verified by checking $A \cdot z - c \cdot t pprox w_1$,
+- Verified by checking $A \cdot z - c \cdot t \approx w_1$,
 - Small due to prior rejection sampling on $y$ and $s_1$,
 - Subject to rejection if it violates size bounds.
 
