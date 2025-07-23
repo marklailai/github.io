@@ -69,48 +69,48 @@ Fast key generation variants are under research but must maintain these constrai
 
 ---
 
-## Why must$c \cdot s_2$be small in verification?
+## Why must $c \cdot s_2$ be small in verification?
 Verifier computes:
-\[ A \cdot z - c \cdot t = A \cdot y - c \cdot s_2 \]
-This must still round to$w_1$. If$c \cdot s_2$is too large, it alters the high bits and causes verification to fail. So$s_2$is small and$c$is sparse.
+$A \cdot z - c \cdot t = A \cdot y - c \cdot s_2$
+This must still round to $w_1$. If $c \cdot s_2$ is too large, it alters the high bits and causes verification to fail. So $s_2$ is small and $c$ is sparse.
 
 ---
 
-## Why different rounding for$t$and$w$?
--$t$(public key): uses *high bits* to obscure$s_1$,$s_2$but still allow recomputation of$A \cdot z - c \cdot t$.
--$w$: uses *centered* rounding to make$w_1$lose more info, better hiding ephemeral$y$.
+## Why different rounding for $t$ and $w$?
+-$t$ (public key): uses *high bits* to obscure $s_1$, $s_2$ but still allow recomputation of $A \cdot z - c \cdot t$.
+-$w$: uses *centered* rounding to make $w_1$ lose more info, better hiding ephemeral $y$.
 
 The rounding methods reflect the role of each variable.
 
 ---
 
-## Why compute$\mu = H(tr \| M)$before the signing loop?
-$\mu$binds the signature to:
-- The public key (via$tr$, a hash of the matrix$A$and$t_1$),
-- The message$M$.
+## Why compute $\mu = H(tr \| M)$ before the signing loop?
+$\mu$ binds the signature to:
+- The public key (via $tr$, a hash of the matrix $A$ and $t_1$),
+- The message $M$.
 
 This ensures deterministic challenge$c$, consistent rejection sampling, and prevents attacks across keys.
 
 ---
 
-## Why not just use$H(M)$for$\mu$?
-Without$tr$, an attacker might substitute the signature for a different public key. Including$tr$binds$M$to the original signer.
+## Why not just use $H(M)$ for $\mu$?
+Without $tr$, an attacker might substitute the signature for a different public key. Including $tr$ binds $M$ to the original signer.
 
 ---
 
 ## Why does Schnorr suffer from signature substitution?
-In classic Schnorr,$c = H(M, w)$could allow an attacker to:
-1. Extract$(z, c)$from a signature under key$pk_1$,
-2. Forge$(z, c)$under a new key$pk_2$.
+In classic Schnorr, $c = H(M, w)$ could allow an attacker to:
+1. Extract $(z, c)$ from a signature under key $pk_1$,
+2. Forge $(z, c)$ under a new key $pk_2$.
 
-Dilithium avoids this by hashing$tr \| M$before generating$c$.
+Dilithium avoids this by hashing $tr \| M$ before generating $c$.
 
 ---
 
 ## What is `SampleInBall()`?
-Generates a challenge polynomial$c \in R_q$:
-- Only$	au$non-zero entries,
-- Each non-zero is$\pm 1$,
+Generates a challenge polynomial $c \in R_q$:
+- Only $	au$ non-zero entries,
+- Each non-zero is $\pm 1$,
 - Deterministically derived from a hash digest.
 
 This ensures compact signatures and reproducible verification.
