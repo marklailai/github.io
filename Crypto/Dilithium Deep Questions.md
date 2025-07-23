@@ -1,3 +1,4 @@
+
 # Questions to Think Deep in Dilithium
 
 The Dilithium signature scheme, part of the CRYSTALS suite selected in the NIST post-quantum cryptography standardization process, is rich with elegant cryptographic design choices. While reading the specifications and studying the algorithm, certain technical decisions may prompt deeper questions. Below is a curated set of such questions, followed by intuitive and technical insights, aimed to provoke deeper understanding for practitioners and researchers.
@@ -5,72 +6,114 @@ The Dilithium signature scheme, part of the CRYSTALS suite selected in the NIST 
 ---
 
 ## Why is Dilithium called a "Schnorr-like" signature?
-Because the high-level structure mimics Schnorr: commit (sample y, compute w), challenge (hash message and commitment), response (z = y + cs1). However, Dilithium uses structured lattices (module-LWE, module-SIS) rather than discrete logs, and adds rounding and rejection sampling for lattice security.
+Because the high-level structure mimics Schnorr: 
+1. **Commitment**: Sample a short random vector \( y \), compute \( w = A \cdot y \).
+2. **Challenge**: Compute \( c = H(\mu, w_1) \).
+3. **Response**: Reveal \( z = y + c \cdot s_1 \).
+
+It differs from classic Schnorr in key ways: lattice-based operations replace modular exponentiation, and extra mechanisms (rounding, rejection sampling) are needed to preserve security and correctness under module-LWE/SIS assumptions.
 
 ---
 
-## Why is the commitment w = A*y rounded to w1?
-Without rounding, the verifier could potentially recover y from w = A*y since A is public. Rounding hides low bits of w to mask y, increasing the difficulty of recovering y while preserving enough correctness to enable verification.
+## Why is the commitment \( w = A \cdot y \) rounded to \( w_1 \)?
+The matrix \( A \) is public, so \( w = A \cdot y \) may leak information about \( y \). Rounding \( w \) to \( w_1 \) removes low bits and acts as a hiding function:
+- It makes recovering \( y \) from \( w_1 \) hard,
+- Yet keeps enough structure to enable correct verification later.
 
 ---
 
-## Is solving w = A*y easy if y is small?
-If y is small and unprotected, solving for y in w = A*y is indeed easier than solving a general module-LWE problem. This is why rounding and rejection sampling are used to reduce leakage about y.
+## Is solving \( w = A \cdot y \) easy if \( y \) is small?
+Yes — smaller \( y \) makes this system more vulnerable, as it reduces the solution space. That’s why Dilithium uses both:
+- **Rejection sampling** to ensure \( y \) is uniformly random within a bounded domain,
+- **Rounding** to hide the output of \( A \cdot y \).
 
 ---
 
-## Is solving t = A*s1 easy if s2 = 0?
-Yes, t = A*s1 + s2 becomes a plain LWE instance if s2 = 0. The hardness of LWE requires that the error s2 be nonzero and small. Without s2, recovering s1 becomes much easier.
+## Is solving \( t = A \cdot s_1 \) easy if \( s_2 = 0 \)?
+Yes. If \( s_2 = 0 \), then \( t = A \cdot s_1 \), and with \( s_1 \) being small, this resembles a bounded-solution SIS problem — which is much easier than LWE. The presence of \( s_2 \) (noise term) is crucial to ensure hardness.
 
 ---
 
-## But s1 is also small — doesn't that make t leak information?
-Yes, which is why the public key t = A*s1 + s2 is rounded (t1 = HighBits(t)) before publishing. This rounding hides some information about s1 while allowing verification later. Without it, s1 could potentially be recovered through lattice techniques.
+## Why isn’t \( s_1 \)’s small size still a problem?
+It *would* be, if \( t = A \cdot s_1 + s_2 \) were published directly. Instead, \( t \) is rounded using a "high bits" operation before publication:
+- This ensures that attackers only get coarse information,
+- Prevents them from solving for \( s_1 \) or \( s_2 \) easily.
 
 ---
 
-## If y and s1 have the same bounds, does solving w = A*y become as easy as solving t = A*s1?
-From a mathematical viewpoint, yes — if the bounds are identical and there's no rounding or error term, solving either is equally hard. However, Dilithium designs the bounds and rounding carefully to avoid this equivalence and keep y ephemeral.
+## If \( y \) and \( s_1 \) have the same bound, is solving \( w = A \cdot y \) as hard as \( t = A \cdot s_1 \)?
+Mathematically, yes — if both are small and unrounded, solving either is about equally hard. However:
+- \( y \) is ephemeral and never published directly,
+- \( w \) is rounded to \( w_1 \),
+- \( s_1 \) is protected by noise \( s_2 \) and public key rounding.
+
+The scheme exploits these differences to balance security and efficiency.
 
 ---
 
-## Why is the response z = y + c*s1?
-This is directly inspired by the Schnorr paradigm. The response encodes both the ephemeral y and the secret s1 influenced by the challenge c. It must be small enough to pass verification and rejection bounds.
+## Why is the response \( z = y + c \cdot s_1 \)?
+Inspired by Schnorr: instead of revealing \( y \) directly (which would leak info), we hide it with a multiple of \( s_1 \). The response \( z \) is:
+- Verified by checking \( A \cdot z - c \cdot t pprox w_1 \),
+- Small due to prior rejection sampling on \( y \) and \( s_1 \),
+- Subject to rejection if it violates size bounds.
 
 ---
 
 ## Why does key generation use rejection sampling?
-Keygen ensures that s1 and s2 (the secret vectors) are within bounds so that later computations — especially signature responses — remain small and rejection rates are manageable. This also ensures that rounding and reconstruction during verification are valid.
+To ensure:
+- \( s_1, s_2 \) are short enough to prevent leaking info through \( t = A \cdot s_1 + s_2 \),
+- Later responses \( z = y + c \cdot s_1 \) stay within bounds,
+- Verification rounding and bounds-checks work reliably.
+
+Fast key generation variants are under research but must maintain these constraints.
 
 ---
 
-## Why must c*s2 be small in verification?
-During verification, the verifier computes A*z - c*t = A*y - c*s2. For correctness, this result must align with the original w1 (rounded A*y). So, c*s2 must be small enough not to affect the high bits and cause verification failure.
+## Why must \( c \cdot s_2 \) be small in verification?
+Verifier computes:
+\[ A \cdot z - c \cdot t = A \cdot y - c \cdot s_2 \]
+This must still round to \( w_1 \). If \( c \cdot s_2 \) is too large, it alters the high bits and causes verification to fail. So \( s_2 \) is small and \( c \) is sparse.
 
 ---
 
-## Why does w use different rounding than t?
-w (the commitment) uses rounding to hide y completely. t (the public key) uses rounding to hide s1 and s2 partially, but still allow t1 to support signature verification. The rounding strategy is tuned to the role each value plays in security and correctness.
+## Why different rounding for \( t \) and \( w \)?
+- \( t \) (public key): uses *high bits* to obscure \( s_1 \),\( s_2 \) but still allow recomputation of \( A \cdot z - c \cdot t \).
+- \( w \): uses *centered* rounding to make \( w_1 \) lose more info, better hiding ephemeral \( y \).
+
+The rounding methods reflect the role of each variable.
 
 ---
 
-## Why does Dilithium compute \mu = H(tr || M) before the loop?
-\mu is the message digest bound to the key (tr). It’s used to compute the challenge deterministically. It must be fixed before the loop to ensure deterministic signatures and consistent rejection sampling across retries.
+## Why compute \( \mu = H(tr \| M) \) before the signing loop?
+\( \mu \) binds the signature to:
+- The public key (via \( tr \), a hash of the matrix \( A \) and \( t_1 \)),
+- The message \( M \).
+
+This ensures deterministic challenge \( c \), consistent rejection sampling, and prevents attacks across keys.
 
 ---
 
-## Why not just hash the message directly for \mu?
-Including `tr` (a hash of the public key) binds the message to the signer’s identity. This prevents signature substitution attacks across keys — a known issue in plain Schnorr when the public key is not part of the challenge hash.
+## Why not just use \( H(M) \) for \( \mu \)?
+Without \( tr \), an attacker might substitute the signature for a different public key. Including \( tr \) binds \( M \) to the original signer.
 
 ---
 
-## Why does Schnorr suffer from signature substitution across keys?
-If c = H(M || w), then an attacker could reuse a signature under a different public key. Binding the key into the challenge (e.g., c = H(pk || M || w)) prevents this. Dilithium achieves this with \mu = H(tr || M).
+## Why does Schnorr suffer from signature substitution?
+In classic Schnorr, \( c = H(M, w) \) could allow an attacker to:
+1. Extract \( (z, c) \) from a signature under key \( pk_1 \),
+2. Forge \( (z, c) \) under a new key \( pk_2 \).
+
+Dilithium avoids this by hashing \( tr \| M \) before generating \( c \).
 
 ---
 
-## What does SampleInBall do?
-It deterministically maps a hash digest to a sparse polynomial with \tau non-zero coefficients in \{-1, 1\}. It ensures that the challenge polynomial c is compact, sparse, and reproducible by the verifier, which helps maintain signature size and efficiency.
+## What is `SampleInBall()`?
+Generates a challenge polynomial \( c \in R_q \):
+- Only \( 	au \) non-zero entries,
+- Each non-zero is \( \pm 1 \),
+- Deterministically derived from a hash digest.
+
+This ensures compact signatures and reproducible verification.
 
 ---
 
@@ -95,3 +138,4 @@ def SampleInBall(tildec, n, tau):
         i += 1
     return c
 ```
+
