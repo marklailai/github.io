@@ -52,7 +52,7 @@ With a bot like Freqtrade, you can:
 
 ---
 
-## 🧠 Who Should Use Freqtrade?
+## Who Should Use Freqtrade?
 
 - Crypto enthusiasts who want to automate trading logic
 - Developers or data scientists looking to experiment with trading strategies
