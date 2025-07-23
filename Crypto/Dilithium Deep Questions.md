@@ -41,15 +41,6 @@ It *would* be, if $t = A \cdot s_1 + s_2$ were published directly. Instead, $t$ 
 
 ---
 
-## If $y$ and $s_1$ have the same bound, is solving $w = A \cdot y$ as hard as $t = A \cdot s_1$?
-Mathematically, yes — if both are small and unrounded, solving either is about equally hard. However:
--$y$ is ephemeral and never published directly,
--$w$ is rounded to $w_1$,
--$s_1$ is protected by noise$s_2$and public key rounding.
-
-The scheme exploits these differences to balance security and efficiency.
-
----
 
 ## Why is the response $z = y + c \cdot s_1$?
 Inspired by Schnorr: instead of revealing $y$ directly (which would leak info), we hide it with a multiple of $s_1$. The response $z$ is:
@@ -61,7 +52,7 @@ Inspired by Schnorr: instead of revealing $y$ directly (which would leak info), 
 
 ## Why does key generation use rejection sampling?
 To ensure:
--$s_1, s_2$ are short enough to prevent leaking info through $t = A \cdot s_1 + s_2$,
+- $s_1, s_2$ are short enough to prevent leaking info through $t = A \cdot s_1 + s_2$,
 - Later responses $z = y + c \cdot s_1$ stay within bounds,
 - Verification rounding and bounds-checks work reliably.
 
@@ -77,8 +68,8 @@ This must still round to $w_1$. If $c \cdot s_2$ is too large, it alters the hig
 ---
 
 ## Why different rounding for $t$ and $w$?
--$t$ (public key): uses *high bits* to obscure $s_1$, $s_2$ but still allow recomputation of $A \cdot z - c \cdot t$.
--$w$: uses *centered* rounding to make $w_1$ lose more info, better hiding ephemeral $y$.
+- $t$ (public key): uses *high bits* to obscure $s_1$, $s_2$ but still allow recomputation of $A \cdot z - c \cdot t$.
+- $w$: uses *centered* rounding to make $w_1$ lose more info, better hiding ephemeral $y$.
 
 The rounding methods reflect the role of each variable.
 
@@ -89,7 +80,7 @@ $\mu$ binds the signature to:
 - The public key (via $tr$, a hash of the matrix $A$ and $t_1$),
 - The message $M$.
 
-This ensures deterministic challenge$c$, consistent rejection sampling, and prevents attacks across keys.
+This ensures deterministic challenge $c$, consistent rejection sampling, and prevents attacks across keys.
 
 ---
 
@@ -109,7 +100,7 @@ Dilithium avoids this by hashing $tr \| M$ before generating $c$.
 
 ## What is `SampleInBall()`?
 Generates a challenge polynomial $c \in R_q$:
-- Only $	au$ non-zero entries,
+- Only $\tau$ non-zero entries,
 - Each non-zero is $\pm 1$,
 - Deterministically derived from a hash digest.
 
