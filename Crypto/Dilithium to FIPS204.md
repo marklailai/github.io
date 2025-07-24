@@ -37,7 +37,7 @@ The “toy” version of Dilithium followed the Schnorr logic but over the ring 
 
 1. **Keygen**: Generate matrix $A$, secrets $s_1, s_2$, and compute $t = As_1 + s_2$.
 2. **Sign**: Choose a short random $y$, compute $w = Ay$, derive challenge $c = H(M \parallel w)$, and output $z = y + c s_1$.
-3. **Verify**: Use public key $A, t$, check whether recomputed commitment matches challenge hash.
+3. **Verify**: Use public key $A, t$, check whether recomputed commitment $w_1\prime=HighBits(Az-ct)$ matches challenge hash: $c = H(M \parallel w_1\prime)$.
 
 ---
 
@@ -84,7 +84,9 @@ r1 = (r - r0) // 2^d
 ###  Problem 4: Signature May Leak Info About $s_1$
 
 - **Issue**: $z = y + c s_1$ can leak info if coefficients of $z$ are large.
-- **Solution**: Enforce bounds on $\|z\|_\infty < \gamma_1 - \beta$ and use rejection sampling to discard leaky signatures.
+- **Solution**:
+  - Enforce bounds on $\|z\|_\infty < \gamma_1 - \beta$ and use rejection sampling to discard leaky signatures.
+  - we want to compute $w$ but with $Az-ct$ we can only got $Az-ct=A(y+cs_1)-c(As_1+s2)=Ay-cs_2=w-cs_2$. So need check $\parallel r_0\parallel_\infty<\gamma_2-\beta$, where $r_0=LowBits(w-cs_2,2\gamma_2)$
 
 ---
 
