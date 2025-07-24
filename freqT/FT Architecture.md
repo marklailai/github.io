@@ -78,46 +78,46 @@ graph TD
     classDef optimization fill:#ffb703,stroke:#000,color:#000
     classDef ml fill:#8ecae6,stroke:#000,color:#000
 ```
-1. **Entry Point**
-- CLI / Command Line Interface: Entry point for all operations with various subcommands
-2. **Configuration**
-- Configuration System: Handles loading and validation of configuration from multiple sources
-3. **Core Engine**
-- FreqtradeBot Core Engine: Main orchestrator that ties all components together
-4. **Core Components**
+1. **Configuration**
+- **Configuration System**: Handles loading and validation of configuration from multiple sources
+2. **Core Engine**
+- **FreqtradeBot Core Engine**: Main orchestrator that ties all components together
+3. **Core Components**
 - **Exchange Layer**: Unified interface for interacting with various cryptocurrency exchanges
 
-  - CCXT Library: Foundation library supporting 100+ exchanges
-  - Exchange Specific Implementations: Customizations for specific exchange requirements
-  - Crypto Exchanges: Actual exchange connections (Binance, Kraken, etc.)
+  - **CCXT Library**: Foundation library supporting 100+ exchanges
+  - **Exchange Specific Implementations**: Customizations for specific exchange requirements
+  - **Crypto Exchanges**: Actual exchange connections (Binance, Kraken, etc.)
 - **Strategy Engine**: Executes user-defined trading strategies
 
-  - IStrategy Interface: Defines the contract for all trading strategies
-  - Data Provider: Supplies market data to strategies
-    - Market Data: OHLCV and real-time data feeds
-    - Custom Indicators: Technical indicators and custom metrics
-  - FreqAI ML Integration: Machine learning capabilities for predictive modeling
-    - Data Preprocessing: Data cleaning and normalization
-    - Feature Engineering: Creating input features for models
-    - Machine Learning Models: Predictive models for trading signals
+  - **IStrategy Interface**: Defines the contract for all trading strategies
+  - **Data Provider**: Supplies market data to strategies
+    - **Market Data**: OHLCV and real-time data feeds
+    - **Custom Indicators**: Technical indicators and custom metrics
+  - **FreqAI ML Integration**: Machine learning capabilities for predictive modeling
+    - **Data Preprocessing**: Data cleaning and normalization
+    - **Feature Engineering**: Creating input features for models
+    - **Machine Learning Models**: Predictive models for trading signals
 - **Persistence Layer**: Manages all data persistence
 
-  - SQLAlchemy ORM: Object-relational mapping for database operations
-  - SQLite / Other DB: Storage backend for trade history, orders, and configuration
+  - **SQLAlchemy ORM**: Object-relational mapping for database operations
+  - **SQLite / Other DB**: Storage backend for trade history, orders, and configuration
 - **RPC System**: Handles all external communications
 
-  - Telegram: Chat-based bot control and notifications
-  - Web Server/API: REST API and web interface
-  - Webhooks: HTTP callbacks for external integrations
-  - Discord: Discord bot integration
+  - **Telegram**: Chat-based bot control and notifications
+  - **Web Server/API**: REST API and web interface
+  - **Webhooks**: HTTP callbacks for external integrations
+  - **Discord**: Discord bot integration
 - **Optimization Tools**: Strategy development and optimization utilities
 
-  - Backtesting: Historical performance testing of strategies
-    - Performance Metrics: Analysis of strategy results
-  - Hyperopt: Automated parameter optimization
-    - Parameter Optimization: Finding optimal strategy parameters
-  - Edge: Risk analysis and position sizing tools
-    - Risk Management: Capital allocation and risk controls
+  - **Backtesting**: Historical performance testing of strategies
+    - **Performance Metrics**: Analysis of strategy results
+  - **Hyperopt**: Automated parameter optimization
+    - **Parameter Optimization**: Finding optimal strategy parameters
+  - **Edge**: Risk analysis and position sizing tools
+    - **Risk Management**: Capital allocation and risk controls
+4. **Entry Point**
+- **CLI / Command Line Interface**: Entry point for all operations with various subcommands
 
 Let's explore each of these components in detail.
 
@@ -254,13 +254,13 @@ The FreqAI interface allows strategies to incorporate predictive models while ma
 
 Freqtrade uses a command-line interface with subcommands for different operations:
 
-- [trade](file://freqtrade-develop\freqtrade\rpc\api_server\api_v1.py#L211-L215): Main trading mode
-- [backtesting](file://freqtrade-develop\freqtrade\optimize\backtesting.py#L0-L0): Historical strategy testing
-- [hyperopt](file://freqtrade-develop\tests\optimize\conftest.py#L41-L43): Parameter optimization
+- [`trade`](file://freqtrade-develop\freqtrade\rpc\api_server\api_v1.py#L211-L215): Main trading mode
+- [`backtesting`](file://freqtrade-develop\freqtrade\optimize\backtesting.py#L0-L0): Historical strategy testing
+- [`hyperopt`](file://freqtrade-develop\tests\optimize\conftest.py#L41-L43): Parameter optimization
 - `edge`: Risk analysis
 - `download-data`: Market data acquisition
 - `plot-dataframe`: Strategy visualization
-- [list-*](file://freqtrade-develop\docs\commands\list-data.md): Information listing commands
+- [`list-*`](file://freqtrade-develop\docs\commands\list-data.md): Information listing commands
 
 The argument parsing system (`freqtrade/commands/`) provides a consistent interface for all these operations.
 
@@ -277,6 +277,70 @@ The typical data flow in freqtrade follows this pattern:
 7. Information is communicated via RPC channels
 
 This flow can be modified based on the operation mode (live trading, backtesting, etc.).
+```mermaid
+graph TD
+    A[User Configuration] --> B[Configuration System]
+    C[Command Line Args] --> B
+    D[Environment Variables] --> B
+    
+    B --> E[FreqtradeBot Initialization]
+    
+    E --> F[Exchange Connection]
+    F --> G[Market Data Fetching]
+    
+    G --> H[Data Provider]
+    H --> I[Strategy Analysis]
+    
+    I --> J[Signal Generation]
+    J --> K[Trade Execution Engine]
+    
+    K --> L[Order Management]
+    L --> M[Exchange Orders]
+    M --> N[Order Status Updates]
+    N --> K
+    
+    K --> O[Trade Persistence]
+    O --> P[Database Storage]
+    
+    P --> Q[RPC Notifications]
+    Q --> R[Telegram]
+    Q --> S[Web Interface]
+    Q --> T[Webhooks]
+    
+    H --> U[Backtesting/Hyperopt]
+    U --> V[Historical Data]
+    V --> I
+    
+    I --> W[Performance Analysis]
+    W --> X[Strategy Optimization]
+    
+    Y[FreqAI ML Models] --> Z[ML Predictions]
+    Z --> I
+    
+    style A fill:#a8dadc
+    style B fill:#457b9d
+    style E fill:#1d3557,stroke:#fff,color:#fff
+    style F fill:#e63946
+    style H fill:#f28482
+    style I fill:#f4a26a
+    style K fill:#e9c46a
+    style O fill:#2a9d8f,stroke:#fff,color:#fff
+    style Q fill:#8ecae6
+    style U fill:#ffb703
+    style Y fill:#9d4edd
+    
+    classDef input fill:#a8dadc,stroke:#000
+    classDef config fill:#457b9d,stroke:#000,color:#fff
+    classDef core fill:#1d3557,stroke:#fff,color:#fff
+    classDef data fill:#e63946,stroke:#000,color:#fff
+    classDef processing fill:#f28482,stroke:#000
+    classDef analysis fill:#f4a26a,stroke:#000
+    classDef execution fill:#e9c46a,stroke:#000
+    classDef persistence fill:#2a9d8f,stroke:#fff,color:#fff
+    classDef notification fill:#8ecae6,stroke:#000
+    classDef optimization fill:#ffb703,stroke:#000
+    classDef ml fill:#9d4edd,stroke:#fff,color:#fff
+```
 
 ## Extensibility Points
 
