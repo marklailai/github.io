@@ -36,7 +36,7 @@ But instead of working in a group like Schnorr, Dilithium operates over **module
 The “toy” version of Dilithium followed the Schnorr logic but over the ring $R_q = \mathbb{Z}_q[x]/(x^n + 1)$. The steps were:
 
 1. **Keygen**: Generate matrix $A$, secrets $s_1, s_2$, and compute $t = As_1 + s_2$.
-2. **Sign**: Choose a short random $y$, compute $w = Ay$, derive challenge $c = H(M || w)$, and output $z = y + c s_1$.
+2. **Sign**: Choose a short random $y$, compute $w = Ay$, derive challenge $c = H(M \parallel w)$, and output $z = y + c s_1$.
 3. **Verify**: Use public key $A, t$, check whether recomputed commitment matches challenge hash.
 
 ---
