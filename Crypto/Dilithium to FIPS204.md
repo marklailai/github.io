@@ -48,6 +48,15 @@ The “toy” version of Dilithium followed the Schnorr logic but over the ring 
 - **Issue**: $A$, $t$, and $s_1, s_2$ are large.
 - **Solution**: Derive $A$ from a seed. Compress $t$ using `Power2Round` to store only high-order bits $t_1$, and regenerate $s_1, s_2$ from a secret seed.
 
+```pgsql
+Input:  r ∈ [0, q − 1], integer d
+Output: (r1, r0) such that r = r1 * 2^d + r0,
+        with r0 ∈ (−2^{d−1}, 2^{d−1}]
+```
+```python
+r0 = r mod 2^d
+r1 = (r - r0) // 2^d
+```
 ---
 
 ###  Problem 2: Repeated Hashing of Message $M$
