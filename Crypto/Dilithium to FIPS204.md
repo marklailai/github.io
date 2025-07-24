@@ -62,7 +62,12 @@ r1 = (r - r0) // 2^d
 ###  Problem 2: Repeated Hashing of Message $M$
 
 - **Issue**: Hashing $M$ repeatedly in each signing loop slows performance.
-- **Solution**: Hash once to get $\mu = H(M)$, then compute challenges as $c = H(\mu || w_1)$.
+- **Solution**: Hash once to get $\mu = H(M)$, then compute challenges as $c = H(\mu \parallel w_1)$.
+  - From the public key compute tag: $tr=𝐻(\parallel 𝑡_1)$
+    - $ρ$: seed used to expand matrix 
+    - $t_1$: high bits of public value 
+  - From the message: $𝜇=𝐻(tr\parallel 𝑀)$
+  - Use $μ$ for challenge derivation: $\tilde 𝑐=𝐻(𝜇\parallel 𝑤_1)$
 
 ---
 
@@ -70,6 +75,9 @@ r1 = (r - r0) // 2^d
 
 - **Issue**: Requires fresh randomness in each signature attempt.
 - **Solution**: Use deterministic ExpandMask from a secret seed $\kappa$ and counter.
+  - $(\rho, \rho\prime,K) =H(\xi,1024)$
+  - $\rho\prime\prime=H(K\parallel rnd\parallel\mu,512)$
+  - $y=ExpandMask(\rho\prime\prime,\kappa)$
 
 ---
 
