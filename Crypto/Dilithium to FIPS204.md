@@ -38,7 +38,10 @@ The “toy” version of Dilithium followed the Schnorr logic but over the ring 
 1. **Keygen**: Generate matrix $A$, secrets $s_1, s_2$, and compute $t = As_1 + s_2$.
 2. **Sign**: Choose a short random $y$, compute $w = Ay$, derive challenge $c = H(M \parallel w)$, and output $z = y + c s_1$.
 3. **Verify**: Use public key $A, t$, check whether recomputed commitment $w_1\prime=HighBits(Az-ct)$ matches challenge hash: $c = H(M \parallel w_1\prime)$.
-    - Note: $w_1\prime=Az-ct=A(y+cs_1)-c(As_1+s2)=Ay-cs_2=w-cs_2\ne w$, so $HighBits(w)=?HightBits(Az-ct)$ is used for verification and $cs_2$ need be "small".
+Note:
+  - $w_1\prime=Az-ct=A(y+cs_1)-c(As_1+s2)=Ay-cs_2=w-cs_2\ne w$, so $HighBits(w)\stackrel{?}{=}HightBits(Az-ct)=HighBits(w-cs_2)$ is used for verification and $cs_2$ need be "small".
+  - In full version, $t$ is compressed ($t=t_1\cdot2^d+t_0$) and only $t_1$ is passed as part of the public key, so $w_1\prime=Az-ct_12^d=A(y+cs_1)-c(t-t_0)=A(y+cs_1)-c(As_1+s_2-t_0)=w-cs_2+ct_0$.
+  - To ensure $HighBits(w_1\prime)=HighBits(Az-ct_12^d)=HighBits(w-cs_2+ct_0)$, $𝑤−𝑐𝑠_2$ shall be safely within an interval — not near a boundary — so adding $c𝑡_0\in[-\beta,\beta]$ won't push it over into a new HighBits value.
 
 ---
 
