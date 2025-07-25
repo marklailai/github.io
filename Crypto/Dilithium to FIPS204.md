@@ -115,7 +115,9 @@ r1 = (r - r0) // α
 ###  Problem 6: Compression of $t$
 
 - **Issue**: Only $t_1$ is stored in the public key; verifier lacks $t_0$.
-- **Solution**: Compute $Az - ct_1 2^d$ and include “hint bits” to help reconstruct original values.
+- **Solution**:
+  - Compute $Az - ct_1 2^d$ and include “hint bits” to help reconstruct original values.
+  - As mentioned in privious content, $w_1\prime=Az-ct_12^d=A(y+cs_1)-c(t-t_0)=A(y+cs_1)-c(As_1+s_2-t_0)=w-cs_2+ct_0$, 
 
 ---
 
