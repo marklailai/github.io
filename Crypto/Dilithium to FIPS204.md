@@ -38,6 +38,7 @@ The “toy” version of Dilithium followed the Schnorr logic but over the ring 
 1. **Keygen**: Generate matrix $A$, secrets $s_1, s_2$, and compute $t = As_1 + s_2$.
 2. **Sign**: Choose a short random $y$, compute $w = Ay$, derive challenge $c = H(M \parallel w)$, and output $z = y + c s_1$.
 3. **Verify**: Use public key $A, t$, check whether recomputed commitment $w_1\prime=HighBits(Az-ct)$ matches challenge hash: $c = H(M \parallel w_1\prime)$.
+    - Note: $w_1\prime=Az-ct=A(y+cs_1)-c(As_1+s2)=Ay-cs_2=w-cs_2\ne w$, so $HighBits(w)=?HightBits(Az-ct)$ is used for verification and $cs_2$ need be "small".
 
 ---
 
@@ -63,7 +64,7 @@ r1 = (r - r0) // 2^d
 
 - **Issue**: Hashing $M$ repeatedly in each signing loop slows performance.
 - **Solution**: Hash once to get $\mu = H(M)$, then compute challenges as $c = H(\mu \parallel w_1)$.
-  - From the public key compute tag: $tr=𝐻(\parallel 𝑡_1)$
+  - From the public key compute tag: $tr=𝐻(\rho\parallel 𝑡_1,2\lambda)$
     - $ρ$: seed used to expand matrix 
     - $t_1$: high bits of public value 
   - From the message: $𝜇=𝐻(tr\parallel 𝑀)$
@@ -85,7 +86,7 @@ r1 = (r - r0) // 2^d
 
 - **Issue**: $z = y + c s_1$ can leak info if coefficients of $z$ are large.
 - **Solution**:
-  - Enforce bounds on $\|z\|_\infty < \gamma_1 - \beta$ and use rejection sampling to discard leaky signatures.
+  - Enforce bounds on $\parallel z\parallel_\infty < \gamma_1 - \beta$ and use rejection sampling to discard leaky signatures.
   - we want to compute $w$ but with $Az-ct$ we can only got $Az-ct=A(y+cs_1)-c(As_1+s2)=Ay-cs_2=w-cs_2$. So need check $\parallel r_0\parallel_\infty<\gamma_2-\beta$, where $r_0=LowBits(w-cs_2,2\gamma_2)$
 
 ---
@@ -93,8 +94,19 @@ r1 = (r - r0) // 2^d
 ###  Problem 5: Compression of $w$
 
 - **Issue**: Verifier doesn’t have access to $w$, only $z, c$, and public key.
-- **Solution**: Use $w_1 = \text{HighBits}(w)$ and reconstruct it from compressed values and hints.
+- **Solution**:
+  - Use $w_1 = \text{HighBits}(w)$ and reconstruct it from compressed values and hints.
+  - As what we can get is $Az-ct=A(y+cs_1)-c(As_1+s2)=Ay-cs_2=w-cs_2=w_1+w_0-cs_2$, so $w_0-cs_2$ shall be small. Since $\parallel cs_2 \parallel_\infty\le\tau\eta=\beta$, if $\parallel LowBits(w-cs_2,2\gamma_2)<\gamma_2-\beta$, then we have $HighBits()$
 
+```pgsql
+Input: r ∈ [0, q−1], α such that q−1 = m · α
+Output: (r1, r0) such that r = r1 · α + r0
+        with r0 ∈ (−α/2, α/2]
+```
+```python
+r0 = r mod α
+r1 = (r - r0) // α
+```
 ---
 
 ###  Problem 6: Compression of $t$
