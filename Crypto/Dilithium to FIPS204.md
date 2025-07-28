@@ -47,6 +47,10 @@ Note:
 
 ##  Key Problems and Solutions
 
+### Bound requirement
+
+---
+
 ###  Problem 1: Large Key Sizes
 
 - **Issue**: $A$, $t$, and $s_1, s_2$ are large.
@@ -123,6 +127,8 @@ r1 = (r - r0) // α
 
 ###  Problem 7: Hint Bits
 
+- **Issue**: To enable the verifier to compute $HighBits(w-cs_2,2\gamma_2)$ from $w-cs_2+ct_0$ (without
+knowledge of $t_0$), the signer includes some “hint bits” in the signature.  These hint bits are essentially the “carry digits” when $−ct_0$ is added to $w−cs_2+ct_0$.
 - **Solution**: Use `MakeHint` and `UseHint` functions to encode the effect of the low bits so verifier can recover high bits of $w$ reliably.
 
 ---
