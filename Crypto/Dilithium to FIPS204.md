@@ -69,7 +69,7 @@ Note:
     - The one-bit hint is not enough — you'd need more complex reconciliation
 #### 3. Bound on $ct_0$
   - **Requirement:**
-    - $\|c t_0 \|_\infty \le \beta \quad \text{(where } \beta = \tau \cdot \eta \text{)}$
+    - $\|c t_0 \|_\infty < \beta \quad \text{(where } \beta = \tau \cdot \eta \text{)}$
   - **Why:**
     - Ensures that: substracting $ct_0$ from $w-cs_2$ will affect the HighBits of $w-cs_2$ by -1,0 or +1.
     - Prevents overflows that would alter `HighBits`
@@ -89,7 +89,7 @@ So, after compression of w and t by the signer, to recover w, what the verifier 
 |-------------|----------------------------------|----------------------------------------------|
 | $z$     | $\| z \|_\infty < \gamma_1 - \beta$ | Prevents key leakage, ensures correctness     |
 | $r_0$   | $\| \text{LowBits}(w - c s_2) \|_\infty < \gamma_2 - \beta$ | Keeps HighBits of $w$ unchanged|
-| $c t_0$ | $\| c t_0 \|_\infty \le \beta$        | substracting $ct_0$ from $w-cs_2$ will affect the HighBtis of $w-cs_2$ by -1, 0 or +1  |
+| $c t_0$ | $\| c t_0 \|_\infty < \beta$        | substracting $ct_0$ from $w-cs_2$ will affect the HighBtis of $w-cs_2$ by -1, 0 or +1  |
 
 
 ---
@@ -190,6 +190,45 @@ Where:
   - $r=w-cs_2$
   - $z=ct_0$
   - $\alpha=2\gamma_2$
+
+---
+
+### problem 8: Why Is There a Limit on the Number of 1s in Hint Bits?
+
+Dilithium uses a **hint vector** $h \in \{0,1\}^{k \cdot n}$ to tell the verifier **which coefficients of $Az - c t_1 \cdot 2^d$** need a rounding adjustment.
+
+But the number of 1s (i.e., nonzero hint positions) is **strictly bounded**: $\| h \|_0 \le \omega$
+
+Where:
+  - $\omega$ is a small constant (e.g., 75 in ML-DSA-87)
+  - $\| h \|_0$ means the number of 1s in $h$
+
+**Why This Bound Exists**
+
+  1. **Prevents Signature Leakage**
+    - Hint bits **leak information** about $c t_0$ (which depends on the secret key)
+    - If the number of 1s is too large, an attacker could learn structure in the secret
+    - Bounding it ensures that **only minimal information** is leaked
+
+  2. **Enables Signature Size Bound**
+    - Instead of sending all $k \cdot n$ bits, Dilithium only sends **positions of 1s**
+    - This compresses the hint from $k n$ bits → $\omega \cdot \log_2(k n)$ bits
+    - So bounding $\| h \|_0 \le \omega$ keeps the **signature size predictable and small**
+
+  3. **Prevents Signature Forgery / Oracle Attacks**
+    - A malicious signer could otherwise craft signatures with an arbitrary hint
+    - By bounding $\omega$, we limit the space of acceptable hints — this helps prevent forgery strategies where the attacker manipulates rounding
+
+  4. **Verification Efficiency**
+    - The verifier has to apply the hint to at most $\omega$ coefficients
+    - If unbounded, this could lead to performance degradation in the verification step
+
+| Purpose of Hint Limit | Why It Matters |
+|------------------------|----------------|
+| 🔐 Leak mitigation     | Fewer hints = less info about secret $t_0$ |
+| 📦 Signature size bound | Positions of 1s can be compressed efficiently |
+| ✅ Verifiability        | Bounds are part of the signature format; exceeding them = invalid |
+| ⛔ Attack resistance    | Prevents adaptive or malleable signature attacks |
 
 ---
 
