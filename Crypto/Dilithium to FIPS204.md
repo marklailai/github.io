@@ -53,13 +53,13 @@ Note:
 - **Solution**: Derive $A$ from a seed. Compress $t$ using `Power2Round` to store only high-order bits $t_1$, and regenerate $s_1, s_2$ from a secret seed.
 
 ```pgsql
-Input:  r ∈ [0, q − 1], integer d
-Output: (r1, r0) such that r = r1 * 2^d + r0,
-        with r0 ∈ (−2^{d−1}, 2^{d−1}]
+Input:  t ∈ [0, q − 1], integer d
+Output: (t1, t0) such that t = t1 * 2^d + t0,
+        with t0 ∈ (−2^{d−1}, 2^{d−1}]
 ```
 ```python
-r0 = r mod 2^d
-r1 = (r - r0) // 2^d
+t0 = t mod 2^d
+t1 = (t - t0) // 2^d
 ```
 ---
 
