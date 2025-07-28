@@ -47,7 +47,50 @@ Note:
 
 ##  Key Problems and Solutions
 
-### Bound requirement
+###  Bound requirement
+#### 1. Bound on $z=y+cs_1$
+  - **Requirement**:
+    - $\|z\|_\infty < \gamma_1 - \beta$
+  - **Why:**
+    - Prevents leakage of secret $s_1$:  if a coefficient of $z$ is at the maximum value, it reveals info about $s_1$
+  - **If not satisfied:**
+    - The signature could leak partial bits of the secret key
+    - Cryptanalysis (e.g., lattice attacks) becomes feasible over many signatures
+#### 2. Bound on $r_0=LowBits(w-cs_2,2\gamma_2)$
+  - **Requirement:**
+    - $\|r_0 \|_\infty < \gamma_2 - \beta$
+  - **Why:**
+    - Ensures that **subtracting $cs_2 \in [-\beta, \beta]$** to $w$ **will not change the high bits of $w$**
+    - So the verifier’s reconstruction via: $\text{HighBits}(w - c s_2 + ct_0) = \text{HighBits}(w)$ holds true
+    - Enables hint bit to be **sufficiently informative** (1-bit is enough)
+  - **If not satisfied:**
+    - The verifier may compute the wrong high bits
+    - Signature verification may fail even for valid signatures
+    - The one-bit hint is not enough — you'd need more complex reconciliation
+#### 3. Bound on $ct_0$
+  - **Requirement:**
+    - $\|c t_0 \|_\infty \le \beta \quad \text{(where } \beta = \tau \cdot \eta \text{)}$
+  - **Why:**
+    - Ensures that: substracting $ct_0$ from $w-cs_2$ will affect the HighBits of $w-cs_2$ by -1,0 or +1.
+    - Prevents overflows that would alter `HighBits`
+    - Guarantees that **UseHint** can operate correctly without full access to $t_0$
+
+  - **If not satisfied:**
+    - $c t_0$ could push a coefficient across the boundary of a rounding interval
+    - `HighBits` would shift, and verifier would fail to reconstruct correct challenge hash
+
+#### Summary Table
+So, after compression of w and t by the signer, to recover w, what the verifier can get is $Az-ct_12^d=w-cs_2+ct_0$:
+  - Bound on $r_0=\text{LowBits}(w - c s_2)$ ensures the HighBits of w will not be changed by substracting $cs_2$;
+  - Bound on $ct_0$ ensures substracting $ct_0$ from $w-cs_2$ will affect the HighBtis of $w-cs_2$ by -1, 0 or +1, and hint bits can be used for recovery of HighBits(w).
+
+
+| Value       | Bound                            | Purpose                                      |
+|-------------|----------------------------------|----------------------------------------------|
+| $z$     | $\| z \|_\infty < \gamma_1 - \beta$ | Prevents key leakage, ensures correctness     |
+| $r_0$   | $\| \text{LowBits}(w - c s_2) \|_\infty < \gamma_2 - \beta$ | Keeps HighBits of $w$ unchanged|
+| $c t_0$ | $\| c t_0 \|_\infty \le \beta$        | substracting $ct_0$ from $w-cs_2$ will affect the HighBtis of $w-cs_2$ by -1, 0 or +1  |
+
 
 ---
 
@@ -128,8 +171,25 @@ r1 = (r - r0) // α
 ###  Problem 7: Hint Bits
 
 - **Issue**: To enable the verifier to compute $HighBits(w-cs_2,2\gamma_2)$ from $w-cs_2+ct_0$ (without
-knowledge of $t_0$), the signer includes some “hint bits” in the signature.  These hint bits are essentially the “carry digits” when $−ct_0$ is added to $w−cs_2+ct_0$.
+knowledge of $t_0$), the signer includes some “hint bits” in the signature.  These hint bits are essentially the “carry digits” when $ct_0$ is substracted from $w−cs_2$.
 - **Solution**: Use `MakeHint` and `UseHint` functions to encode the effect of the low bits so verifier can recover high bits of $w$ reliably.
+
+```python
+MakeHint(z, r, α):
+    return 1 if HighBits(r + z, α) ≠ HighBits(r, α)
+    else 0
+
+UseHint(h, r, α):
+    if h == 1:
+        if LowBits(r) > 0:  increment HighBits
+        if LowBits(r) ≤ 0:  decrement HighBits
+    return HighBits(r) (adjusted)
+
+```
+Where:
+  - $r=w-cs_2$
+  - $z=ct_0$
+  - $\alpha=2\gamma_2$
 
 ---
 
