@@ -1,6 +1,6 @@
 # Part 6: Strategy Optimization with Hyperparameters (Hyperopt)
 
-Welcome to Episode 6! Now that you’ve created your custom strategy and explored technical indicators, it’s time to **optimize your strategy parameters** using Freqtrade’s built-in tool: **Hyperopt**.
+Welcome to Part 6! Now that you’ve created your custom strategy and explored technical indicators, it’s time to **optimize your strategy parameters** using Freqtrade’s built-in tool: **Hyperopt**.
 
 Hyperopt allows you to automatically search for the best combinations of parameters to maximize profitability or reduce risk—saving you hours of manual trial and error.
 
