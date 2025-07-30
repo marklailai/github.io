@@ -71,7 +71,7 @@ Note:
   - **Requirement:**
     - $\|c t_0 \|_\infty < \beta \quad \text{(where } \beta = \tau \cdot \eta \text{)}$
   - **Why:**
-    - Ensures that: substracting $ct_0$ from $w-cs_2$ will affect the HighBits of $w-cs_2$ by -1,0 or +1.
+    - Ensures that: adding $ct_0$ to $w-cs_2$ will affect the HighBits of $w-cs_2$ by -1,0 or +1.
     - Prevents overflows that would alter `HighBits`
     - Guarantees that **UseHint** can operate correctly without full access to $t_0$
 
@@ -82,7 +82,7 @@ Note:
 #### Summary Table
 So, after compression of w and t by the signer, to recover w, what the verifier can get is $Az-ct_12^d=w-cs_2+ct_0$:
   - Bound on $r_0=\text{LowBits}(w - c s_2)$ ensures the HighBits of w will not be changed by substracting $cs_2$;
-  - Bound on $ct_0$ ensures substracting $ct_0$ from $w-cs_2$ will affect the HighBtis of $w-cs_2$ by -1, 0 or +1, and hint bits can be used for recovery of HighBits(w).
+  - Bound on $ct_0$ ensures adding $ct_0$ to $w-cs_2$ will affect the HighBtis of $w-cs_2$ by -1, 0 or +1, and hint bits can be used for recovery of HighBits(w).
 
 
 | Value       | Bound                            | Purpose                                      |
@@ -171,7 +171,7 @@ r1 = (r - r0) // α
 ###  Problem 7: Hint Bits
 
 - **Issue**: To enable the verifier to compute $HighBits(w-cs_2,2\gamma_2)$ from $w-cs_2+ct_0$ (without
-knowledge of $t_0$), the signer includes some “hint bits” in the signature.  These hint bits are essentially the “carry digits” when $ct_0$ is substracted from $w−cs_2$.
+knowledge of $t_0$), the signer includes some “hint bits” in the signature.  These hint bits are essentially the “carry digits” when $-ct_0$ is substracted from $w−cs_2+ct_0$.
 - **Solution**: Use `MakeHint` and `UseHint` functions to encode the effect of the low bits so verifier can recover high bits of $w$ reliably.
 
 ```python
