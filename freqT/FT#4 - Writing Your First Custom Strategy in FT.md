@@ -1,6 +1,6 @@
 # Part 4: Writing Your First Custom Strategy in Freqtrade
 
-Welcome to Episode 4! Now that you’ve successfully run backtests using the built-in strategy, it’s time to write your **own custom strategy** using Python.
+Welcome to Part 4! Now that you’ve successfully run backtests using the built-in strategy, it’s time to write your **own custom strategy** using Python.
 
 Freqtrade strategies are Python classes that define **buy/sell logic** using technical indicators like RSI, EMA, MACD, etc. In this episode, you’ll create your first strategy and backtest it.
 
