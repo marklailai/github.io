@@ -212,11 +212,11 @@ Key challenges:
 - Heavy use of 32-bit rotates, XORs, conditional functions (FF, GG)
 
 ### SIMD Strategy
-1. Parallel message blocks (best suited for AVX2):
+- Parallel message blocks (best suited for AVX2):
   - Each lane processes an independent block
-2. Round parallelism (more complex):
+- Round parallelism (more complex):
   - Multiple rounds of the same block processed using SIMD
-3. W message schedule (SIMD-friendly):
+- W message schedule (SIMD-friendly):
   - Heavy on shifts, XORs—easy to parallelize
 
 ### AVX2 Sample (Parallel Message Processing)
@@ -254,65 +254,53 @@ for (int i = 0; i < 64; i++) {
 - ECC involves **conditional logic, carry propagation**, and **variable timing**
 
 ### SIMD-Accelerated Techniques
-Field multiplication
-Use SIMD for Montgomery/Barrett multiplication
-SIMD Karatsuba for large 256-bit integer multiplication
-Batch operations
-Batch signature verification (multi-scalar multiplication)
+- **Field multiplication**
+  - Use SIMD for Montgomery/Barrett multiplication
+  - SIMD Karatsuba for large 256-bit integer multiplication
+- **Batch operations**
+  - Batch signature verification (multi-scalar multiplication)
+  - Useful in authentication servers
+- **SIMD-friendly libraries**
+  - Use `__m256i` or NEON to accelerate:
+    - Schoolbook multiplication
+    - Modular reduction
+    - Point doubling/addition
 
-Useful in authentication servers
-
-SIMD-friendly libraries
-
-Use __m256i or NEON to accelerate:
-
-Schoolbook multiplication
-
-Modular reduction
-
-Point doubling/addition
-
-AVX2 Modular Multiplication
-c
-复制
-编辑
+### AVX2 Modular Multiplication
+```c
 __m256i A_lo = _mm256_loadu_si256(...);
 __m256i B_lo = _mm256_loadu_si256(...);
 __m256i prod = _mm256_mul_epu32(A_lo, B_lo);
 // Accumulate + reduce
-NEON Multiplication
-c
-复制
-编辑
+```
+
+### NEON Multiplication
+```c
 uint64x2_t A = vld1q_u64(...);
 uint64x2_t B = vld1q_u64(...);
 uint64x2_t prod = vmulq_u64(A, B);
 // Combine and reduce
-🧪 Benchmarking & Toolchain
-Use rdtsc, clock_gettime(), or perf for timing
+```
+---
 
-Align data (AVX2 needs 32-byte aligned memory)
+## Benchmarking & Toolchain
+- Use rdtsc, clock_gettime(), or perf for timing
+- Align data (AVX2 needs 32-byte aligned memory)
+- Enable compiler flags:
+  - mavx2 -O3 (x86)
+  - mfpu=neon -O3 (ARM)
 
-Enable compiler flags:
+### Libraries to Explore
+- Intel IPP Crypto
+- ARM mbedTLS
+- SIMDe (SIMD Everywhere)
+- BoringSSL
+- OpenSSL 3.x
 
--mavx2 -O3 (x86)
+---
 
--mfpu=neon -O3 (ARM)
-
-Libraries to Explore
-Intel IPP Crypto
-
-ARM mbedTLS
-
-SIMDe (SIMD Everywhere)
-
-BoringSSL
-
-OpenSSL 3.x
-
-📌 Final Thoughts
+## Final Thoughts
 SIMD is a powerful tool for cryptography. For block-oriented ciphers like SM4 and hash functions like SM3, SIMD acceleration can yield multi-fold performance gains. Even for SM2, careful optimization of field arithmetic with SIMD yields real-world benefits, especially in high-load verification scenarios.
 
 Whether you're targeting Intel Xeon or ARM Cortex-A, understanding SIMD can turn your crypto from sluggish to blazing fast.
 
-🛠 Need help implementing SM4 in AVX2 or tuning SM3 for NEON? Drop a comment or request a sample repo!
