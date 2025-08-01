@@ -92,18 +92,22 @@ Prover wants to prove knowledge of $r$ such that:
    - $t_1 = g^w$
    - $t_2 = pk^w$
 
+
 #### Step 2: Challenge
 
 Use the **Fiat-Shamir heuristic** to derive challenge:
 $$c = H(C_1, C_2, t_1, t_2)$$
 
+
 #### Step 3: Response
 
 $$s = w + c \cdot r \mod q$$
 
+
 #### Step 4: Send Proof
 
 $$\pi = (t_1, t_2, s)$$
+
 
 #### Step 5: Verifier Checks
 
