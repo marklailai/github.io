@@ -167,7 +167,7 @@ In electronic voting, votes are **encrypted** to preserve voter privacy. But if 
 
 This is where **verifiable encryption** comes in.
 
-### 🧩 Setup
+### Setup
 
 Let’s define a simplified election system:
 
@@ -180,7 +180,7 @@ Votes are encoded as:
 - Candidate 2 → $m_2 = g^2$
 - Candidate 3 → $m_3 = g^3$
 
-### Example: Voter Encrypts Vote for Candidate 2
+#### Example: Voter Encrypts Vote for Candidate 2
 
 Let the voter choose candidate 2, so:
 $$m = g^2$$
@@ -199,11 +199,11 @@ We don’t want the voter to submit $g^{99}$ as a bogus vote.
 
 So the voter adds a **zero-knowledge proof**:
 
-> "This ciphertext encrypts **one of** $\{g^1, g^2, g^3\}$ using ElGamal."
+> "This ciphertext encrypts **one of** $\{g^1, g^2, g^3\}$ using ElGamal without revealing which one."
 
 This is a **disjunctive proof** (also called an OR-proof) — it proves that one of the possible statements is true, but hides which one.
 
-#### OR-Proof (Sketch)
+### OR-Proof (Sketch)
 
 The voter constructs 3 proofs:
 
@@ -215,6 +215,53 @@ This allows:
 - Verifier to check: “One of the options is valid”
 - Without learning: “Which candidate the voter chose”
 
+Let’s denote:
+- $i \in \{0,1,2\}$ as candidate indices
+- $m_i = g^{i+1}$
+- Real vote index: $j = 2$
+
+#### Step 1: Choose Random Challenges and Responses
+
+For each $i \in \{0,1,2\}$:
+
+- If $i \neq j$ (fake):
+  - Choose random $c_i, s_i \in \mathbb{Z}_q$
+  - Compute commitments:
+
+    $$t_{1,i} = g^{s_i} \cdot C_1^{-c_i},\quad
+    t_{2,i} = pk^{s_i} \cdot (C_2 / m_i)^{-c_i}$$
+
+- If $i = j$ (real):
+  - Choose random $w \in \mathbb{Z}_q$
+  - Compute:
+    
+    $$t_{1,j} = g^w,\quad
+    t_{2,j} = pk^w$$
+
+
+#### Step 2: Compute Global Challenge via Fiat-Shamir
+
+Hash all commitments:
+
+$$c = H(C_1, C_2, t_{1,0}, t_{2,0}, t_{1,1}, t_{2,1}, t_{1,2}, t_{2,2})$$
+
+Then set:
+$$c_j = c - c_0 - c_2 \mod q$$
+
+
+#### Step 3: Compute Real Response
+
+$$s_j = w + c_j \cdot r \mod q$$
+
+
+#### Final Proof
+
+Send:
+- Challenges: $c_0, c_1, c_2$
+- Responses: $s_0, s_1, s_2$
+- Commitments: $t_{1,0}, t_{2,0}, t_{1,1}, t_{2,1}, t_{1,2}, t_{2,2}$
+
+
 ### Ballot Submission
 
 The voter submits:
@@ -225,6 +272,24 @@ The server:
 - Verifies the proof $\pi$
 - Stores the ciphertext
 - Keeps the vote content secret
+
+**Proof verification goes as below:**
+1. Recompute global challenge:
+   
+   $$c' = H(C_1, C_2, t_{1,0}, t_{2,0}, t_{1,1}, t_{2,1}, t_{1,2}, t_{2,2})$$
+   
+2. Check that:
+   
+   $$c_0 + c_1 + c_2 \equiv c' \mod q$$
+
+
+3. For each $i \in \{0,1,2\}$, verify:
+
+   $$g^{s_i} \stackrel{?}{=} t_{1,i} \cdot C_1^{c_i}$$
+
+   $$pk^{s_i} \stackrel{?}{=} t_{2,i} \cdot (C_2 / m_i)^{c_i}$$
+
+If all checks pass, the verifier is convinced the ciphertext encrypts a **valid vote** (one of the allowed candidates), without knowing which.
 
 
 ### Tallying Phase
