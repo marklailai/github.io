@@ -208,10 +208,11 @@ Freqtrade supports multiple optimization algorithms:
 4. Evolutionary Algorithms: Genetic algorithm-based optimization
 
 ## Edge Module: Risk and Stake Analysis
-Edge Concept
+
+### Edge Concept
 The Edge module provides dynamic stake amount calculation based on pair-specific risk and return characteristics. It analyzes historical performance to determine optimal position sizing for each trading pair.
 
-python
+```python
 class Edge:
     def calculate(self, pairs: List[str]) -> Dict[str, Dict[str, float]]:
         """
@@ -237,18 +238,22 @@ class Edge:
             }
         
         return edge_results
-Risk Management Features
+```
+
+### Risk Management Features
 Edge helps manage risk through:
 
-Pair-specific analysis: Individual evaluation of each trading pair
-Dynamic position sizing: Adjust stake amounts based on historical performance
-Win rate optimization: Focus on pairs with higher probability of success
-Expectancy calculation: Consider average profit per trade
-Advanced Backtesting Features
-Customizable Timeframes and Data
+- **Pair-specific analysis**: Individual evaluation of each trading pair
+- **Dynamic position sizing**: Adjust stake amounts based on historical performance
+- **Win rate optimization**: Focus on pairs with higher probability of success
+- **Expectancy calculation**: Consider average profit per trade
+
+## Advanced Backtesting Features
+
+### Customizable Timeframes and Data
 Freqtrade supports sophisticated backtesting configurations:
 
-bash
+```bash
 # Test multiple timeframes
 freqtrade backtesting --timeframe 1h --timeframe-detail 5m
 
@@ -257,17 +262,19 @@ freqtrade backtesting --timerange 20220101-20221231
 
 # Use specific pairs
 freqtrade backtesting --pairs BTC/USDT ETH/USDT
-Trade Analysis Tools
+```
+### Trade Analysis Tools
 Detailed trade analysis capabilities include:
 
-Trade-by-trade breakdown: Individual trade performance analysis
-Time-based analysis: Performance across different market periods
-Pair performance: Evaluation of strategy effectiveness per pair
-Drawdown analysis: Detailed maximum drawdown examination
-Export and Reporting
+- **Trade-by-trade breakdown**: Individual trade performance analysis
+- **Time-based analysis**: Performance across different market periods
+- **Pair performance**: Evaluation of strategy effectiveness per pair
+- **Drawdown analysis**: Detailed maximum drawdown examination
+
+### Export and Reporting
 Comprehensive reporting features:
 
-python
+```python
 def export_backtest_results(self, results: Dict[str, Any], 
                            filename: str = None) -> str:
     """
@@ -280,38 +287,45 @@ def export_backtest_results(self, results: Dict[str, Any],
         json.dump(results, f, indent=2, default=str)
     
     return filename
+```
+
 Export formats include:
 
-JSON: Detailed structured data
-CSV: Tabular trade data
-HTML: Interactive reports
-Plotting data: For visualization
-Performance Analysis and Metrics
-Key Performance Indicators
+- JSON: Detailed structured data
+- CSV: Tabular trade data
+- HTML: Interactive reports
+- Plotting data: For visualization
+
+## Performance Analysis and Metrics
+
+### Key Performance Indicators
 Freqtrade calculates comprehensive performance metrics:
 
-Profitability Metrics:
+1. **Profitability Metrics:**
 
-Total profit and profit percentage
-Profit factor (gross profits / gross losses)
-Average profit per trade
-Monthly/weekly/daily returns
-Risk Metrics:
+  - Total profit and profit percentage
+  - Profit factor (gross profits / gross losses)
+  - Average profit per trade
+  - Monthly/weekly/daily returns
 
-Maximum drawdown
-Sharpe ratio
-Sortino ratio
-Value at Risk (VaR)
-Trade Statistics:
+2. **Risk Metrics**:
 
-Total number of trades
-Win rate and loss rate
-Average trade duration
-Best and worst trades
-Comparative Analysis
+  - Maximum drawdown
+  - Sharpe ratio
+  - Sortino ratio
+  - Value at Risk (VaR)
+
+3. **Trade Statistics**:
+
+  - Total number of trades
+  - Win rate and loss rate
+  - Average trade duration
+  - Best and worst trades
+
+### Comparative Analysis
 The system supports comparative strategy analysis:
 
-python
+```python
 def compare_strategies(self, results_list: List[Dict]) -> Dict[str, Any]:
     """
     Compare multiple strategy results
@@ -328,11 +342,15 @@ def compare_strategies(self, results_list: List[Dict]) -> Dict[str, Any]:
         }
     
     return comparison
-Configuration and Customization
-Backtesting Configuration
+```
+
+## Configuration and Customization
+
+### Backtesting Configuration
+
 Extensive configuration options are available:
 
-json
+```json
 {
     "backtest": {
         "enabled": true,
@@ -352,10 +370,12 @@ json
         "random_state": 42
     }
 }
-Custom Analysis Functions
+```
+
+### Custom Analysis Functions
 Users can implement custom analysis functions:
 
-python
+```python
 def custom_analysis(self, results: Dict[str, Any]) -> Dict[str, Any]:
     """
     Custom analysis function
@@ -368,41 +388,49 @@ def custom_analysis(self, results: Dict[str, Any]) -> Dict[str, Any]:
     }
     
     return custom_metrics
-Best Practices for Backtesting and Optimization
-Avoiding Overfitting
+```
+
+## Best Practices for Backtesting and Optimization
+### Avoiding Overfitting
 Critical practices to prevent overfitting:
 
-Out-of-Sample Testing: Reserve recent data for validation
-Parameter Stability: Ensure parameters work across different periods
-Market Regime Testing: Test across bull, bear, and sideways markets
-Simplicity: Prefer simpler strategies with fewer parameters
-Data Quality Considerations
+1. **Out-of-Sample Testing**: Reserve recent data for validation
+2. **Parameter Stability**: Ensure parameters work across different periods
+3. **Market Regime Testing**: Test across bull, bear, and sideways markets
+4. **Simplicity**: Prefer simpler strategies with fewer parameters
+
+### Data Quality Considerations
 Ensure high-quality backtesting data:
 
-Data Validation: Check for gaps and inconsistencies
-Survivorship Bias: Include delisted pairs in analysis
-Dividends and Splits: Account for corporate actions
-Slippage Modeling: Realistic execution assumptions
-Performance Optimization
+1. **Data Validation**: Check for gaps and inconsistencies
+2. **Survivorship Bias**: Include delisted pairs in analysis
+3. **Dividends and Splits**: Account for corporate actions
+4. **Slippage Modeling**: Realistic execution assumptions
+
+
+### Performance Optimization
 Tips for efficient backtesting:
 
-Data Caching: Reuse processed data when possible
-Parallel Processing: Use multiple cores for optimization
-Early Stopping: Terminate poor-performing parameter sets early
-Incremental Testing: Start with simple tests before complex optimizations
-Integration with Other Modules
-Strategy Development Workflow
+1. **Data Caching**: Reuse processed data when possible
+2. **Parallel Processing**: Use multiple cores for optimization
+3. **Early Stopping**: Terminate poor-performing parameter sets early
+4. **Incremental Testing**: Start with simple tests before complex optimizations
+
+## Integration with Other Modules
+
+### Strategy Development Workflow
 The optimization modules integrate seamlessly with strategy development:
 
-Initial Strategy Creation: Basic strategy implementation
-Backtesting: Validate basic logic
-Parameter Optimization: Fine-tune with hyperopt
-Risk Analysis: Use Edge for position sizing
-Final Validation: Comprehensive out-of-sample testing
-Live Trading Integration
+1. **Initial Strategy Creation**: Basic strategy implementation
+2. **Backtesting**: Validate basic logic
+3. **Parameter Optimization**: Fine-tune with hyperopt
+4. **Risk Analysis**: Use Edge for position sizing
+5. **Final Validation**: Comprehensive out-of-sample testing
+
+### Live Trading Integration
 Optimization results feed into live trading:
 
-python
+```python
 def apply_optimized_parameters(self, strategy: IStrategy, 
                               optimized_params: Dict[str, Any]) -> None:
     """
@@ -411,22 +439,27 @@ def apply_optimized_parameters(self, strategy: IStrategy,
     for param_name, param_value in optimized_params.items():
         if hasattr(strategy, param_name):
             setattr(strategy, param_name, param_value)
-Future Developments
-Planned Enhancements
+```
+
+## Future Developments
+
+### Planned Enhancements
 Future improvements to the optimization and backtesting modules include:
 
-Enhanced Machine Learning Integration: More sophisticated optimization algorithms
-Real-time Backtesting: Streaming data backtesting capabilities
-Multi-objective Optimization: Simultaneous optimization of multiple metrics
-Cloud-based Processing: Distributed optimization for faster results
-Advanced Features
+- **Enhanced Machine Learning Integration**: More sophisticated optimization algorithms
+- **Real-time Backtesting**: Streaming data backtesting capabilities
+- **Multi-objective Optimization**: Simultaneous optimization of multiple metrics
+- **Cloud-based Processing**: Distributed optimization for faster results
+
+### Advanced Features
 Upcoming advanced features:
 
-Walk-forward Analysis: Automated rolling window optimization
-Monte Carlo Simulations: Statistical significance testing
-Stress Testing: Extreme market condition simulation
-Ensemble Methods: Combination of multiple optimized strategies
-Conclusion
+- **Walk-forward Analysis**: Automated rolling window optimization
+- **Monte Carlo Simulations**: Statistical significance testing
+- **Stress Testing**: Extreme market condition simulation
+- **Ensemble Methods**: Combination of multiple optimized strategies
+
+## Conclusion
 Freqtrade's optimization and backtesting modules provide a comprehensive toolkit for developing, testing, and refining algorithmic trading strategies. From basic backtesting to advanced hyperparameter optimization, these modules offer the tools needed to build confidence in trading strategies before risking real capital.
 
 The modular design allows for easy customization while maintaining robust core functionality. Features like the Edge module for dynamic position sizing, comprehensive performance metrics, and multiple optimization algorithms make Freqtrade a powerful platform for both novice and experienced algorithmic traders.
