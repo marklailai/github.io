@@ -47,7 +47,7 @@ def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame
 Moving averages are among the most fundamental indicators in technical analysis, used to identify trend direction and potential support/resistance levels.
 
 #### Simple Moving Average (SMA)
-> Simple Moving Average (SMA) is a fundamental concept in technical analysis used to smooth out price data by creating a constantly updated average price.
+> **SMA** is a fundamental concept in technical analysis used to smooth out price data by creating a constantly updated average price.
 > 
 > The SMA is calculated by adding up the closing prices of a security over a specific number of periods (days, weeks, months, etc.), and then dividing this total by the number of periods.
 >
@@ -63,6 +63,10 @@ dataframe['sma50'] = ta.SMA(dataframe, timeperiod=50)
 - **In Freqtrade**: Commonly used for trend following strategies
 
 #### Exponential Moving Average (EMA)
+> The **EMA** is a type of moving average used in technical analysis that places greater weight on more recent price data, making it more responsive to new information compared to the Simple Moving Average (SMA).
+>
+> Because it emphasizes recent prices, the EMA reacts faster to recent price changes, which makes it a popular tool for traders who want to identify trends or potential entry and exit points more quickly.
+
 ```python
 dataframe['ema9'] = ta.EMA(dataframe, timeperiod=9)
 dataframe['ema21'] = ta.EMA(dataframe, timeperiod=21)
