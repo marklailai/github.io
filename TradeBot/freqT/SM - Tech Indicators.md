@@ -92,6 +92,37 @@ dataframe['wma'] = ta.WMA(dataframe, timeperiod=20)
 - **In Freqtrade**: Less common but useful in specific market conditions
 
 ### Moving Average Convergence Divergence (MACD)
+> The Moving Average Convergence Divergence (MACD) is one of the most widely used technical indicators in trading and financial analysis. MACD helps traders identify trend direction, momentum, and potential entry or exit points by analyzing the relationship between two moving averages of a security’s price.
+>
+> The MACD consists of three main elements:
+> - **MACD Line**
+>   - This is the difference between two Exponential Moving Averages (EMAs):
+>
+>   - $$MACD Line = \text{12-day EMA} − \text{26-day EMA}$$
+> - **Signal Line**
+>   - A 9-day EMA of the MACD Line. It acts as a trigger for buy and sell signals:
+>
+>   - $$\text{Signal Line} = \text{9-day EMA of MACD Line}$$
+>
+> - **MACD Histogram**
+>   - Represents the difference between the MACD Line and the Signal Line:
+>   - $$Histogram =\text{ MACD Line − Signal Line}$$
+>     - When the histogram is above zero, the MACD line is above the signal line.
+>     - When it's rising, momentum is increasing in the direction of the trend.
+> - How to use MACD Line
+>   1. **Crossover Signals**
+>     - Bullish Signal: When the MACD Line crosses above the Signal Line → potential buy signal.
+>     - Bearish Signal: When the MACD Line crosses below the Signal Line → potential sell signal.
+>   2. **Zero Line Crossover**
+>     - MACD crosses above zero: Suggests upward momentum (bullish).
+>     - MACD crosses below zero: Suggests downward momentum (bearish).
+>   3. **Divergence**
+>     - Bullish Divergence: Price makes a lower low, but MACD makes a higher low → potential reversal upward.
+>     - Bearish Divergence: Price makes a higher high, but MACD makes a lower high → potential reversal downward.
+>   4. **Histogram Analysis**
+>     - Increasing bar height → momentum is strengthening.
+>     - Decreasing bar height → momentum is weakening.
+
 ```python
 macd = ta.MACD(dataframe)
 dataframe['macd'] = macd['macd']
