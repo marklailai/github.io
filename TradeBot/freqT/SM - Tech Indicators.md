@@ -47,6 +47,12 @@ def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame
 Moving averages are among the most fundamental indicators in technical analysis, used to identify trend direction and potential support/resistance levels.
 
 #### Simple Moving Average (SMA)
+> Simple Moving Average (SMA) is a fundamental concept in technical analysis used to smooth out price data by creating a constantly updated average price.
+> 
+> The SMA is calculated by adding up the closing prices of a security over a specific number of periods (days, weeks, months, etc.), and then dividing this total by the number of periods.
+>
+> SMA helps traders identify trends by smoothing out short-term fluctuations and highlighting longer-term trends. 
+
 ```python
 dataframe['sma20'] = ta.SMA(dataframe, timeperiod=20)
 dataframe['sma50'] = ta.SMA(dataframe, timeperiod=50)
