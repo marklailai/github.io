@@ -77,6 +77,12 @@ dataframe['ema21'] = ta.EMA(dataframe, timeperiod=21)
 - **In Freqtrade**: Popular for fast-moving market strategies
 
 #### Weighted Moving Average (WMA)
+> The Weighted Moving Average (WMA) is a type of moving average used in technical analysis that assigns greater weight to more recent data points and less weight to older data points, making it more responsive to recent price changes than the Simple Moving Average (SMA).
+>
+> Unlike the Exponential Moving Average (EMA), which applies exponentially decreasing weights to all past data (infinite memory), the WMA applies linearly decreasing weights over a fixed number of periods.
+>
+> $$WMA=P_1\times w_1+P_2\times w_2+\cdots+P_n\times w_n$$
+
 ```python
 dataframe['wma'] = ta.WMA(dataframe, timeperiod=20)
 ```
