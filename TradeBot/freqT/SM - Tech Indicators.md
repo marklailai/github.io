@@ -231,7 +231,7 @@ dataframe['rsi'] = ta.RSI(dataframe, timeperiod=14)
 > **Standard Setting**
 > - 14-period lookback (can be minutes, days, etc.)
 > - %K is calculated as:
->   $$%K=(\text{Current Close-Lowest Low})/(Highest High-Lowest Low)\times 100$$
+> $$\frac{Current Close-Lowest Low}{Highest High-Lowest Low} \times 100$$
 >   - Where:
 >     - Lowest Low = lowest price over the last 14 periods
 >     - Highest High = highest price over the last 14 periods
@@ -258,7 +258,7 @@ dataframe['slowd'] = stoch['slowd']
 ### Williams %R (Williams Percent Range)
 > Williams %R  is a momentum oscillator used in technical analysis to identify overbought and oversold levels in financial markets. It works similarly to the Stochastic Oscillator, but with a reversed scale.
 >
-> $$%R=(\text{Highest High-Current Close})/(\text{Highest High-Lowest Low})\times \text{-100}$$
+> $$\frac{Highest High-Current Close}{Highest High-Lowest Low} \times \text{-100}$$
 >
 > **Interpretation of Values**
 > |%R Value| Interpretation |
