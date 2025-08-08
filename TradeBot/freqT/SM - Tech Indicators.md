@@ -199,6 +199,19 @@ dataframe['kijun_sen'] = (dataframe['high'].rolling(26).max() +
 
 ## Momentum Indicators
 ### Relative Strength Index (RSI)
+> RSI is a popular momentum oscillator used in technical analysis to measure the speed and change of price movements. it helps traders identify overbought or oversold conditions in financial markets.
+>
+> The RSI is displayed as a line graph that moves between 0 and 100. It is typically calculated using 14 periods (though this can be adjusted), and it compares the average gains to average losses over that time frame.
+>
+> $$RSI=100-100/(1+RS)$$
+>  - RS (Relative Strength) = Average of x days' up closes / Average of x days' down closes, and x is usually 14.
+>
+> |RSI Value      | Interpretation |
+> |---------------|----------------|
+> |Above 70       |Overbought — The asset may be overvalued, suggesting a potential pullback or reversal downward. |
+> |Below 30	      |Oversold — The asset may be undervalued, suggesting a potential bounce or reversal upward. |
+> |30 to 70	      |Neutral zone — No strong momentum in either direction. |
+
 ```python
 dataframe['rsi'] = ta.RSI(dataframe, timeperiod=14)
 ```
