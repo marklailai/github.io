@@ -288,6 +288,13 @@ dataframe['wr'] = ta.WILLR(dataframe, timeperiod=14)
 > - SMA = Simple Moving Average of the Typical Price (usually over 20 periods)
 > - Mean Deviation = Average of the absolute differences between each Typical Price and the SMA
 > - 0.015 = A constant set by Lambert to ensure that most values fall within the –100 to +100 range
+> 
+> **Interpretation of CCI Values**
+> |CCI Value|Interpretation|
+> |---------|--------------|
+> |Above +100 |	Strong Uptrend / Bullish Momentum — Suggests the start of a new uptrend or overbought condition. |
+> |Below –100 | Strong Downtrend / Bearish Momentum — Suggests the start of a new downtrend or oversold condition. |
+> |Between –100 and +100 | Neutral / Range-bound market — No clear trend; price is within normal range. |
 
 ```python
 dataframe['cci'] = ta.CCI(dataframe, timeperiod=20)
