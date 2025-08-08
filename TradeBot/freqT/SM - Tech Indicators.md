@@ -277,6 +277,18 @@ dataframe['wr'] = ta.WILLR(dataframe, timeperiod=14)
 - **In Freqtrade**: Alternative to RSI/Stochastic for momentum strategies
 
 ### Commodity Channel Index (CCI)
+> The Commodity Channel Index (CCI) is a momentum-based technical analysis oscillator used to identify overbought and oversold conditions, as well as potential trend reversals and price strength.
+> 
+> The CCI measures the current price level relative to an average price over a specified period. It helps traders detect when an asset is trading significantly above or below its "typical" price range, which may signal the start of a new trend or an impending reversal.
+>
+> $$CCI=\frac{\text{typical Price-SMA}}{0.015\times \text{Mean Deviation}}$$
+>
+> Where:
+> - Typical Price (TP) = (High + Low + Close) / 3
+> - SMA = Simple Moving Average of the Typical Price (usually over 20 periods)
+> - Mean Deviation = Average of the absolute differences between each Typical Price and the SMA
+> - 0.015 = A constant set by Lambert to ensure that most values fall within the –100 to +100 range
+
 ```python
 dataframe['cci'] = ta.CCI(dataframe, timeperiod=20)
 ```
