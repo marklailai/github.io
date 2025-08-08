@@ -222,6 +222,28 @@ dataframe['rsi'] = ta.RSI(dataframe, timeperiod=14)
 - **In Freqtrade**: Extremely popular for mean reversion strategies
 
 ### Stochastic Oscillator
+> The Stochastic Oscillator is a momentum-based technical analysis indicator used to identify overbought and oversold conditions in financial markets. It compares a security’s closing price to its price range over a specific period, helping traders predict potential reversals.
+>
+>  The indicator consists of two lines that fluctuate between 0 and 100:
+> - %K (Fast Stochastic): The main line that shows the current momentum.
+> - %D (Slow Stochastic): A moving average of %K, used to smooth the signal and generate trade signals.
+> 
+> **Standard Setting**
+> - 14-period lookback (can be minutes, days, etc.)
+> - %K is calculated as:
+>   $$%K=(\text{Current Close-Lowest Low})/(Highest High-Lowest Low)\times 100$$
+>   - Where:
+>     - Lowest Low = lowest price over the last 14 periods
+>     - Highest High = highest price over the last 14 periods
+> - %D = 3-period moving average of %K
+>
+> **Key Levels and Interpretation**
+> |Value Range  |Interpretation|
+> |-------------|--------------|
+> |Above 80     |Overbought — Asset may be overvalued; potential bearish reversal or pullback. |
+> |Below 20     |Oversold — Asset may be undervalued; potential bullish reversal or bounce. |
+> |20 to 80     |Neutral zone — No extreme momentum. |
+
 ```python
 stoch = ta.STOCH(dataframe)
 dataframe['slowk'] = stoch['slowk']
