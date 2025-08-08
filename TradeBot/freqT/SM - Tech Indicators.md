@@ -255,7 +255,18 @@ dataframe['slowd'] = stoch['slowd']
 - **Usage**: Overbought/oversold signals, divergences
 - **In Freqtrade**: Often combined with RSI for confirmation
 
-### Williams %R
+### Williams %R (Williams Percent Range)
+> Williams %R  is a momentum oscillator used in technical analysis to identify overbought and oversold levels in financial markets. It works similarly to the Stochastic Oscillator, but with a reversed scale.
+>
+> $$%R=(\text{Highest High-Current Close})/(\text{Highest High-Lowest Low})\times \text{-100}$$
+>
+> **Interpretation of Values**
+> |%R Value| Interpretation |
+> |--------|----------------|
+> |Between 0 and –20| Overbought — Price is near the top of its recent range. Possible bearish reversal or pullback. |
+> |Between –80 and –100| Oversold — Price is near the bottom of its range. Possible bullish reversal or bounce. |
+> |Between –20 and –80 | Neutral zone — No extreme conditions; trend may continue. |
+
 ```python
 dataframe['wr'] = ta.WILLR(dataframe, timeperiod=14)
 ```
