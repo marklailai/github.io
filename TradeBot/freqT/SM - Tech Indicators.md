@@ -306,6 +306,14 @@ dataframe['cci'] = ta.CCI(dataframe, timeperiod=20)
 
 ## Volume Indicators
 ### On-Balance Volume (OBV)
+> - **How it works**:
+>   - Adds volume on up days and subtracts volume on down days.
+>   - Creates a cumulative line that tracks money flow.
+> - **Interpretation**:
+>   - Rising OBV = Buying pressure (bullish).
+>   - Falling OBV = Selling pressure (bearish).
+>   - Divergence between price and OBV can signal reversals (e.g., price up, OBV down → weak rally).
+
 ```python
 dataframe['obv'] = ta.OBV(dataframe)
 ```
