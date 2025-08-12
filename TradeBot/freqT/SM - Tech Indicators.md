@@ -323,6 +323,30 @@ dataframe['obv'] = ta.OBV(dataframe)
 - **In Freqtrade**: Volume confirmation for price movements
 
 ### Chaikin Money Flow (CMF)
+> CMF measure the volume-weighted accumulation and distribution of an asset over a specific period (typically 20 or 21 days). It helps traders assess buying and selling pressure by combining price and volume data.
+> 
+> CMF evaluates whether volume is flowing into (accumulation) or out of (distribution) an asset by analyzing where the closing price is within the day’s trading range — and then weighting that with volume.
+> - Above zero → Buying pressure (bullish).
+> - Below zero → Selling pressure (bearish).
+> 
+> **How CMF is Calculated**:
+> - Step 1: Compute Money Flow Multiplier (per period):
+>   - This ranges from –1 to +1: if close is near the top of the range → positive (buying); if close is near the bottom → negative (selling).
+>
+>  $$Multiplier=\frac{(Close−Low)−(High−Close)}{High−Low}$$
+> 
+> - Step 2: Compute Money Flow Volume: $\text{Money Flow Volume}=\text{Multiplier}\times\text{Volume}$
+> - Step 3: Compute CMF: $\text{CMF}=\text{21-day sum of Money Flow Volume}/\text{21-day sum of Volume}$
+>
+> |CMF Value | Interpretation |
+> |----------|----------------|
+> |Above 0 |	Net buying pressure — Bulls in control. |
+> |Below 0 |	Net selling pressure — Bears in control. |
+> |Rising CMF |	Increasing buying or decreasing selling. |
+> |Falling CMF |	Increasing selling or decreasing buying. |
+> |Above +0.05 to +0.10 | Strong accumulation (bullish). |
+> |Below –0.05 to –0.10 | Strong distribution (bearish). |
+
 ```python
 # Custom implementation since not in TA-Lib
 def chaikin_money_flow(dataframe, period=20):
@@ -341,6 +365,19 @@ dataframe['cmf'] = chaikin_money_flow(dataframe)
 
 ## Volatility Indicators
 ### Average True Range (ATR)
+> **How it works**:
+> - Measures the average range of price movement over a period (usually 14).
+> - True Range = max of:
+>   - Current High – Current Low
+>   - |Current High – Previous Close|
+>   - |Current Low – Previous Close|
+>
+> **Interpretation**:
+> - High ATR = High volatility (large price movements).
+> - Low ATR = Low volatility (quiet market).
+> - ATR rises during sharp moves (up or down).
+> - ATR falls during consolidation.
+
 ```python
 dataframe['atr'] = ta.ATR(dataframe, timeperiod=14)
 ```
@@ -349,6 +386,16 @@ dataframe['atr'] = ta.ATR(dataframe, timeperiod=14)
 - **In Freqtrade**: Risk management and position sizing
 
 ### Bollinger Bands
+> **How it works**:
+> - A moving average (usually 20-day SMA) with two outer bands set at ±2 standard deviations.
+> - Bands expand during high volatility and contract during low volatility.
+>
+>  **Key Signals**:
+> - "Bollinger Squeeze": Narrow bands → low volatility → often precedes a strong breakout.
+> - Price touching upper band → relatively high (possibly overbought).
+> - Price touching lower band → relatively low (possibly oversold).
+> - Breakouts outside bands can signal strong momentum
+
 ```python
 bb = ta.BBANDS(dataframe, timeperiod=20, nbdevup=2, nbdevdn=2)
 dataframe['bb_upperband'] = bb['upperband']
