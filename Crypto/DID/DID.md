@@ -462,38 +462,443 @@ DID 1.0 was approved as an official W3C Recommendation in June 2022, making it a
 
 ## 2. Core Architecture
 
-### DID Document Structure
+### 2.1 Architecture Overview
+
+The DID architecture consists of several interconnected components that work together to enable decentralized identity management. Here's a comprehensive view:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        DID Ecosystem Architecture                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│    ┌──────────────┐                          ┌──────────────────────┐       │
+│    │ DID Subject  │◄────── identifies ──────│         DID          │       │
+│    │  (Entity)    │                          │  did:example:123     │       │
+│    └──────────────┘                          └──────────┬───────────┘       │
+│           │                                            │                    │
+│           │                                            │ resolves to        │
+│           │                                            ▼                    │
+│           │                               ┌──────────────────────┐           │
+│           │                               │    DID Document      │           │
+│           │                               │  ┌────────────────┐  │           │
+│           │                               │  │ id             │  │           │
+│           │                               │  │ controller     │  │           │
+│           │                               │  │ verification   │  │           │
+│           │                               │  │ authentication │  │           │
+│           │                               │  │ services       │  │           │
+│           │                               │  └────────────────┘  │           │
+│           │                               └──────────┬───────────┘           │
+│           │                                          │                        │
+│           │                                          │ stored in              │
+│           │                                          ▼                        │
+│    ┌──────┴─────────┐                   ┌──────────────────────┐             │
+│    │ DID Controller │◄── controls ──────│ Verifiable Data      │             │
+│    │  (Entity)      │                   │ Registry             │             │
+│    └────────────────┘                   │ (Blockchain/DB/etc)  │             │
+│                                         └──────────────────────┘             │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 2.2 Core Components Explained
+
+#### DID Subject (被标识主体)
+
+**Definition:** The entity that the DID identifies. This can be:
+- A person (individual)
+- An organization
+- A device (IoT, computer)
+- An abstract entity (concept, data model)
+- Any thing that needs to be identified
+
+**Key Points:**
+- The DID subject is what the DID refers to
+- The subject does NOT control the DID (that's the controller)
+- In many cases, the subject and controller are the same entity
+- Example: A person's digital identity, a company's organizational identity
+
+```
+DID Subject Examples:
+┌─────────────────────────────────────────────────────────┐
+│ Subject Type        │ Example DID                      │
+├─────────────────────┼──────────────────────────────────┤
+│ Person              │ did:web:alice.example.com        │
+│ Organization        │ did:web:company.com              │
+│ IoT Device          │ did:ion:EiAnKD8...device123      │
+│ Smart Contract      │ did:ethr:0x123abc...             │
+│ Data Model          │ did:example:dataset456           │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+#### DID Controller (DID 控制者)
+
+**Definition:** The entity that has the authority to make changes to the DID document.
+
+**Key Points:**
+- Controls the DID document (update, delete operations)
+- Owns the private keys for the DID
+- Can be the same as the DID subject (self-controlled)
+- Can be different (guardianship, organizational control)
+- A DID can have multiple controllers
+
+```
+Controller Relationships:
+┌─────────────────────────────────────────────────────────┐
+│                                                         │
+│  Case 1: Self-Controlled (Subject = Controller)        │
+│  ┌─────────────┐                                       │
+│  │   Person    │── owns ──▶ DID ◀── controls ──┐      │
+│  │  (Alice)    │                              │      │
+│  └─────────────┘                              │      │
+│                                      (same entity)    │
+│                                                         │
+│  Case 2: Guardianship (Subject ≠ Controller)           │
+│  ┌─────────────┐                              │        │
+│  │   Parent    │── controls ──▶ DID ◀── identifies    │
+│  │             │                              │        │
+│  └─────────────┘                              │        │
+│                                      ┌───────┴───┐    │
+│                                      │   Child   │    │
+│                                      │ (Subject) │    │
+│                                      └───────────┘    │
+│                                                         │
+│  Case 3: Multi-Controller                              │
+│  ┌─────────────┐        ┌─────────────┐               │
+│  │ Controller 1│───────▶│     DID     │◀──────┐       │
+│  └─────────────┘        └─────────────┘       │       │
+│                                 │              │       │
+│                         ┌───────┴───────┐      │       │
+│                         │   Subject     │      │       │
+│                         │ (Organization)│      │       │
+│                         └───────────────┘      │       │
+│  ┌─────────────┐                               │       │
+│  │ Controller 2│───────────────────────────────┘       │
+│  └─────────────┘                                       │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+#### DID Document (DID 文档)
+
+**Definition:** A JSON-LD document that contains information associated with a DID, including cryptographic material and service endpoints.
+
+**Structure:**
 
 ```json
 {
   "@context": "https://www.w3.org/ns/did/v1.1",
   "id": "did:example:123456789abcdefghi",
   "controller": "did:example:123456789abcdefghi",
-  "authentication": [{
+  "verificationMethod": [{
     "id": "did:example:123456789abcdefghi#keys-1",
     "type": "Multikey",
     "controller": "did:example:123456789abcdefghi",
     "publicKeyMultibase": "z6MkmM42vxfqZQsv4ehtTjFFxQ4sQKS2w6WR7emozFAn5cxu"
   }],
+  "authentication": ["did:example:123456789abcdefghi#keys-1"],
+  "assertionMethod": ["did:example:123456789abcdefghi#keys-1"],
+  "keyAgreement": [{
+    "id": "did:example:123456789abcdefghi#keys-2",
+    "type": "X25519KeyAgreementKey2019",
+    "controller": "did:example:123456789abcdefghi",
+    "publicKeyMultibase": "z6LSj72tK8brWgZja8NLRwPigth2T9QRiG1uH9oKZuKjdh9p"
+  }],
   "service": [{
-    "id": "did:example:123456789abcdefghi#vcs",
-    "type": "VerifiableCredentialService",
-    "serviceEndpoint": "https://example.com/vc/"
+    "id": "did:example:123456789abcdefghi#hub",
+    "type": "IdentityHub",
+    "serviceEndpoint": "https://hub.example.com/"
   }]
 }
 ```
 
-### Key Components
+---
 
-| Component | Description |
-|-----------|-------------|
-| `id` | The DID itself (required) |
-| `controller` | Who controls the DID |
-| `verificationMethod` | Cryptographic keys for authentication |
-| `authentication` | Methods to prove control |
-| `assertionMethod` | Methods for issuing credentials |
-| `keyAgreement` | Methods for key exchange |
-| `service` | Endpoints for interactions |
+#### Verifiable Data Registry (可验证数据注册表)
+
+**Definition:** A system (blockchain, distributed database, etc.) where DIDs and DID documents are stored and can be resolved from.
+
+**Types of Registries:**
+
+| Registry Type | Examples | Characteristics |
+|---------------|----------|-----------------|
+| **Blockchain** | Bitcoin, Ethereum, Hyperledger Indy | Immutable, decentralized, consensus-based |
+| **Distributed Database** | IPFS, Distributed Hash Tables | Content-addressable, peer-to-peer |
+| **Web Infrastructure** | DNS + HTTPS (did:web) | Existing infrastructure, centralized DNS |
+| **Self-Contained** | None (did:key, did:jwk) | No registry, derived from key |
+
+```
+Registry Architecture Examples:
+┌────────────────────────────────────────────────────────────────────┐
+│                                                                    │
+│  Blockchain-Based (did:ethr, did:ion, did:sov)                    │
+│  ┌──────────────────────────────────────────────────────────┐     │
+│  │                    Blockchain Network                     │     │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐ │     │
+│  │  │  Node 1  │  │  Node 2  │  │  Node 3  │  │  Node N  │ │     │
+│  │  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘ │     │
+│  │       │             │             │             │        │     │
+│  │       └─────────────┴──────┬──────┴─────────────┘        │     │
+│  │                            │                             │     │
+│  │                    ┌───────┴───────┐                     │     │
+│  │                    │ DID Registry  │                     │     │
+│  │                    │   (on-chain)  │                     │     │
+│  │                    └───────────────┘                     │     │
+│  └──────────────────────────────────────────────────────────┘     │
+│                                                                    │
+│  Web-Based (did:web)                                              │
+│  ┌──────────────────────────────────────────────────────────┐     │
+│  │     DNS        ──────▶    Web Server                      │     │
+│  │  ┌─────────┐           ┌────────────────────┐            │     │
+│  │  │.com DNS │           │ example.com/did.json│            │     │
+│  │  └─────────┘           └────────────────────┘            │     │
+│  └──────────────────────────────────────────────────────────┘     │
+│                                                                    │
+│  Self-Contained (did:key)                                         │
+│  ┌──────────────────────────────────────────────────────────┐     │
+│  │                    No Registry Needed                     │     │
+│  │                                                          │     │
+│  │    DID ──────────────▶ DID Document                      │     │
+│  │    (derived from key)  (generated from key)              │     │
+│  └──────────────────────────────────────────────────────────┘     │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 2.3 DID Document Properties Deep Dive
+
+#### Property Categories
+
+```
+DID Document Properties
+├── Core Properties
+│   ├── id (required) ──────────── The DID itself
+│   ├── controller (optional) ──── Who can modify this document
+│   └── alsoKnownAs (optional) ─── Other identifiers for this subject
+│
+├── Verification Methods
+│   └── verificationMethod ─────── Cryptographic keys
+│
+├── Verification Relationships
+│   ├── authentication ─────────── Keys for proving control
+│   ├── assertionMethod ────────── Keys for issuing credentials
+│   ├── keyAgreement ───────────── Keys for encryption/key exchange
+│   ├── capabilityInvocation ───── Keys for invoking capabilities
+│   └── capabilityDelegation ───── Keys for delegating capabilities
+│
+└── Services
+    └── service ────────────────── Service endpoints
+```
+
+#### Verification Methods Explained
+
+**Definition:** Cryptographic material (public keys) that can be used to verify proofs.
+
+```json
+{
+  "verificationMethod": [{
+    "id": "did:example:123#key-1",
+    "type": "Multikey",
+    "controller": "did:example:123",
+    "publicKeyMultibase": "z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK"
+  }]
+}
+```
+
+**Verification Method Properties:**
+
+| Property | Required | Description |
+|----------|----------|-------------|
+| `id` | Yes | Unique identifier (DID URL) |
+| `type` | Yes | Key type (Multikey, JsonWebKey2020, etc.) |
+| `controller` | Yes | DID that controls this key |
+| `publicKeyMultibase` | No | Multibase-encoded public key |
+| `publicKeyJwk` | No | JWK format public key |
+
+**Common Verification Method Types:**
+
+| Type | Algorithm | Use Case |
+|------|-----------|----------|
+| `Multikey` | Ed25519, secp256k1, etc. | General purpose |
+| `JsonWebKey2020` | RSA, EC (P-256, etc.) | JWT/JWS compatibility |
+| `Ed25519VerificationKey2020` | Ed25519 | Digital signatures |
+| `EcdsaSecp256k1VerificationKey2019` | secp256k1 | Ethereum, Bitcoin |
+
+---
+
+#### Verification Relationships Explained
+
+**Definition:** Relationships between a DID subject and its verification methods, defining the purpose of each key.
+
+```
+Verification Relationships:
+┌─────────────────────────────────────────────────────────────────────┐
+│                                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │                    DID Document                              │   │
+│  │                                                              │   │
+│  │  verificationMethod:                                         │   │
+│  │    ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐      │   │
+│  │    │  Key 1  │  │  Key 2  │  │  Key 3  │  │  Key 4  │      │   │
+│  │    └────┬────┘  └────┬────┘  └────┬────┘  └────┬────┘      │   │
+│  │         │            │            │            │            │   │
+│  └─────────┼────────────┼────────────┼────────────┼────────────┘   │
+│            │            │            │            │                 │
+│            ▼            ▼            ▼            ▼                 │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │ authentication ────────────▶ Key 1, Key 2                   │   │
+│  │ assertionMethod ───────────▶ Key 1                          │   │
+│  │ keyAgreement ──────────────▶ Key 3                          │   │
+│  │ capabilityInvocation ──────▶ Key 2                          │   │
+│  │ capabilityDelegation ──────▶ Key 4                          │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**Detailed Purpose of Each Relationship:**
+
+| Relationship | Purpose | Example Use Case |
+|--------------|---------|------------------|
+| `authentication` | Prove control of DID | Login, access control |
+| `assertionMethod` | Issue Verifiable Credentials | University issuing diplomas |
+| `keyAgreement` | Encrypt/decrypt messages | Secure messaging, key exchange |
+| `capabilityInvocation` | Authorize actions | Smart contract calls, API access |
+| `capabilityDelegation` | Delegate authority | Authorizing another party to act |
+
+---
+
+#### Service Endpoints Explained
+
+**Definition:** URLs where services related to the DID subject can be accessed.
+
+```json
+{
+  "service": [{
+    "id": "did:example:123#messaging",
+    "type": "DIDCommMessaging",
+    "serviceEndpoint": "https://example.com/message",
+    "accept": ["didcomm/v2"],
+    "routingKeys": ["z6MkhaXg..."]
+  }, {
+    "id": "did:example:123#hub",
+    "type": "IdentityHub",
+    "serviceEndpoint": ["https://hub1.example.com/", "https://hub2.example.com/"]
+  }]
+}
+```
+
+**Common Service Types:**
+
+| Service Type | Purpose |
+|--------------|---------|
+| `DIDCommMessaging` | Secure peer-to-peer messaging |
+| `IdentityHub` | Personal data storage |
+| `LinkedDomains` | Linked websites/domains |
+| `VerifiableCredentialService` | VC issuance/verification |
+
+---
+
+### 2.4 How Components Work Together
+
+#### Complete DID Lifecycle Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        DID Lifecycle                                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  1. CREATE                                                                  │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                     │
+│  │ Generate    │───▶│ Create DID  │───▶│ Store DID   │                     │
+│  │ Key Pair    │    │ Document    │    │ Document    │                     │
+│  └─────────────┘    └─────────────┘    └──────┬──────┘                     │
+│                                                │                            │
+│                                                ▼                            │
+│                                       ┌─────────────────┐                   │
+│                                       │ Verifiable Data │                   │
+│                                       │    Registry     │                   │
+│                                       └─────────────────┘                   │
+│                                                                             │
+│  2. RESOLVE (Read)                                                          │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                     │
+│  │ Query DID   │───▶│ Lookup in   │───▶│ Return DID  │                     │
+│  │             │    │ Registry    │    │ Document    │                     │
+│  └─────────────┘    └─────────────┘    └─────────────┘                     │
+│                                                                             │
+│  3. UPDATE                                                                  │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                     │
+│  │ Authenticate│───▶│ Modify DID  │───▶│ Store New   │                     │
+│  │ (prove ctrl)│    │ Document    │    │ Version     │                     │
+│  └─────────────┘    └─────────────┘    └─────────────┘                     │
+│                                                                             │
+│  4. DEACTIVATE                                                              │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                     │
+│  │ Authenticate│───▶│ Mark DID as │───▶│ DID is No   │                     │
+│  │ (prove ctrl)│    │ Deactivated │    │ Longer Valid│                     │
+│  └─────────────┘    └─────────────┘    └─────────────┘                     │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Authentication Flow Example
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    DID Authentication Flow                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  Alice (DID Controller)                Verifier (e.g., Website)            │
+│  ┌─────────────────┐                   ┌─────────────────┐                  │
+│  │                 │                   │                 │                  │
+│  │  did:web:alice  │                   │    Service      │                  │
+│  │  Private Key    │                   │                 │                  │
+│  │                 │                   │                 │                  │
+│  └────────┬────────┘                   └────────┬────────┘                  │
+│           │                                     │                           │
+│           │  1. Request Access                  │                           │
+│           │ ◀───────────────────────────────────│                           │
+│           │                                     │                           │
+│           │  2. Challenge (nonce)               │                           │
+│           │ ◀───────────────────────────────────│                           │
+│           │                                     │                           │
+│           │  3. Resolve did:web:alice           │                           │
+│           │ ────────────────────────────────────▶                           │
+│           │                                     │                           │
+│           │  4. Return DID Document             │                           │
+│           │ ◀───────────────────────────────────│                           │
+│           │    (contains public key)            │                           │
+│           │                                     │                           │
+│           │  5. Sign challenge with private key │                           │
+│           │ ────────────────────────────────────▶                           │
+│           │                                     │                           │
+│           │  6. Verify signature with public key│                           │
+│           │    ✅ Authentication Successful!    │                           │
+│           │                                     │                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 2.5 Key Components Summary
+
+| Component | Description | Required? |
+|-----------|-------------|-----------|
+| `id` | The DID itself (identifier) | ✅ Yes |
+| `controller` | Who controls the DID document | No (defaults to self) |
+| `alsoKnownAs` | Other identifiers for this subject | No |
+| `verificationMethod` | Cryptographic public keys | No |
+| `authentication` | Keys for proving DID control | No |
+| `assertionMethod` | Keys for issuing credentials | No |
+| `keyAgreement` | Keys for encryption | No |
+| `capabilityInvocation` | Keys for invoking actions | No |
+| `capabilityDelegation` | Keys for delegating authority | No |
+| `service` | Service endpoints | No |
 
 ---
 
