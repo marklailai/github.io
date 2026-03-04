@@ -902,30 +902,7 @@ Verification Relationships:
 
 ---
 
-## 3. DID Methods Comparison
-
-| DID Method | Infrastructure | Decentralization | Scalability | Key Features | Best For |
-|------------|---------------|------------------|-------------|--------------|----------|
-| **did:ion** | Bitcoin (anchoring) | High | High | Batched operations, cost-effective | Large-scale public identity |
-| **did:ethr** | Ethereum | High | Medium | Smart contracts, key rotation | Web3, dApps, DeFi |
-| **did:sov** | Hyperledger Indy | Medium (permissioned) | Medium | Privacy features, governance | Enterprise, regulated industries |
-| **did:web** | DNS/Web servers | Low | High | Simple, existing infrastructure | Organizational identity |
-| **did:key** | None (self-contained) | High | High | Stateless, portable | Offline systems, temporary IDs |
-| **did:peer** | P2P networks | High | High | Private, no registry | Pairwise relationships |
-| **did:dht** | Distributed Hash Table | High | High | Decentralized storage | Quick identity lookup |
-| **did:jwk** | JSON Web Key | High | High | Self-contained, simple | Simple verification, testing |
-
-### Selection Guidelines
-
-- **Simplicity first:** Start with `did:key` or `did:web`
-- **Maximum decentralization:** `did:ion` or `did:ethr`
-- **Enterprise compliance:** `did:sov`
-- **Private relationships:** `did:peer`
-- **Quick prototyping:** `did:jwk`
-
----
-
-## 4. How DID Works: Technical Deep Dive
+## 3. How DID Works: Technical Deep Dive
 
 ### 4.1 DID Resolution Process
 
@@ -1100,7 +1077,7 @@ did:example:123456/path/to/resource?query=value#fragment
 
 ---
 
-## 5. Verifiable Credentials Integration
+## 4. Verifiable Credentials Integration
 
 ### Ecosystem Participants
 
@@ -1152,7 +1129,7 @@ did:example:123456/path/to/resource?query=value#fragment
 
 ---
 
-## 6. Industry Use Cases
+## 5. Industry Use Cases
 
 ### Healthcare
 
@@ -1198,7 +1175,7 @@ did:example:123456/path/to/resource?query=value#fragment
 
 ---
 
-## 7. Privacy & Security Considerations
+## 6. Privacy & Security Considerations
 
 ### Privacy by Design Principles
 
@@ -1216,7 +1193,7 @@ did:example:123456/path/to/resource?query=value#fragment
 
 ---
 
-## 8. DID Development in China
+## 7. DID Development in China
 
 ### 8.1 Overview
 
@@ -1417,7 +1394,7 @@ DIDA (DID-Alliance) is China's first distributed digital identity industry allia
 
 ---
 
-## 9. Key Standards & Resources
+## 8. Key Standards & Resources
 
 | Resource | URL |
 |----------|-----|
@@ -1433,7 +1410,7 @@ DIDA (DID-Alliance) is China's first distributed digital identity industry allia
 
 ---
 
-## 10. Design Goals (W3C Specification)
+## 9. Design Goals (W3C Specification)
 
 | Goal | Description |
 |------|-------------|
@@ -1450,7 +1427,7 @@ DIDA (DID-Alliance) is China's first distributed digital identity industry allia
 
 ---
 
-## 11. Data Model Types
+## 10. Data Model Types
 
 | Data Type | Description |
 |-----------|-------------|
@@ -1466,7 +1443,7 @@ DIDA (DID-Alliance) is China's first distributed digital identity industry allia
 
 ---
 
-## 12. Summary: Key Takeaways
+## 11. Summary: Key Takeaways
 
 ### Technical Understanding
 
