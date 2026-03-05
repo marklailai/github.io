@@ -11,6 +11,264 @@ A Decentralized Identifier (DID) is a new type of globally unique identifier def
 - **Cryptographically verifiable** - Proof of ownership
 - **Resolvable** - Can be looked up to discover associated information
 
+---
+
+### How Users Use DID (Real-World Scenario)
+
+#### Simple Analogy
+
+Think of a DID as your **digital passport** that you create and control yourself, rather than one issued by a government. Just like a physical passport proves your identity when traveling, a DID proves your digital identity online—but you own it completely.
+
+#### Real-World Application: Job Application with Verifiable Credentials
+
+Let's walk through a practical scenario where Alice uses her DID to apply for a job:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    Alice's Job Application Journey                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  STEP 1: Create Digital Identity                                            │
+│  ─────────────────────────────────                                          │
+│  Alice downloads a DID wallet app (like Dock Wallet or Trinsic Wallet)      │
+│                                                                             │
+│  ┌─────────────┐                                                            │
+│  │ Alice's     │  Creates                                                    │
+│  │ Smartphone  │ ─────────▶  did:key:z6MkhaXg... (Alice's DID)               │
+│  │             │         ┌─────────────────────────┐                        │
+│  └─────────────┘         │  Private Key (kept      │                        │
+│                          │  secret on phone)       │                        │
+│                          │  Public Key (shared     │                        │
+│                          │  with others)           │                        │
+│                          └─────────────────────────┘                        │
+│                                                                             │
+│  STEP 2: Receive Verifiable Credentials                                     │
+│  ─────────────────────────────────────                                      │
+│                                                                             │
+│  ┌──────────────┐      Issue Credential      ┌──────────────┐              │
+│  │  University  │ ──────────────────────────▶│  Alice's     │              │
+│  │  (Issuer)    │   "Bachelor of Science     │  DID Wallet  │              │
+│  │  did:web:    │    in Computer Science"    │              │              │
+│  │  uni.edu     │   Signed with uni's key    │  ✅ Stored   │              │
+│  └──────────────┘                            └──────────────┘              │
+│                                                                             │
+│  ┌──────────────┐      Issue Credential      ┌──────────────┐              │
+│  │  Previous    │ ──────────────────────────▶│  Alice's     │              │
+│  │  Employer    │   "3 Years Experience      │  DID Wallet  │              │
+│  │  (Issuer)    │    Certificate"            │              │              │
+│  └──────────────┘                            └──────────────┘              │
+│                                                                             │
+│  STEP 3: Apply for Job                                                      │
+│  ───────────────────                                                        │
+│                                                                             │
+│  ┌──────────────┐      Scan QR Code          ┌──────────────┐              │
+│  │  TechCorp    │ ◀──────────────────────────│  Alice's     │              │
+│  │  (Employer)  │   "We need your degree     │  Smartphone  │              │
+│  │              │    and experience proof"   │              │              │
+│  └──────────────┘                            └──────────────┘              │
+│                                                                             │
+│  STEP 4: Selective Disclosure                                               │
+│  ───────────────────────────                                                │
+│                                                                             │
+│  Alice reviews the request and chooses what to share:                       │
+│  ☑️ University Degree (Bachelor of Science)                                 │
+│  ☑️ Years of Experience (3 years)                                           │
+│  ☐ Home Address (not shared)                                                │
+│  ☐ Date of Birth (not shared)                                               │
+│                                                                             │
+│  STEP 5: Present Credentials                                                │
+│  ─────────────────────────                                                  │
+│                                                                             │
+│  Alice's wallet creates a presentation:                                     │
+│  ┌─────────────────────────────────────────────────────────┐               │
+│  │  Verifiable Presentation                                │               │
+│  │  ─────────────────────                                  │               │
+│  │  Holder: did:key:z6MkhaXg... (Alice's DID)              │               │
+│  │                                                         │               │
+│  │  Credentials:                                           │               │
+│  │  1. University Degree (signed by uni.edu)               │               │
+│  │  2. Experience Certificate (signed by prev-employer)    │               │
+│  │                                                         │               │
+│  │  Proof: Alice's digital signature                       │               │
+│  └─────────────────────────────────────────────────────────┘               │
+│                                                                             │
+│  STEP 6: Employer Verification                                              │
+│  ───────────────────────────                                                │
+│                                                                             │
+│  TechCorp's system automatically verifies:                                  │
+│  1. ✅ University signature is valid (uni.edu is a recognized institution)  │
+│  2. ✅ Previous employer signature is valid                                 │
+│  3. ✅ Alice's presentation signature proves she controls the DID           │
+│  4. ✅ Credentials have not been tampered with                              │
+│  5. ✅ Credentials are not expired or revoked                               │
+│                                                                             │
+│  Result: Alice gets the interview! 🎉                                       │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+#### ⚠️ Important Clarification: DID vs Verifiable Credentials
+
+**The DID Document does NOT contain the credentials!** Here's the correct relationship:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│           Relationship: DID Document vs Verifiable Credentials              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                    ALICE'S DID DOCUMENT                              │   │
+│  │                    (Stored in DID Registry)                          │   │
+│  │                                                                      │   │
+│  │  {                                                                   │   │
+│  │    "id": "did:key:z6MkhaXg...",      ◄── Alice's DID                │   │
+│  │    "verificationMethod": [{                                          │   │
+│  │      "id": "#key-1",                                                │   │
+│  │      "type": "Ed25519VerificationKey2020",                          │   │
+│  │      "publicKeyMultibase": "z6MkhaXg..."  ◄── Alice's Public Key    │   │
+│  │    }],                                                               │   │
+│  │    "authentication": ["#key-1"]      ◄── Key for proving control    │   │
+│  │  }                                                                   │   │
+│  │                                                                      │   │
+│  │  Contains: Cryptographic keys ONLY                                   │   │
+│  │  Does NOT contain: Degrees, experience, personal data                │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                    ▲                                        │
+│                                    │                                        │
+│                    DID is referenced in credentials                         │
+│                                    │                                        │
+│  ┌─────────────────────────────────┴─────────────────────────────────────┐ │
+│  │              ALICE'S VERIFIABLE CREDENTIALS (Stored in Wallet)        │ │
+│  │                                                                       │ │
+│  │  ┌─────────────────────────────────────────────────────────────────┐  │ │
+│  │  │  CREDENTIAL 1: University Degree                                 │  │ │
+│  │  │  ─────────────────────────────                                   │  │ │
+│  │  │  {                                                               │  │ │
+│  │  │    "@context": ["https://www.w3.org/2018/credentials/v1"],       │  │ │
+│  │  │    "id": "urn:uuid:1234...",                                     │  │ │
+│  │  │    "type": ["VerifiableCredential", "DegreeCredential"],         │  │ │
+│  │  │    "issuer": "did:web:uni.edu",      ◄── University's DID       │  │ │
+│  │  │    "credentialSubject": {                                        │  │ │
+│  │  │      "id": "did:key:z6MkhaXg...",    ◄── Alice's DID (subject)  │  │ │
+│  │  │      "degree": "Bachelor of Science",                            │  │ │
+│  │  │      "field": "Computer Science",                                │  │ │
+│  │  │      "graduationDate": "2023-05-15"                              │  │ │
+│  │  │    },                                                            │  │ │
+│  │  │    "proof": {                                                    │  │ │
+│  │  │      "type": "Ed25519Signature2020",                             │  │ │
+│  │  │      "created": "2023-05-15T10:00:00Z",                          │  │ │
+│  │  │      "proofValue": "z58DAdF..."    ◄── University's Signature   │  │ │
+│  │  │    }                                                             │  │ │
+│  │  │  }                                                               │  │ │
+│  │  └─────────────────────────────────────────────────────────────────┘  │ │
+│  │                                                                       │ │
+│  │  ┌─────────────────────────────────────────────────────────────────┐  │ │
+│  │  │  CREDENTIAL 2: Experience Certificate                            │  │ │
+│  │  │  ─────────────────────────────────                               │  │ │
+│  │  │  {                                                               │  │ │
+│  │  │    "issuer": "did:web:prev-employer.com",                        │  │ │
+│  │  │    "credentialSubject": {                                        │  │ │
+│  │  │      "id": "did:key:z6MkhaXg...",    ◄── Alice's DID (subject)  │  │ │
+│  │  │      "position": "Software Engineer",                            │  │ │
+│  │  │      "years": 3                                                  │  │ │
+│  │  │    },                                                            │  │ │
+│  │  │    "proof": { ... }                ◄── Employer's Signature     │  │ │
+│  │  │  }                                                               │  │ │
+│  │  └─────────────────────────────────────────────────────────────────┘  │ │
+│  │                                                                       │ │
+│  │  Credentials are signed by issuers and stored in Alice's wallet       │ │
+│  └───────────────────────────────────────────────────────────────────────┘ │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**How Each Component Works:**
+
+| Component | What It Contains | Who Creates It | Where It's Stored |
+|-----------|------------------|----------------|-------------------|
+| **DID Document** | Public keys for verification | Alice (or method-specific process) | DID Registry (blockchain, web server, etc.) |
+| **Verifiable Credential** | Claims about Alice (degree, experience) | Issuer (University, Employer) | Alice's wallet (credential holder) |
+| **Private Key** | Secret key for signing | Alice's wallet | Securely on Alice's device only |
+
+**How Verification Works:**
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         Verification Process                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  1. ISSUER SIGNS CREDENTIAL                                                  │
+│  ─────────────────────────                                                   │
+│  University creates credential with Alice's DID as subject                   │
+│  University signs with its private key                                       │
+│                                                                             │
+│  ┌─────────────┐         Sign with           ┌──────────────────────┐       │
+│  │  University │ ────▶  University's  ────▶  │ Signed Credential    │       │
+│  │  Private Key│         Private Key         │ (given to Alice)     │       │
+│  └─────────────┘                             └──────────────────────┘       │
+│                                                                             │
+│  2. ALICE PRESENTS CREDENTIAL                                                │
+│  ────────────────────────────                                                │
+│  Alice creates presentation with her private key                             │
+│                                                                             │
+│  ┌─────────────┐         Sign with           ┌──────────────────────┐       │
+│  │  Alice's    │ ────▶  Alice's      ────▶  │ Verifiable           │       │
+│  │  Private Key│         Private Key         │ Presentation         │       │
+│  └─────────────┘                             └──────────────────────┘       │
+│                                                                             │
+│  3. EMPLOYER VERIFIES                                                        │
+│  ───────────────────                                                         │
+│  Employer checks both signatures using public DIDs                           │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │  a) Resolve University's DID ────▶ Get University's Public Key      │    │
+│  │  b) Verify credential signature ────▶ ✅ Valid                      │    │
+│  │                                                                      │    │
+│  │  c) Resolve Alice's DID ────▶ Get Alice's Public Key                │    │
+│  │  d) Verify presentation signature ────▶ ✅ Valid                    │    │
+│  │                                                                      │    │
+│  │  Result: Both signatures valid ✅ Alice is the legitimate holder    │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Key Points:**
+
+1. **DID Document = Keys Only** - Contains public keys for cryptographic verification
+2. **Credentials = Claims + Signatures** - Contain actual data (degree, experience) signed by issuers
+3. **Subject Binding** - Each credential references Alice's DID in the `credentialSubject.id` field
+4. **Issuer Verification** - Anyone can verify by resolving the issuer's DID to get their public key
+5. **Holder Binding** - Alice proves she's the legitimate holder by signing the presentation with her private key
+
+---
+
+#### Key Benefits in This Scenario
+
+| Traditional Process | DID-Based Process |
+|---------------------|-------------------|
+| Alice emails PDF resume | Alice shares cryptographically signed credentials |
+| Employer must contact university to verify degree | Employer verifies instantly using university's public DID |
+| Verification takes days/weeks | Verification takes seconds |
+| Alice reveals all information | Alice shares only what's necessary |
+| Risk of forged documents | Cryptographically impossible to forge |
+| Alice has no control over her data | Alice owns and controls her credentials |
+
+#### Other Real-World Use Cases
+
+| Use Case | How DID Helps |
+|----------|---------------|
+| **Healthcare** | Patients carry medical records between hospitals securely |
+| **Banking** | Instant KYC verification without sharing excessive personal data |
+| **Supply Chain** | Verify product authenticity from manufacturer to consumer |
+| **Government Services** | Citizens access services with privacy-preserving digital ID |
+| **Education** | Students collect lifelong learning credentials from multiple institutions |
+| **IoT Devices** | Devices prove their identity and firmware authenticity |
+
+---
+
 ### DID Syntax
 
 #### Basic Structure
