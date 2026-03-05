@@ -904,7 +904,22 @@ Verification Relationships:
 
 ## 3. How DID Works: Technical Deep Dive
 
-### 4.1 DID Resolution Process
+### 3.1 DID Operations Overview
+
+DIDs support four fundamental operations (CRUD):
+
+| Operation | Description | Key Point |
+|-----------|-------------|-----------|
+| **Create** | Generate a new DID and DID document | Establishes control over the identifier |
+| **Read/Resolve** | Retrieve the DID document for a DID | Enables verification and interaction |
+| **Update** | Modify the DID document | Supports key rotation, service changes |
+| **Deactivate** | Permanently revoke the DID | Prevents future use of the identifier |
+
+Each DID method defines how these operations are implemented on its specific infrastructure.
+
+---
+
+### 3.2 DID Resolution Process
 
 DID Resolution is the process of obtaining a DID document for a given DID. This is one of four required operations (Create, Read/Resolve, Update, Deactivate).
 
@@ -915,47 +930,77 @@ resolve(did, resolutionOptions) →
    « didResolutionMetadata, didDocument, didDocumentMetadata »
 ```
 
-#### Step-by-Step Resolution Algorithm
+#### Detailed Resolution Algorithm
 
 ```
-┌─────────────────┐
-│   Input: DID    │
-│   + Options     │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ 1. Validate DID │
-│    Syntax       │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ 2. Identify DID │
-│    Method       │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ 3. Execute      │
-│    Method-Spec  │
-│    Resolution   │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ 4. Return DID   │
-│    Document +   │
-│    Metadata     │
-└─────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         DID Resolution Algorithm                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ INPUT                                                               │   │
+│  │   - did: The DID to resolve (string)                                │   │
+│  │   - resolutionOptions: Optional parameters (map)                    │   │
+│  │     * accept: Preferred media type                                  │   │
+│  │     * expandRelativeUrls: Whether to expand relative URLs           │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                    │                                        │
+│                                    ▼                                        │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ STEP 1: Validate DID Syntax                                         │   │
+│  │   - Check if DID matches ABNF grammar                               │   │
+│  │   - Verify: did:<method>:<method-specific-id>                       │   │
+│  │   - If invalid → Return error (invalidDid)                          │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                    │                                        │
+│                                    ▼                                        │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ STEP 2: Identify DID Method                                         │   │
+│  │   - Extract method name from DID                                    │   │
+│  │   - Check if resolver supports this method                          │   │
+│  │   - If not supported → Return error (methodNotSupported)            │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                    │                                        │
+│                                    ▼                                        │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ STEP 3: Execute Method-Specific Resolution                          │   │
+│  │   - did:web → Fetch from HTTPS URL                                  │   │
+│  │   - did:ethr → Query Ethereum smart contract                        │   │
+│  │   - did:key → Generate from public key in DID                       │   │
+│  │   - did:ion → Query Bitcoin + IPFS                                  │   │
+│  │   - ... (method-specific logic)                                     │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                    │                                        │
+│                                    ▼                                        │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ STEP 4: Process Resolution Result                                   │   │
+│  │   - If successful:                                                  │   │
+│  │     * Build didDocument                                             │   │
+│  │     * Build didDocumentMetadata                                     │   │
+│  │     * Build didResolutionMetadata                                   │   │
+│  │   - If failed:                                                      │   │
+│  │     * Return appropriate error                                      │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                    │                                        │
+│                                    ▼                                        │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ OUTPUT                                                              │   │
+│  │   - didResolutionMetadata: Process metadata                         │   │
+│  │   - didDocument: The resolved document (or null)                    │   │
+│  │   - didDocumentMetadata: Document metadata                          │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-#### Resolution Inputs
+#### Resolution Options
 
-| Input | Description |
-|-------|-------------|
-| `did` | The DID to resolve (required) |
-| `resolutionOptions` | Accept, expandRelativeUrls, etc. (optional) |
+| Option | Type | Description | Default |
+|--------|------|-------------|---------|
+| `accept` | string | Preferred media type (e.g., `application/did+json`) | method-specific |
+| `expandRelativeUrls` | boolean | Convert relative URLs to absolute | `false` |
+| `versionId` | string | Request specific version | latest |
+| `versionTime` | datetime | Request version at timestamp | latest |
 
 #### Resolution Outputs
 
@@ -965,9 +1010,32 @@ resolve(did, resolutionOptions) →
 | `didDocument` | The resolved DID document (or null if error) |
 | `didDocumentMetadata` | Metadata about the DID document (created, updated, versionId, deactivated, etc.) |
 
-### 4.2 DID URL Dereferencing
+#### DID Resolution Metadata Properties
 
-DID URL Dereferencing retrieves a resource for a given DID URL (which may include path, query, and fragment).
+| Property | Type | Description |
+|----------|------|-------------|
+| `contentType` | string | Media type of the DID document representation |
+| `error` | string | Error code if resolution failed |
+| `retrieved` | datetime | When the document was retrieved |
+
+#### DID Document Metadata Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `created` | datetime | Timestamp when DID was created |
+| `updated` | datetime | Timestamp of last update |
+| `versionId` | string | Version identifier |
+| `deactivated` | boolean | Whether the DID is deactivated |
+| `nextUpdate` | datetime | When next update occurred (for historical queries) |
+| `nextVersionId` | string | Next version ID (for historical queries) |
+| `equivalentId` | array | Other DIDs referring to same subject |
+| `canonicalId` | string | Canonical DID for this subject |
+
+---
+
+### 3.3 DID URL Dereferencing
+
+DID URL Dereferencing retrieves a specific resource for a given DID URL (which may include path, query, and fragment).
 
 #### Dereferencing Function
 
@@ -987,7 +1055,52 @@ did:example:123456/path/to/resource?query=value#fragment
 └────────────────────────────────────────────── DID (base identifier)
 ```
 
-### 4.3 Common DID Parameters
+#### Dereferencing Process
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      DID URL Dereferencing Process                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  Input: did:example:123/path?service=files&relativeRef=/doc.pdf#section1   │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ STEP 1: Parse DID URL                                               │   │
+│  │   - DID: did:example:123                                            │   │
+│  │   - Path: /path                                                     │   │
+│  │   - Query: service=files&relativeRef=/doc.pdf                       │   │
+│  │   - Fragment: #section1                                             │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                    │                                        │
+│                                    ▼                                        │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ STEP 2: Resolve DID to DID Document                                 │   │
+│  │   - Call resolve("did:example:123")                                 │   │
+│  │   - Get DID document                                                │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                    │                                        │
+│                                    ▼                                        │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ STEP 3: Dereference Resource                                        │   │
+│  │   - If path present: Handle path-based resource                     │   │
+│  │   - If service param: Select service endpoint                       │   │
+│  │   - If fragment present: Extract sub-resource                       │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                    │                                        │
+│                                    ▼                                        │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ STEP 4: Return Resource                                             │   │
+│  │   - contentStream: The dereferenced resource                        │   │
+│  │   - contentMetadata: Metadata about the resource                    │   │
+│  │   - dereferencingMetadata: Process metadata                         │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 3.4 Common DID Parameters
 
 | Parameter | Description | Example |
 |-----------|-------------|---------|
@@ -997,12 +1110,146 @@ did:example:123456/path/to/resource?query=value#fragment
 | `versionId` | Specific DID document version | `did:example:123?versionId=1` |
 | `versionTime` | DID document at timestamp | `did:example:123?versionTime=2021-05-10T17:00:00Z` |
 | `hl` | Resource hash for integrity | `did:example:123?hl=zQmWvQx...` |
+| `transformKey` | Transform key format | `did:example:123?transformKey=JsonWebKey` |
 
-### 4.4 DID Document Metadata Properties
+---
 
-| Property | Description |
-|----------|-------------|
-| `created` | Timestamp when DID was created |
+### 3.5 DID Authentication Flow
+
+Authentication using DIDs involves proving control over the identifier through cryptographic signatures.
+
+#### Authentication Process
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        DID Authentication Flow                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌──────────────────┐                              ┌──────────────────┐    │
+│  │   DID Controller │                              │     Verifier     │    │
+│  │   (Prover)       │                              │   (Relying Party)│    │
+│  └────────┬─────────┘                              └────────┬─────────┘    │
+│           │                                                 │              │
+│           │  1. Authentication Request                      │              │
+│           │ ◀──────────────────────────────────────────────│              │
+│           │     (includes challenge/nonce)                  │              │
+│           │                                                 │              │
+│           │  2. Resolve DID                                 │              │
+│           │ ──────────────────────────────────────────────▶│              │
+│           │                                                 │              │
+│           │  3. Return DID Document                         │              │
+│           │ ◀──────────────────────────────────────────────│              │
+│           │     (contains public keys)                      │              │
+│           │                                                 │              │
+│           │  4. Sign Challenge                              │              │
+│           │     - Retrieve private key                      │              │
+│           │     - Sign challenge with authentication key    │              │
+│           │     - Create proof                              │              │
+│           │                                                 │              │
+│           │  5. Send Proof                                  │              │
+│           │ ──────────────────────────────────────────────▶│              │
+│           │     (signature + DID)                           │              │
+│           │                                                 │              │
+│           │                              6. Verify Proof    │              │
+│           │                              - Extract public key│             │
+│           │                              - Verify signature │              │
+│           │                              - Check key purpose│              │
+│           │                                                 │              │
+│           │  7. Authentication Result                       │              │
+│           │ ◀──────────────────────────────────────────────│              │
+│           │     ✅ Success / ❌ Failure                     │              │
+│           │                                                 │              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Cryptographic Proof Structure
+
+```json
+{
+  "type": "Ed25519Signature2020",
+  "created": "2024-01-15T10:30:00Z",
+  "verificationMethod": "did:example:123#key-1",
+  "proofPurpose": "authentication",
+  "challenge": "c0b53e5c-5b5e-4f5d-9f8e-1a2b3c4d5e6f",
+  "domain": "example.com",
+  "proofValue": "z58DAdFfa9SkqZMVPxAQpic7ndSaynfK6iV..."
+}
+```
+
+#### Proof Purposes
+
+| Purpose | When to Use | Example |
+|---------|-------------|---------|
+| `authentication` | Prove DID control | Login, access control |
+| `assertionMethod` | Issue credentials | University diploma |
+| `keyAgreement` | Establish shared secret | Encrypted messaging |
+| `capabilityInvocation` | Perform authorized action | API call |
+| `capabilityDelegation` | Grant authority to another | Delegate signing |
+
+---
+
+### 3.6 Error Handling
+
+#### Resolution Errors
+
+| Error Code | Description | When It Occurs |
+|------------|-------------|----------------|
+| `invalidDid` | DID syntax is invalid | Malformed DID string |
+| `methodNotSupported` | Resolver doesn't support method | Unknown DID method |
+| `notFound` | DID document not found | DID doesn't exist |
+| `deactivated` | DID has been deactivated | DID was revoked |
+| `representationNotSupported` | Media type not supported | Invalid `accept` header |
+
+#### Dereferencing Errors
+
+| Error Code | Description |
+|------------|-------------|
+| `invalidDidUrl` | DID URL syntax is invalid |
+| `notFound` | Resource not found |
+| `serviceNotFound` | Referenced service doesn't exist |
+
+---
+
+### 3.7 Method-Specific Resolution Examples
+
+#### did:web Resolution
+
+```
+DID: did:web:example.com:users:alice
+
+Resolution Steps:
+1. Extract domain: example.com
+2. Extract path: users:alice → /users/alice
+3. Construct URL: https://example.com/users/alice/did.json
+4. Fetch via HTTPS
+5. Return DID document
+```
+
+#### did:ethr Resolution
+
+```
+DID: did:ethr:0xE6Fe788d8ca214A080b0f6aC7F48480b2AEfa9a6
+
+Resolution Steps:
+1. Extract Ethereum address: 0xE6Fe...a6
+2. Query ERC-1056 contract on Ethereum
+3. Get identity owner
+4. Enumerate events (DIDOwnerChanged, DIDDelegateChanged, DIDAttributeChanged)
+5. Build DID document from contract state
+6. Return DID document
+```
+
+#### did:key Resolution
+
+```
+DID: did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK
+
+Resolution Steps:
+1. Extract multibase value: z6MkhaXg...
+2. Decode to get public key and key type
+3. Generate DID document deterministically
+4. Return DID document (no network call needed)
+```
 | `updated` | Timestamp of last update |
 | `deactivated` | Whether DID is deactivated (true/false) |
 | `nextUpdate` | Timestamp of next scheduled update |
@@ -1011,7 +1258,7 @@ did:example:123456/path/to/resource?query=value#fragment
 | `equivalentId` | Logically equivalent DIDs |
 | `canonicalId` | Canonical DID for the subject |
 
-### 4.5 Authentication Flow
+### 3.5 Authentication Flow
 
 ```
 ┌──────────┐                              ┌──────────┐
@@ -1037,7 +1284,7 @@ did:example:123456/path/to/resource?query=value#fragment
      │                                         │
 ```
 
-### 4.6 Verification Relationships
+### 3.6 Verification Relationships
 
 | Relationship | Purpose |
 |--------------|---------|
@@ -1047,7 +1294,7 @@ did:example:123456/path/to/resource?query=value#fragment
 | `capabilityInvocation` | Authorize operations on behalf of DID subject |
 | `capabilityDelegation` | Delegate capabilities to another party |
 
-### 4.7 DID Operations Lifecycle
+### 3.7 DID Operations Lifecycle
 
 ```
                     ┌────────────┐
