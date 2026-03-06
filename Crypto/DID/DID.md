@@ -282,6 +282,129 @@ Let's walk through a practical scenario where Alice uses her DID to apply for a 
 
 #### Part 1: DID and DID Document Generation
 
+**Who Generates the DID/DID Document?**
+
+The answer depends on the DID method:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    Who Generates DID/DID Document?                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  METHOD 1: Self-Generated (did:key)                                         │
+│  ──────────────────────────────────                                         │
+│                                                                             │
+│  Alice (User) generates everything herself:                                  │
+│                                                                             │
+│  Alice's Device                                                              │
+│  ┌─────────────────────────────────────────┐                                 │
+│  │  1. Generate Key Pair                   │                                 │
+│  │     - Private Key (kept secret)         │                                 │
+│  │     - Public Key                        │                                 │
+│  │                                         │                                 │
+│  │  2. Construct DID from Public Key       │                                 │
+│  │     did:key:z6Mk...                     │                                 │
+│  │                                         │                                 │
+│  │  3. Generate DID Document               │                                 │
+│  │     (deterministic algorithm)           │                                 │
+│  │                                         │                                 │
+│  │  ❌ NO external service provider        │                                 │
+│  │  ❌ NO registration needed              │                                 │
+│  │  ✅ Alice has complete control          │                                 │
+│  └─────────────────────────────────────────┘                                 │
+│                                                                             │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                             │
+│  METHOD 2: Domain-Based (did:web)                                           │
+│  ─────────────────────────────────                                          │
+│                                                                             │
+│  Organization generates and hosts DID document:                              │
+│                                                                             │
+│  Organization's IT Team                                                      │
+│  ┌─────────────────────────────────────────┐                                 │
+│  │  1. Generate Key Pair                   │                                 │
+│  │                                         │                                 │
+│  │  2. Create DID from domain              │                                 │
+│  │     did:web:example.com                 │                                 │
+│  │                                         │                                 │
+│  │  3. Create DID Document                 │                                 │
+│  │                                         │                                 │
+│  │  4. Host on web server                  │                                 │
+│  │     /.well-known/did.json               │                                 │
+│  │                                         │                                 │
+│  │  ✅ Organization controls               │                                 │
+│  │  ✅ DNS/HTTPS provides authority        │                                 │
+│  └─────────────────────────────────────────┘                                 │
+│                                                                             │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                             │
+│  METHOD 3: Blockchain-Based (did:ethr, did:ion)                             │
+│  ──────────────────────────────────────────────                             │
+│                                                                             │
+│  User generates keys, but DID document is resolved from blockchain:          │
+│                                                                             │
+│  Alice (User)                    Blockchain Network                          │
+│  ┌─────────────────────┐         ┌──────────────────────────────────────┐   │
+│  │ 1. Generate Key Pair│         │                                      │   │
+│  │                     │         │  Smart Contract (ERC-1056)           │   │
+│  │ 2. Create DID from  │         │  ┌────────────────────────────────┐  │   │
+│  │    Ethereum Address │         │  │ DID Document stored/resolved   │  │   │
+│  │                     │────────▶│  │ from blockchain events         │  │   │
+│  │ 3. Sign transactions│         │  └────────────────────────────────┘  │   │
+│  │    (if updating)    │         │                                      │   │
+│  └─────────────────────┘         └──────────────────────────────────────┘   │
+│                                                                             │
+│  ✅ Alice controls keys (self-sovereign)                                    │
+│  ✅ Blockchain provides decentralized registry                              │
+│  ✅ No single service provider controls the DID                             │
+│                                                                             │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                             │
+│  METHOD 4: Service Provider Assisted (BSN-DID, etc.)                        │
+│  ───────────────────────────────────────────────────                        │
+│                                                                             │
+│  In some enterprise/government scenarios:                                    │
+│                                                                             │
+│  Alice + BSN Service Provider                                                │
+│  ┌─────────────────────────────────────────┐                                 │
+│  │  1. Alice requests DID creation         │                                 │
+│  │     (provides identity proof)           │                                 │
+│  │                                         │                                 │
+│  │  2. Service Provider verifies identity  │                                 │
+│  │     (e.g., real-name authentication)    │                                 │
+│  │                                         │                                 │
+│  │  3. Service Provider generates DID      │                                 │
+│  │     and DID Document                    │                                 │
+│  │                                         │                                 │
+│  │  4. Alice receives private keys         │                                 │
+│  │     (or key is secured for Alice)       │                                 │
+│  │                                         │                                 │
+│  │  ✅ Alice gets verified DID             │                                 │
+│  │  ✅ Service provider guarantees         │                                 │
+│  │     real-world identity                 │                                 │
+│  └─────────────────────────────────────────┘                                 │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Summary Table: Who Does What**
+
+| DID Method | Key Generation | DID Creation | DID Document Creation | Storage/Registry | Service Provider Role |
+|------------|----------------|--------------|----------------------|------------------|----------------------|
+| **did:key** | User | User (algorithmic) | User (deterministic) | None (self-contained) | None - fully self-sovereign |
+| **did:web** | Organization | Organization | Organization | Web server (DNS-based) | Organization IT hosts document |
+| **did:ethr** | User | User (from address) | Smart contract / Default | Ethereum blockchain | Blockchain network provides registry |
+| **did:ion** | User | User (from public key) | Sidetree nodes aggregate | Bitcoin blockchain | ION network nodes help batch/anchor |
+| **BSN-DID** | Service Provider | Service Provider | Service Provider | BSN blockchain | BSN provides verified, real-name DID |
+
+**Key Insight:**
+
+- **Self-Sovereign Methods (did:key, did:ethr, did:ion)**: User generates everything. No service provider needed. True "self-sovereign identity."
+- **Organization Methods (did:web)**: Organization generates and controls. Good for corporate/institutional identities.
+- **Assisted Methods (BSN-DID)**: Service provider helps generate, but user still controls keys (in most designs). Bridges real-world identity with decentralized identity.
+
+---
+
 The process varies depending on the DID method. Here are three common examples:
 
 ##### Method A: did:key (Self-Generated)
