@@ -243,6 +243,363 @@ Let's walk through a practical scenario where Alice uses her DID to apply for a 
 4. **Issuer Verification** - Anyone can verify by resolving the issuer's DID to get their public key
 5. **Holder Binding** - Alice proves she's the legitimate holder by signing the presentation with her private key
 
+**Simple Summary: One DID, Many Credentials**
+
+```
+                    ONE DID (Alice's Identity)
+                         did:key:z6Mk...
+                              │
+                              │  Stored in DID Registry
+                              │  (contains only public keys)
+                              │
+              ┌───────────────┼───────────────┐
+              │               │               │
+              ▼               ▼               ▼
+    ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+    │   VC #1         │ │   VC #2         │ │   VC #3         │
+    │   University    │ │   Employer      │ │   Government    │
+    │   Degree        │ │   Certificate   │ │   ID Card       │
+    │                 │ │                 │ │                 │
+    │  Subject:       │ │  Subject:       │ │  Subject:       │
+    │  did:key:z6Mk.. │ │  did:key:z6Mk.. │ │  did:key:z6Mk.. │
+    └─────────────────┘ └─────────────────┘ └─────────────────┘
+              │               │               │
+              └───────────────┴───────────────┘
+                              │
+                    Stored in Alice's Wallet
+                    (multiple credentials connect
+                     to one DID)
+```
+
+**In Short:**
+- ✅ **One DID** = One identity identifier (stored on registry)
+- ✅ **Many VCs** = Multiple credentials all reference the same DID (stored in wallet)
+- ✅ **One-to-Many Relationship** = Single DID : Multiple Verifiable Credentials
+
+---
+
+### How DID/DID Document and VC Are Generated and Issued
+
+#### Part 1: DID and DID Document Generation
+
+The process varies depending on the DID method. Here are three common examples:
+
+##### Method A: did:key (Self-Generated)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    did:key Generation Process (Self-Generated)              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  STEP 1: Generate Cryptographic Key Pair                                     │
+│  ─────────────────────────────────────                                       │
+│                                                                             │
+│  Alice's Wallet App:                                                         │
+│  ┌─────────────────────────────────────────┐                                 │
+│  │  Generate Ed25519 Key Pair              │                                 │
+│  │                                         │                                 │
+│  │  Private Key (sk) ──────▶ Keep Secret   │                                 │
+│  │     ↓                                   │                                 │
+│  │  Public Key (pk) ───────▶ Used for DID  │                                 │
+│  └─────────────────────────────────────────┘                                 │
+│                                                                             │
+│  STEP 2: Encode Public Key                                                   │
+│  ─────────────────────────                                                   │
+│                                                                             │
+│  Raw Public Key: 0x279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959...  │
+│       ↓                                                                      │
+│  Multicodec Prefix: 0xed (for Ed25519)                                       │
+│       ↓                                                                      │
+│  Multibase Base58-btc Encoding: z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnn   │
+│                                                                             │
+│  STEP 3: Construct DID                                                       │
+│  ────────────────────                                                        │
+│                                                                             │
+│  did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK                   │
+│  │      │                                                  │                  │
+│  │      │                                                  └── Method-Specific │
+│  │      │                                                      ID (encoded pk)│
+│  │      └── Method Name                                        │              │
+│  └── Scheme                                                    │              │
+│                                                                             │
+│  STEP 4: Generate DID Document (Deterministic)                               │
+│  ─────────────────────────────────────────────                               │
+│                                                                             │
+│  The DID document is automatically generated from the public key:            │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │  {                                                                  │    │
+│  │    "@context": ["https://www.w3.org/ns/did/v1"],                   │    │
+│  │    "id": "did:key:z6MkhaXg...",                                    │    │
+│  │    "verificationMethod": [{                                         │    │
+│  │      "id": "did:key:z6MkhaXg...#z6MkhaXg...",                      │    │
+│  │      "type": "Ed25519VerificationKey2020",                         │    │
+│  │      "controller": "did:key:z6MkhaXg...",                          │    │
+│  │      "publicKeyMultibase": "z6MkhaXg..."                           │    │
+│  │    }],                                                              │    │
+│  │    "authentication": ["#z6MkhaXg..."]                              │    │
+│  │  }                                                                  │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│                                                                             │
+│  STEP 5: Store Private Key                                                   │
+│  ───────────────────────                                                     │
+│                                                                             │
+│  ❌ NO REGISTRY NEEDED for did:key                                           │
+│  ✅ Private key stored securely in Alice's wallet                            │
+│  ✅ DID document can be regenerated anytime from the public key              │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+##### Method B: did:web (Domain-Based)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    did:web Generation Process (Domain-Based)                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  STEP 1: Own a Domain                                                        │
+│  ────────────────────                                                        │
+│  Alice's organization owns: example.com                                      │
+│                                                                             │
+│  STEP 2: Generate Key Pair                                                   │
+│  ───────────────────────                                                     │
+│  Generate cryptographic keys (same as did:key)                               │
+│                                                                             │
+│  STEP 3: Create DID                                                          │
+│  ────────────────                                                            │
+│                                                                             │
+│  did:web:example.com                                                         │
+│  │      │           │                                                        │
+│  │      │           └── Domain name (must own DNS)                          │
+│  │      └── Method Name                                                      │
+│  └── Scheme                                                                  │
+│                                                                             │
+│  STEP 4: Create and Host DID Document                                        │
+│  ───────────────────────────────────                                         │
+│                                                                             │
+│  Create did.json file:                                                       │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │  {                                                                  │    │
+│  │    "@context": ["https://www.w3.org/ns/did/v1"],                   │    │
+│  │    "id": "did:web:example.com",                                    │    │
+│  │    "verificationMethod": [{                                         │    │
+│  │      "id": "did:web:example.com#key-1",                            │    │
+│  │      "type": "JsonWebKey2020",                                     │    │
+│  │      "controller": "did:web:example.com",                          │    │
+│  │      "publicKeyJwk": { "kty": "OKP", "crv": "Ed25519", ... }       │    │
+│  │    }],                                                              │    │
+│  │    "authentication": ["did:web:example.com#key-1"]                  │    │
+│  │  }                                                                  │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│                                                                             │
+│  Host at: https://example.com/.well-known/did.json                           │
+│                                                                             │
+│  STEP 5: DNS Resolution                                                      │
+│  ───────────────────                                                         │
+│                                                                             │
+│  When someone resolves did:web:example.com:                                  │
+│  1. Extract domain: example.com                                              │
+│  2. DNS lookup → resolves to web server IP                                   │
+│  3. HTTPS GET: https://example.com/.well-known/did.json                      │
+│  4. Return DID document                                                      │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+##### Method C: did:ethr (Blockchain-Based)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                 did:ethr Generation Process (Ethereum-Based)                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  STEP 1: Generate Ethereum Key Pair                                          │
+│  ─────────────────────────────────                                           │
+│                                                                             │
+│  Private Key ────▶ Public Key (64 hex chars) ────▶ Ethereum Address (40)    │
+│       │                                               │                      │
+│       │                                               ▼                      │
+│       │                                        0xb9c5714089478a327f...      │
+│       │                                               │                      │
+│       └───────────────────────────────────────────────┘                      │
+│                    Used to control the DID                                   │
+│                                                                             │
+│  STEP 2: Construct DID                                                       │
+│  ────────────────────                                                        │
+│                                                                             │
+│  did:ethr:0xb9c5714089478a327f09197987f16f9e5d936e8a                        │
+│  │      │  │                                          │                      │
+│  │      │  │                                          └── Ethereum Address   │
+│  │      │  └── Network identifier (optional, defaults to mainnet)            │
+│  │      └── Method Name                                                      │
+│  └── Scheme                                                                  │
+│                                                                             │
+│  STEP 3: Default DID Document (No Registration Required)                     │
+│  ───────────────────────────────────────────────────────                     │
+│                                                                             │
+│  Even without blockchain transaction, a default DID document exists:         │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │  {                                                                  │    │
+│  │    "id": "did:ethr:0xb9c5...",                                     │    │
+│  │    "verificationMethod": [{                                         │    │
+│  │      "id": "did:ethr:0xb9c5...#controller",                        │    │
+│  │      "type": "EcdsaSecp256k1RecoveryMethod2020",                   │    │
+│  │      "controller": "did:ethr:0xb9c5...",                           │    │
+│  │      "blockchainAccountId": "eip155:1:0xb9c5..."                   │    │
+│  │    }],                                                              │    │
+│  │    "authentication": ["#controller"]                                │    │
+│  │  }                                                                  │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│                                                                             │
+│  STEP 4: Optional - Register on ERC-1056 Smart Contract                      │
+│  ───────────────────────────────────────────────────────                     │
+│                                                                             │
+│  To add services or delegate keys, submit Ethereum transaction:              │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │  Transaction to: 0xdca7ef03e98e0dc2b855be647c39abe984fcf21b         │    │
+│  │  Function: changeOwnerDelegated() or setAttribute()                  │    │
+│  │  Cost: Gas fees (ETH)                                                │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│                                                                             │
+│  STEP 5: Resolution                                                          │
+│  ────────────                                                                │
+│                                                                             │
+│  When resolving did:ethr:0xb9c5...:                                          │
+│  1. Query ERC-1056 smart contract on Ethereum                                │
+│  2. Read events: DIDOwnerChanged, DIDDelegateChanged, DIDAttributeChanged   │
+│  3. Build DID document from event history                                    │
+│  4. Return complete DID document                                             │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Part 2: Verifiable Credential Generation and Issuance
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│              Verifiable Credential Generation and Issuance Process          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ACTORS:                                                                     │
+│  ┌──────────────┐         ┌──────────────┐         ┌──────────────┐        │
+│  │   University │         │    Alice     │         │   Employer   │        │
+│  │   (Issuer)   │         │   (Holder)   │         │  (Verifier)  │        │
+│  └──────┬───────┘         └──────┬───────┘         └──────┬───────┘        │
+│         │                        │                        │                │
+└─────────┼────────────────────────┼────────────────────────┼────────────────┘
+          │                        │                        │
+          ▼                        │                        │
+┌─────────────────────┐            │                        │
+│ STEP 1: University  │            │                        │
+│ Prepares Credential │            │                        │
+│ ─────────────────── │            │                        │
+│                     │            │                        │
+│  {                  │            │                        │
+│    "@context": [    │            │                        │
+│      "https://www.w3.org/2018/credentials/v1",          │
+│      "https://www.w3.org/2018/credentials/examples/v1"  │
+│    ],               │            │                        │
+│    "id": "urn:uuid:12345678-1234-1234-1234-123456789abc"│
+│    "type": ["VerifiableCredential", "DegreeCredential"],│
+│    "issuer": {      │            │                        │
+│      "id": "did:web:uni.edu",  ◄── University's DID     │
+│      "name": "Example University"                       │
+│    },               │            │                        │
+│    "issuanceDate": "2023-05-15T10:00:00Z",              │
+│    "credentialSubject": {        ◄── Claims about Alice  │
+│      "id": "did:key:z6MkhaXg...", ◄── Alice's DID        │
+│      "degree": {                                     │
+│        "type": "BachelorDegree",                       │
+│        "name": "Bachelor of Science",                  │
+│        "field": "Computer Science"                     │
+│      },                                                │
+│      "graduationDate": "2023-05-15"                    │
+│    }                                                   │
+│  }                                                     │
+└─────────┬──────────────────────────────────────────────┘
+          │
+          ▼
+┌─────────────────────┐
+│ STEP 2: University  │
+│ Signs Credential    │
+│ ─────────────────   │
+│                     │
+│  Canonicalization:  │
+│  Normalize JSON-LD  │
+│       ↓             │
+│  Hash (SHA-256):    │
+│  0x8a3f2b1c...      │
+│       ↓             │
+│  Sign with          │
+│  University's       │
+│  Private Key        │
+│       ↓             │
+│  Signature:         │
+│  z58DAdF7HV...      │
+└─────────┬───────────┘
+          │
+          ▼
+┌─────────────────────┐
+│ STEP 3: Complete    │
+│ Signed Credential   │
+│ ─────────────────   │
+│                     │
+│  {                  │
+│    ...credential data...                               │
+│    "proof": {       │
+│      "type": "Ed25519Signature2020",                   │
+│      "created": "2023-05-15T10:00:00Z",                │
+│      "proofPurpose": "assertionMethod",                │
+│      "verificationMethod": "did:web:uni.edu#key-1",   │
+│      "proofValue": "z58DAdF7HV..."  ◄── Signature     │
+│    }                                                   │
+│  }                                                     │
+└─────────┬──────────────────────────────────────────────┘
+          │
+          │ Issue to Alice
+          ▼
+┌─────────────────────┐            ┌─────────────────────┐
+│ STEP 4: Alice       │            │ STEP 5: Alice Stores│
+│ Receives Credential │───────────▶│ Credential in Wallet│
+│ ─────────────────── │            │ ─────────────────── │
+└─────────────────────┘            └─────────────────────┘
+                                              │
+          ┌───────────────────────────────────┼───────────────────────────┐
+          │                                   │                           │
+          ▼                                   ▼                           ▼
+┌─────────────────────┐            ┌─────────────────────┐   ┌─────────────────────┐
+│ STEP 6: Employer    │            │ STEP 7: Alice Creates│   │ STEP 8: Employer    │
+│ Requests Proof      │◄───────────│ Verifiable          │   │ Verifies            │
+│ ─────────────────   │  Scan QR   │ Presentation        │──▶│ ───────────         │
+│                     │  Code      │ ──────────────────  │   │                     │
+│ "Please prove your  │            │                     │   │ 1. Resolve Uni DID  │
+│  degree and         │            │ {                   │   │ 2. Verify signature │
+│  experience"        │            │   "@context": [...],│   │ 3. Resolve Alice DID│
+│                     │            │   "type": "VerifiablePresentation",          │
+│                     │            │   "verifiableCredential": [cred1, cred2],    │
+│                     │            │   "holder": "did:key:z6MkhaXg...",            │
+│                     │            │   "proof": {        │   │ 4. Verify Alice sig │
+│                     │            │     "type": "Ed25519Signature2020",          │
+│                     │            │     "proofPurpose": "authentication",        │
+│                     │            │     "proofValue": "z7sN8K..." ◄── Alice sig │
+│                     │            │   }                                                │
+│                     │            │ }                   │   │ ✅ All verified!    │
+└─────────────────────┘            └─────────────────────┘   └─────────────────────┘
+```
+
+#### Summary Table: DID vs VC Generation
+
+| Aspect | DID/DID Document | Verifiable Credential |
+|--------|------------------|----------------------|
+| **Who generates** | User (or user's wallet/app) | Issuer (University, Employer, Government) |
+| **Who signs** | N/A (DID doc contains public keys) | Issuer signs with their private key |
+| **Storage location** | DID Registry (blockchain, web server, etc.) | Holder's wallet |
+| **Contains** | Public keys, service endpoints | Claims about subject, issuer info, signature |
+| **References** | Self-references | References subject's DID and issuer's DID |
+| **Number per user** | One DID (can have multiple for different contexts) | Many VCs per DID |
+| **Creation cost** | Varies (free for did:key, gas fees for did:ethr) | Free (issuer pays any blockchain fees) |
+| **Updateable** | Depends on method (did:key: no, did:ethr: yes) | No (immutable once issued, can be revoked) |
+
 ---
 
 #### Key Benefits in This Scenario
