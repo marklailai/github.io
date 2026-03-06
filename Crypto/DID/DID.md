@@ -602,6 +602,365 @@ The process varies depending on the DID method. Here are three common examples:
 
 ---
 
+### How Authorities of DID and VC Are Guaranteed
+
+The authority and trustworthiness of DIDs and VCs are guaranteed through multiple layers of cryptographic security, decentralized verification, and trust frameworks.
+
+#### 1. Cryptographic Security Foundation
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    Cryptographic Security Layers                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  LAYER 1: Public Key Infrastructure (PKI)                                    │
+│  ─────────────────────────────────────────                                   │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  Asymmetric Cryptography (Ed25519, secp256k1, etc.)                 │   │
+│  │                                                                     │   │
+│  │   Private Key ──────Sign──────▶ Signature                           │   │
+│  │      │                                                            │   │
+│  │      │ Derive                                                    │   │
+│  │      ▼                                                            │   │
+│  │   Public Key ────Verify──────▶ ✅ Valid / ❌ Invalid                │   │
+│  │                                                                     │   │
+│  │  Mathematical guarantee: Only private key holder can create         │   │
+│  │  valid signatures; anyone with public key can verify                │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                    ▲                                        │
+│                                    │                                        │
+│  LAYER 2: DID Document Binding     │                                        │
+│  ─────────────────────────────     │                                        │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  DID Document contains public keys for verification                 │   │
+│  │                                                                     │   │
+│  │  did:example:123 ────Resolves───▶ {                                 │   │
+│  │    "verificationMethod": [{                                        │   │
+│  │      "publicKeyMultibase": "z6Mk..."  ◄── Public key               │   │
+│  │    }]                                                               │   │
+│  │  }                                                                  │   │
+│  │                                                                     │   │
+│  │  Anyone can resolve DID to get the public key for verification     │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                    ▲                                        │
+│                                    │                                        │
+│  LAYER 3: Verifiable Credentials   │                                        │
+│  ───────────────────────────────── │                                        │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  VC contains:                                                       │   │
+│  │  1. Claims about subject                                            │   │
+│  │  2. Issuer's DID reference                                          │   │
+│  │  3. Issuer's digital signature                                      │   │
+│  │                                                                     │   │
+│  │  Verification:                                                      │   │
+│  │  1. Resolve issuer's DID ────▶ Get issuer's public key              │   │
+│  │  2. Verify signature on VC ──▶ Confirm issuer signed it             │   │
+│  │  3. Verify VC not tampered ──▶ Check hash matches                   │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### 2. DID Authority Guarantees
+
+##### 2.1 Control Proof (Authentication)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    Proving Control Over a DID                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  CHALLENGE-RESPONSE PROTOCOL                                                │
+│  ───────────────────────────                                                │
+│                                                                             │
+│  Verifier                          Prover (DID Controller)                  │
+│  ────────                          ───────────────────────                  │
+│                                                                             │
+│  Step 1: Send Challenge                                                      │
+│  ┌──────────────┐                                                          │
+│  │  "Prove you  │                                                          │
+│  │   control    │──────────▶                                              │
+│  │   did:ex:123 │                                                          │
+│  └──────────────┘                                                          │
+│                                                                             │
+│  Step 2: Create Proof                                                      │
+│                               ┌──────────────────────┐                     │
+│                               │  1. Generate nonce   │                     │
+│                               │  2. Sign with        │                     │
+│                               │     private key      │                     │
+│                               │  3. Create proof     │                     │
+│                               │     document         │                     │
+│                               └──────────┬───────────┘                     │
+│                                          │                                  │
+│  Step 3: Verify Proof                    │                                  │
+│  ┌──────────────┐                        │                                  │
+│  │  Resolve DID │◄───────────────────────┘                                  │
+│  │  Get public  │  Send proof + signature                                   │
+│  │  key         │                                                           │
+│  └──────┬───────┘                                                           │
+│         │                                                                   │
+│         ▼                                                                   │
+│  ┌──────────────┐                                                           │
+│  │  Verify      │                                                           │
+│  │  signature   │                                                           │
+│  │  with public │                                                           │
+│  │  key         │                                                           │
+│  └──────┬───────┘                                                           │
+│         │                                                                   │
+│         ▼                                                                   │
+│  ┌──────────────┐                                                           │
+│  │  ✅ Valid    │  Only holder of private key could create valid signature  │
+│  │     OR       │                                                           │
+│  │  ❌ Invalid  │  Proof of control established!                             │
+│  └──────────────┘                                                           │
+│                                                                             │
+│  GUARANTEE: Mathematical certainty that prover controls the DID             │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+##### 2.2 DID Method-Specific Authority
+
+| DID Method | Authority Mechanism | Security Guarantee |
+|------------|---------------------|-------------------|
+| **did:key** | Self-generated from key pair | Control = possession of private key |
+| **did:web** | Domain ownership via DNS + TLS | Control = DNS record + HTTPS server control |
+| **did:ethr** | Ethereum address control | Control = possession of Ethereum private key |
+| **did:ion** | Bitcoin anchoring + Sidetree | Control = possession of operation signing keys |
+| **did:sov** | Hyperledger Indy consensus | Control = consensus of validator nodes |
+
+#### 3. Verifiable Credential Authority Guarantees
+
+##### 3.1 Issuer Authentication
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    Verifying VC Issuer Authority                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  VERIFICATION STEPS:                                                         │
+│                                                                             │
+│  Step 1: Extract Issuer DID from VC                                          │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  {                                                                  │   │
+│  │    "issuer": "did:web:uni.edu",  ◄── Extract issuer DID            │   │
+│  │    ...                                                              │   │
+│  │    "proof": {                                                       │   │
+│  │      "verificationMethod": "did:web:uni.edu#key-1"                 │   │
+│  │    }                                                                │   │
+│  │  }                                                                  │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                    │                                        │
+│                                    ▼                                        │
+│  Step 2: Resolve Issuer's DID                                               │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  did:web:uni.edu ────Resolve───▶ {                                  │   │
+│  │    "verificationMethod": [{                                        │   │
+│  │      "id": "did:web:uni.edu#key-1",                                │   │
+│  │      "publicKeyJwk": { "x": "0-e2i2...", ... }  ◄── Public key     │   │
+│  │    }]                                                               │   │
+│  │  }                                                                  │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                    │                                        │
+│                                    ▼                                        │
+│  Step 3: Verify VC Signature                                                │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                                                                     │   │
+│  │  VC Document (without proof) ────Hash───▶ Hash Value                │   │
+│  │                                                                     │   │
+│  │  Signature from VC proof ────────▶ Verify against hash              │   │
+│  │         │                            using issuer's public key      │   │
+│  │         ▼                                                           │   │
+│  │    ✅ Valid Signature                                               │   │
+│  │       = Issuer really did sign this VC                              │   │
+│  │                                                                     │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  GUARANTEE: Cryptographic proof that specific issuer created the VC         │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+##### 3.2 Trust Frameworks
+
+Beyond cryptography, real-world trust is established through:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    Trust Framework Layers                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  LAYER 1: Cryptographic Trust (Base Layer)                                  │
+│  ─────────────────────────────────────────                                  │
+│  • Mathematical guarantees of signatures                                    │
+│  • Decentralized verification (no central authority needed)                 │
+│  • Tamper-evident (any modification breaks signature)                       │
+│                                                                             │
+│  LAYER 2: Institutional Trust                                               │
+│  ────────────────────────────                                               │
+│  • University is accredited and recognized                                  │
+│  • Government ID is legally valid                                           │
+│  • Employer is registered business                                          │
+│  • Trust registries (eIDAS, etc.)                                           │
+│                                                                             │
+│  LAYER 3: Governance Trust                                                  │
+│  ─────────────────────────                                                  │
+│  • Legal frameworks (eIDAS 2.0 in EU)                                       │
+│  • Industry standards (W3C VC Data Model)                                   │
+│  • Compliance requirements (GDPR, KYC/AML)                                  │
+│  • Audit trails and accountability                                          │
+│                                                                             │
+│  LAYER 4: Technical Trust                                                   │
+│  ─────────────────────                                                      │
+│  • DID method specifications                                                │
+│  • Revocation registries (if credential is revoked)                         │
+│  • Status lists (is credential still valid?)                                │
+│  • Schema validation (does data follow expected format?)                    │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### 4. Revocation and Status Checking
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    Credential Revocation Mechanisms                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  PROBLEM: What if a credential needs to be revoked?                          │
+│  (e.g., degree revoked due to academic misconduct, employee terminated)      │
+│                                                                             │
+│  SOLUTION 1: Revocation List                                                 │
+│  ───────────────────────────                                                 │
+│                                                                             │
+│  Issuer maintains a public revocation list:                                  │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  https://uni.edu/revoked-credentials.json                           │   │
+│  │                                                                     │   │
+│  │  {                                                                  │   │
+│  │    "revokedCredentials": [                                          │   │
+│  │      "urn:uuid:1234...",  ◄── Alice's degree revoked               │   │
+│  │      "urn:uuid:5678..."                                             │   │
+│  │    ]                                                                │   │
+│  │  }                                                                  │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  Verifier checks: Is credential ID in revocation list?                      │
+│                                                                             │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                             │
+│  SOLUTION 2: Status List 2021 (Privacy-Preserving)                          │
+│  ────────────────────────────────────────────────                           │
+│                                                                             │
+│  Issuer publishes compressed bitstring:                                      │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  Status List: [0, 0, 1, 0, 0, 0, 1, 0, ...]  (1 = revoked)         │   │
+│  │                                                                     │   │
+│  │  Alice's credential index: 2 ────▶ Value = 1 (REVOKED)              │   │
+│  │  Bob's credential index: 0 ──────▶ Value = 0 (VALID)                │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  Advantages:                                                                 │
+│  • Verifier doesn't reveal which credential they're checking                 │
+│  • Efficient for large numbers of credentials                                │
+│  • Cryptographically signed by issuer                                        │
+│                                                                             │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                             │
+│  SOLUTION 3: Blockchain Anchoring                                            │
+│  ────────────────────────────────                                            │
+│                                                                             │
+│  Issuer publishes revocation transaction:                                    │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  Ethereum Transaction                                               │   │
+│  │                                                                     │   │
+│  │  Function: revokeCredential(bytes32 credentialHash)                 │   │
+│  │  From: did:ethr:uni.edu                                             │   │
+│  │  Data: 0x8a3f2b1c... (hash of Alice's credential)                  │   │
+│  │  Status: ✅ Confirmed on blockchain                                 │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  Immutable, timestamped proof of revocation                                  │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### 5. Complete Authority Verification Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│               Complete Authority Verification Example                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  SCENARIO: TechCorp verifies Alice's degree                                  │
+│                                                                             │
+│  ┌──────────────┐                              ┌──────────────┐            │
+│  │  TechCorp    │                              │  University  │            │
+│  │  (Verifier)  │                              │  (Issuer)    │            │
+│  └──────┬───────┘                              └──────┬───────┘            │
+│         │                                             │                     │
+│         │  1. Receive VC from Alice                   │                     │
+│         │◄────────────────────────────────────────────┤                     │
+│         │                                             │                     │
+│         │  2. Verify VC Structure                     │                     │
+│         │     ✅ Valid JSON-LD                        │                     │
+│         │     ✅ Required fields present              │                     │
+│         │     ✅ Not expired                          │                     │
+│         │                                             │                     │
+│         │  3. Resolve Issuer DID                      │                     │
+│         │     did:web:uni.edu ────▶ DNS lookup        │                     │
+│         │     DNS ────▶ 203.0.113.10                  │                     │
+│         │     HTTPS GET /.well-known/did.json         │                     │
+│         │     ✅ Retrieved DID document               │                     │
+│         │                                             │                     │
+│         │  4. Verify Issuer Signature                 │                     │
+│         │     Extract public key from DID doc         │                     │
+│         │     Verify signature on VC                  │                     │
+│         │     ✅ Signature valid                      │                     │
+│         │     ✅ Issuer authenticated                 │                     │
+│         │                                             │                     │
+│         │  5. Check Revocation Status                 │                     │
+│         │     Query: uni.edu/status/1234...           │                     │
+│         │     Response: { "revoked": false }          │                     │
+│         │     ✅ Credential not revoked               │                     │
+│         │                                             │                     │
+│         │  6. Verify Holder Binding                   │                     │
+│         │     VC.subject.id == Alice's DID?           │                     │
+│         │     ✅ Yes, issued to correct person        │                     │
+│         │                                             │                     │
+│         │  7. Verify Presentation (if applicable)     │                     │
+│         │     Alice signed presentation?              │                     │
+│         │     ✅ Yes, Alice controls her DID          │                     │
+│         │                                             │                     │
+│         │  ╔═══════════════════════════════════════╗  │                     │
+│         │  ║  ✅ ALL CHECKS PASSED                 ║  │                     │
+│         │  ║  • Cryptographically authentic        ║  │                     │
+│         │  ║  • Issuer verified (uni.edu)          ║  │                     │
+│         │  ║  • Not revoked                        ║  │                     │
+│         │  ║  • Issued to correct person           ║  │                     │
+│         │  ║  • Holder proved control              ║  │                     │
+│         │  ╚═══════════════════════════════════════╝  │                     │
+│         │                                             │                     │
+└─────────┴─────────────────────────────────────────────┴─────────────────────┘
+```
+
+#### 6. Security Properties Summary
+
+| Security Property | How It's Guaranteed | Mechanism |
+|-------------------|---------------------|-----------|
+| **Authenticity** | Digital signatures | Only private key holder can sign |
+| **Integrity** | Cryptographic hashing | Any tampering breaks signature |
+| **Non-repudiation** | Blockchain/ledger anchoring (optional) | Immutable record of issuance |
+| **Control** | Challenge-response protocol | Prover must demonstrate key possession |
+| **Revocability** | Revocation lists/status lists | Issuer can invalidate credentials |
+| **Privacy** | Selective disclosure | Holder chooses what to reveal |
+| **Decentralization** | Distributed registries | No single point of failure/control |
+
+---
+
 #### Key Benefits in This Scenario
 
 | Traditional Process | DID-Based Process |
