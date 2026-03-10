@@ -463,6 +463,158 @@ DID-Based Digital Credential:
 
 ---
 
+#### How Alice's Signature Proves Her Identity (Cryptographic Proof)
+
+When Alice presents her credentials to the employer, she signs a **Verifiable Presentation** with her private key. The verifier then uses Alice's public key (from her DID document) to verify the signature.
+
+**The Math Behind It:**
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                                                                     │
+│   Alice's Private Key ───Sign───▶ Signature ───▶ VP.proof.proofValue │
+│          │                                                          │
+│          │ (mathematically linked)                                   │
+│          ▼                                                          │
+│   Alice's Public Key ───Verify──▶ ✅ Valid / ❌ Invalid               │
+│       (in DID doc)                                                  │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**Why This Proves Alice's Identity:**
+
+| What Alice Has | What Verifier Has | Mathematical Property |
+|---------------|-------------------|----------------------|
+| Private key (secret) | Public key (from DID document) | Only private key can create signatures that public key can verify |
+
+The verifier knows:
+- Alice's DID is `did:key:z6MkhaXg...`
+- Her DID document contains her public key
+- **Anyone** can get that public key (it's public)
+- **Only Alice** has the corresponding private key
+
+**Verification Flow:**
+
+```
+Employer (Verifier)                     Alice's DID Document
+─────────────────────────────────────────────────────────────────
+1. Receive VP from Alice
+   │
+   ▼
+2. Extract holder DID from VP
+   "holder": "did:key:z6MkhaXg..."
+   │
+   ▼
+3. Resolve Alice's DID ───────────────▶ did:key:z6MkhaXg...
+                                       │
+                                       ▼
+4. Get Alice's public key ◀─────────── {
+                                         verificationMethod: [{
+                                           publicKeyMultibase: "z6Mk..."
+                                         }]
+                                       }
+   │
+   ▼
+5. Verify signature
+   VP.proof.proofValue + Alice's public key
+   │
+   ▼
+   ✅ Signature valid = Only Alice could have signed!
+```
+
+**What This Prevents (Stolen Credential Attack):**
+
+```
+Without Alice's signature:
+┌──────────────┐      Stolen VC       ┌──────────────┐
+│   Hacker     │ ────────────────────▶ │   Employer   │
+│  (Has VC)    │   "Here's my degree"  │              │
+└──────────────┘                       └──────────────┘
+       ✅ Employer: "University signature valid!"
+       ❌ BUT: Is this really Alice?
+
+With Alice's signature:
+┌──────────────┐      VP (signed)      ┌──────────────┐
+│   Hacker     │ ────────────────────▶ │   Employer   │
+│  (No private │   "Here's my degree"  │              │
+│      key)    │                       │              │
+└──────────────┘                       └──────────────┘
+       ❌ Employer: "Sign this challenge"
+       ❌ Hacker: Can't! (no private key)
+       ❌ VERIFICATION FAILS
+```
+
+**Key insight:** The VC proves *"University says Alice has a degree"*, but Alice's signature on the VP proves *"I am the real Alice presenting this credential."*
+
+---
+
+##### The Challenge (Nonce): Preventing Replay Attacks
+
+The **challenge (nonce)** in the presentation proof prevents replay attacks:
+
+**Replay Attack Without Challenge:**
+
+```
+┌──────────────┐                    ┌──────────────┐
+│   Hacker     │                    │   Employer   │
+└──────┬───────┘                    └──────┬───────┘
+       │                                   │
+       │ 1. Record Alice's VP + signature  │
+       │◀──────────────────────────────────│ (legitimate session)
+       │                                   │
+       │ 2. Wait...                        │
+       │                                   │
+       │ 3. Replay same VP to Employer #2  │
+       │──────────────────────────────────▶│ (new session)
+       │   "Here's my degree"              │
+       │                                   │
+       │                    ❌ EMPLOYER #2 ACCEPTS!
+       │                    (same signature is valid)
+```
+
+**With Challenge (Nonce) - Replay Prevented:**
+
+```
+SESSION 1 (Legitimate):
+┌──────────────┐                    ┌──────────────┐
+│    Alice     │                    │   Employer   │
+└──────┬───────┘                    └──────┬───────┘
+       │                                   │
+       │◀──── "Challenge: abc123"         │
+       │                                   │
+       │────▶ "Signed: abc123"            │
+       │     (signature over "abc123")     │
+       │                                   │
+       │◀──── "✅ Verified!"              │
+       │                                   │
+
+SESSION 2 (Hacker Replay):
+┌──────────────┐                    ┌──────────────┐
+│   Hacker     │                    │  Employer #2 │
+└──────┬───────┘                    └──────┬───────┘
+       │                                   │
+       │◀──── "Challenge: xyz789"          │  ← DIFFERENT nonce!
+       │                                   │
+       │────▶ "Signed: abc123" (replay)    │
+       │     (signature over OLD "abc123") │
+       │                                   │
+       │◀──── "❌ INVALID! Signature       │
+       │      doesn't match challenge"     │
+```
+
+**Why It Works:**
+
+| Mechanism | Purpose |
+|-----------|---------|
+| **Challenge = Random nonce** | Unique per session |
+| **Alice signs the challenge** | Proves she's participating NOW |
+| **Verifier checks signed challenge** | Ensures signature is fresh |
+
+The challenge binds the signature to **this specific session**, making replayed signatures invalid for any other session.
+
+---
+
 #### DID vs Traditional Digital Certificate: Proving Ownership
 
 You've identified a key advantage of DID! Here's the comparison:
@@ -564,6 +716,366 @@ You've identified a key advantage of DID! Here's the comparison:
 > For DID: University issues VC → Alice uses **DID signature** to prove ownership
 
 The DID replaces the need for physical ID verification with cryptographic proof!
+
+---
+
+#### How Alice Chooses Which Credentials to Share (Selective Disclosure)
+
+One of the powerful privacy features of DID/VC is that Alice can choose exactly which credentials to share and which to keep private.
+
+**Scenario: Alice has 7 credentials but only wants to show 3**
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    Alice's Wallet: 7 Credentials                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ALICE'S DIGITAL WALLET                                                      │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                                                                     │   │
+│  │  📚 CREDENTIAL #1: University Degree (Computer Science)             │   │
+│  │     Issuer: MIT (did:web:mit.edu)                                  │   │
+│  │     Status: ✅ Available                                           │   │
+│  │                                                                     │   │
+│  │  📜 CREDENTIAL #2: Master's Degree (Data Science)                   │   │
+│  │     Issuer: Stanford (did:web:stanford.edu)                        │   │
+│  │     Status: ✅ Available                                           │   │
+│  │                                                                     │   │
+│  │  💼 CREDENTIAL #3: Employment Certificate (Google)                  │   │
+│  │     Issuer: Google HR (did:web:google.com)                         │   │
+│  │     Status: ✅ Available                                           │   │
+│  │                                                                     │   │
+│  │  🏆 CREDENTIAL #4: AWS Certification                                │   │
+│  │     Issuer: Amazon Web Services (did:web:aws.amazon.com)           │   │
+│  │     Status: ✅ Available                                           │   │
+│  │                                                                     │   │
+│  │  🎫 CREDENTIAL #5: Conference Speaker Badge (Blockchain Expo)       │   │
+│  │     Issuer: Expo Org (did:web:blockchainexpo.com)                  │   │
+│  │     Status: ✅ Available                                           │   │
+│  │                                                                     │   │
+│  │  🏥 CREDENTIAL #6: Health Insurance Card                            │   │
+│  │     Issuer: BlueCross (did:web:bluecross.com)                      │   │
+│  │     Status: 🔒 Private (not sharing)                               │   │
+│  │                                                                     │   │
+│  │  🆔 CREDENTIAL #7: Government ID (Passport)                         │   │
+│  │     Issuer: Gov Agency (did:web:gov.agency)                        │   │
+│  │     Status: 🔒 Private (not sharing)                               │   │
+│  │                                                                     │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Step 1: Employer Sends Request**
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    Step 1: Employer Requests Specific Credentials           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  TechCorp sends a "Credential Request" to Alice's wallet:                    │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  CREDENTIAL REQUEST                                                 │   │
+│  │  From: TechCorp (did:web:techcorp.com)                              │   │
+│  │                                                                     │   │
+│  │  "Please provide credentials that prove:"                           │   │
+│  │                                                                     │   │
+│  │  ☑️ 1. You have a degree in Computer Science or related field       │   │
+│  │  ☑️ 2. You have at least 2 years of work experience                 │   │
+│  │  ☐ 3. AWS certification (optional, preferred)                       │   │
+│  │                                                                     │   │
+│  │  We do NOT need:                                                    │   │
+│  │  ☐ Your Master's degree details                                     │   │
+│  │  ☐ Your health insurance information                                │   │
+│  │  ☐ Your government ID                                               │   │
+│  │                                                                     │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Step 2: Alice Reviews and Selects**
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    Step 2: Alice Chooses What to Share                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  Alice's wallet shows a selection screen:                                    │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  SELECT CREDENTIALS TO SHARE                                        │   │
+│  │  Request from: TechCorp                                             │   │
+│  │                                                                     │   │
+│  │  ✅ SELECTED (Will Share):                                          │   │
+│  │  ☑️ [Credential #1] MIT Degree - Computer Science                   │   │
+│  │      └─> Meets requirement: "Degree in CS or related field"         │   │
+│  │                                                                     │   │
+│  │  ☑️ [Credential #3] Google Employment Certificate                   │   │
+│  │      └─> Meets requirement: "2+ years work experience"              │   │
+│  │                                                                     │   │
+│  │  ☑️ [Credential #4] AWS Certification                               │   │
+│  │      └─> Optional but strengthens application                       │   │
+│  │                                                                     │   │
+│  │  ─────────────────────────────────────────────────────────────────  │   │
+│  │                                                                     │   │
+│  │  ❌ NOT SELECTED (Will NOT Share):                                  │   │
+│  │  ☐ [Credential #2] Stanford Master's Degree                         │   │
+│  │      └─> Not needed (already showing MIT degree)                    │   │
+│  │                                                                     │   │
+│  │  ☐ [Credential #5] Conference Speaker Badge                         │   │
+│  │      └─> Not relevant to job requirements                           │   │
+│  │                                                                     │   │
+│  │  🔒 PRIVATE (Never Share):                                          │   │
+│  │  ☐ [Credential #6] Health Insurance                                 │   │
+│  │      └─> Sensitive health data - not sharing                        │   │
+│  │                                                                     │   │
+│  │  ☐ [Credential #7] Government ID/Passport                           │   │
+│  │      └─> Too much personal info - not needed                        │   │
+│  │                                                                     │   │
+│  │  ─────────────────────────────────────────────────────────────────  │   │
+│  │                                                                     │   │
+│  │  [ ✅ Confirm: Share 3 Selected Credentials ]                       │   │
+│  │  [ ❌ Cancel: Don't share anything ]                                │   │
+│  │                                                                     │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  Alice's choice: Share credentials #1, #3, and #4                          │
+│  Keep private: credentials #2, #5, #6, #7                                  │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Step 3: Alice Creates Verifiable Presentation**
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    Step 3: Create Verifiable Presentation                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  Alice's wallet creates a presentation containing ONLY the 3 selected VCs:   │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  VERIFIABLE PRESENTATION                                            │   │
+│  │  Holder: did:key:z6MkhaXg... (Alice's DID)                          │   │
+│  │                                                                     │   │
+│  │  ┌───────────────────────────────────────────────────────────────┐  │   │
+│  │  │ CREDENTIAL 1: MIT Degree (Computer Science)                   │  │   │
+│  │  │ - Included ✅                                                 │  │   │
+│  │  └───────────────────────────────────────────────────────────────┘  │   │
+│  │                                                                     │   │
+│  │  ┌───────────────────────────────────────────────────────────────┐  │   │
+│  │  │ CREDENTIAL 2: Google Employment (3 years)                     │  │   │
+│  │  │ - Included ✅                                                 │  │   │
+│  │  └───────────────────────────────────────────────────────────────┘  │   │
+│  │                                                                     │   │
+│  │  ┌───────────────────────────────────────────────────────────────┐  │   │
+│  │  │ CREDENTIAL 3: AWS Certification                               │  │   │
+│  │  │ - Included ✅                                                 │  │   │
+│  │  └───────────────────────────────────────────────────────────────┘  │   │
+│  │                                                                     │   │
+│  │  ┌───────────────────────────────────────────────────────────────┐  │   │
+│  │  │ CREDENTIALS 4-7: NOT INCLUDED                                  │  │   │
+│  │  │ - Stanford Master's ❌                                        │  │   │
+│  │  │ - Conference Badge ❌                                         │  │   │
+│  │  │ - Health Insurance ❌                                         │  │   │
+│  │  │ - Government ID ❌                                            │  │   │
+│  │  └───────────────────────────────────────────────────────────────┘  │   │
+│  │                                                                     │   │
+│  │  PROOF: Alice's digital signature (proves she controls the DID)    │   │
+│  │                                                                     │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  Result: Only 3 credentials shared, 4 remain private                        │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Technical Implementation:**
+
+```json
+{
+  "@context": ["https://www.w3.org/2018/credentials/v1"],
+  "type": "VerifiablePresentation",
+  "holder": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
+  
+  "verifiableCredential": [
+    // ONLY the 3 selected credentials included
+    { "id": "urn:uuid:mit-degree-001", ... },
+    { "id": "urn:uuid:google-employment-002", ... },
+    { "id": "urn:uuid:aws-cert-003", ... }
+    // Credentials 4-7 are NOT here - Alice chose not to share them
+  ],
+  
+  "proof": {
+    "type": "Ed25519Signature2020",
+    "created": "2024-01-15T10:30:00Z",
+    "proofPurpose": "authentication",
+    "verificationMethod": "did:key:z6MkhaXg...#z6MkhaXg...",
+    "proofValue": "z7sN8K..."
+  }
+}
+```
+
+**Key Points:**
+
+| Feature | How It Works | Benefit |
+|---------|--------------|---------|
+| **Holder Control** | Alice decides what to share | Privacy protection |
+| **Selective Disclosure** | Choose specific credentials from wallet | Share only what's needed |
+| **No Revealing** | Unselected credentials never leave wallet | Complete privacy for unshared data |
+| **Contextual Sharing** | Different presentations for different situations | Right data for right context |
+
+**Real-World Example:**
+
+```
+Job Application to TechCorp:
+- Share: MIT Degree, Google Experience, AWS Cert
+- Don't share: Health Insurance, Government ID
+
+Doctor Visit to Hospital:
+- Share: Health Insurance, Government ID
+- Don't share: Employment history, AWS Cert
+
+Bank Loan Application:
+- Share: Government ID, Employment, Degree
+- Don't share: Health Insurance, Conference badges
+```
+
+**Step 4: Verifier Extracts and Verifies the VCs**
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    Step 4: Verifier Processes the Presentation              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  TechCorp receives the Verifiable Presentation from Alice:                   │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  RECEIVED: VerifiablePresentation.json                              │   │
+│  │                                                                     │   │
+│  │  TechCorp's Verification System starts processing...                │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                    │                                        │
+│                                    ▼                                        │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  STEP 4.1: Extract VCs from Presentation                            │   │
+│  │  ─────────────────────────────────────                              │   │
+│  │                                                                     │   │
+│  │  Presentation.verifiableCredential[0] ────▶ MIT Degree VC           │   │
+│  │  Presentation.verifiableCredential[1] ────▶ Google Employment VC    │   │
+│  │  Presentation.verifiableCredential[2] ────▶ AWS Certification VC    │   │
+│  │                                                                     │   │
+│  │  ✅ Extracted 3 VCs from presentation                               │   │
+│  │                                                                     │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                    │                                        │
+│                                    ▼                                        │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  STEP 4.2: Verify Holder Binding (Alice's Identity)                 │   │
+│  │  ─────────────────────────────────────────────────                  │   │
+│  │                                                                     │   │
+│  │  Check: Presentation.proof                                          │   │
+│  │    ↓                                                                │   │
+│  │  Extract verificationMethod: did:key:z6MkhaXg...#z6MkhaXg...        │   │
+│  │    ↓                                                                │   │
+│  │  Resolve Alice's DID ────▶ Get Alice's public key                   │   │
+│  │    ↓                                                                │   │
+│  │  Verify signature on presentation                                   │   │
+│  │    ↓                                                                │   │
+│  │  ✅ VALID - Only Alice could have signed this presentation          │   │
+│  │                                                                     │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                    │                                        │
+│                                    ▼                                        │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  STEP 4.3: Verify Each VC (Issuer Authenticity)                     │   │
+│  │  ─────────────────────────────────────────────                      │   │
+│  │                                                                     │   │
+│  │  FOR EACH extracted VC:                                             │   │
+│  │                                                                     │   │
+│  │  VC #1: MIT Degree                                                  │   │
+│  │    ├─ Extract issuer: did:web:mit.edu                               │   │
+│  │    ├─ Resolve MIT's DID ────▶ Get MIT's public key                  │   │
+│  │    ├─ Verify VC signature with MIT's key                            │   │
+│  │    ├─ Check revocation status                                       │   │
+│  │    └─ ✅ VALID - MIT really issued this degree                      │   │
+│  │                                                                     │   │
+│  │  VC #2: Google Employment                                           │   │
+│  │    ├─ Extract issuer: did:web:google.com                            │   │
+│  │    ├─ Resolve Google's DID ────▶ Get Google's public key            │   │
+│  │    ├─ Verify VC signature with Google's key                         │   │
+│  │    ├─ Check revocation status                                       │   │
+│  │    └─ ✅ VALID - Google really issued this certificate              │   │
+│  │                                                                     │   │
+│  │  VC #3: AWS Certification                                           │   │
+│  │    ├─ Extract issuer: did:web:aws.amazon.com                        │   │
+│  │    ├─ Resolve AWS's DID ────▶ Get AWS's public key                  │   │
+│  │    ├─ Verify VC signature with AWS's key                            │   │
+│  │    ├─ Check revocation status                                       │   │
+│  │    └─ ✅ VALID - AWS really issued this certification               │   │
+│  │                                                                     │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                    │                                        │
+│                                    ▼                                        │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  STEP 4.4: Verify Subject Binding (VCs belong to Alice)             │   │
+│  │  ─────────────────────────────────────────────────────              │   │
+│  │                                                                     │   │
+│  │  FOR EACH VC:                                                       │   │
+│  │    Check: VC.credentialSubject.id == Alice's DID?                   │   │
+│  │                                                                     │   │
+│  │    MIT Degree.subject.id: did:key:z6MkhaXg... == Alice's DID? ✅    │   │
+│  │    Google Cert.subject.id: did:key:z6MkhaXg... == Alice's DID? ✅   │   │
+│  │    AWS Cert.subject.id: did:key:z6MkhaXg... == Alice's DID? ✅      │   │
+│  │                                                                     │   │
+│  │    ✅ All VCs were issued TO Alice (not to someone else)            │   │
+│  │                                                                     │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                    │                                        │
+│                                    ▼                                        │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                                                                     │   │
+│  │  ╔═════════════════════════════════════════════════════════════════╗│   │
+│  │  ║  ✅ ALL VERIFICATIONS PASSED                                    ║│   │
+│  │  ║                                                                 ║│   │
+│  │  ║  1. Presentation signed by Alice ✅                             ║│   │
+│  │  ║  2. MIT degree is authentic ✅                                  ║│   │
+│  │  ║  3. Google employment is authentic ✅                           ║│   │
+│  │  ║  4. AWS certification is authentic ✅                           ║│   │
+│  │  ║  5. All VCs belong to Alice ✅                                  ║│   │
+│  │  ║  6. No credentials revoked ✅                                   ║│   │
+│  │  ║                                                                 ║│   │
+│  │  ║  RESULT: Alice is legitimate! 🎉                                ║│   │
+│  │  ╚═════════════════════════════════════════════════════════════════╝│   │
+│  │                                                                     │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Verification Summary Table:**
+
+| Step | What Verifier Does | What It Proves |
+|------|-------------------|----------------|
+| **Extract VCs** | Parse `verifiableCredential` array from presentation | Gets the 3 credentials Alice shared |
+| **Verify Holder** | Check presentation signature with Alice's public key | Alice is the one presenting (not stolen) |
+| **Verify Issuer #1** | Check MIT's signature on degree VC | MIT really issued this degree |
+| **Verify Issuer #2** | Check Google's signature on employment VC | Google really issued this certificate |
+| **Verify Issuer #3** | Check AWS's signature on certification VC | AWS really issued this certification |
+| **Verify Subject** | Check `credentialSubject.id` matches Alice's DID | All VCs belong to Alice (not someone else) |
+
+**Answer to Your Question:**
+
+> **Yes!** The verifier:
+> 1. **Extracts** the 3 VCs from `presentation.verifiableCredential` array
+> 2. **Verifies** Alice's signature on the presentation (holder proof)
+> 3. **Verifies** each VC's issuer signature (MIT, Google, AWS)
+> 4. **Verifies** all VCs belong to Alice (subject binding)
+
+**One-Sentence Summary:**
+> The Verifiable Presentation is like an envelope containing 3 VCs. The verifier opens the envelope (extracts VCs), checks Alice signed the envelope (holder proof), and checks each VC is authentic (issuer signatures).
 
 ---
 
