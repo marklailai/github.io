@@ -1,707 +1,89 @@
-# DID (Decentralized Identifier) Research
+Here is the fully organized guide with all original text, tables, and specific diagram placeholders (empty headings) kept exactly as they appeared in the source document.
 
-## 1. Overview & W3C Standards
+### 1. DID (Decentralized Identifier) Research Overview & W3C Standards
+#### What is a DID?
+A Decentralized Identifier (DID) is a new type of globally unique identifier defined by W3C that enables verifiable, self-sovereign digital identity. Unlike traditional identifiers like email or usernames, DIDs are decentralized (no central authority required), persistent (cannot be taken away administratively), cryptographically verifiable (proof of ownership), and resolvable (can be looked up to discover associated information).
 
-### What is a DID?
-
-A Decentralized Identifier (DID) is a new type of globally unique identifier defined by W3C that enables verifiable, self-sovereign digital identity. Unlike traditional identifiers (email, usernames), DIDs are:
-
-- **Decentralized** - No central authority required
-- **Persistent** - Cannot be taken away administratively
-- **Cryptographically verifiable** - Proof of ownership
-- **Resolvable** - Can be looked up to discover associated information
-
----
-
-### How Users Use DID (Real-World Scenario)
-
-#### Simple Analogy
-
+#### How Users Use DID (Real-World Scenario)
+###### Simple Analogy
 Think of a DID as your **digital passport** that you create and control yourself, rather than one issued by a government. Just like a physical passport proves your identity when traveling, a DID proves your digital identity online—but you own it completely.
 
-#### Real-World Application: Job Application with Verifiable Credentials
-
+###### Real-World Application: Job Application with Verifiable Credentials
 Let's walk through a practical scenario where Alice uses her DID to apply for a job:
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    Alice's Job Application Journey                           │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  STEP 1: Create Digital Identity                                            │
-│  ─────────────────────────────────                                          │
-│  Alice downloads a DID wallet app (like Dock Wallet or Trinsic Wallet)      │
-│                                                                             │
-│  ┌─────────────┐                                                            │
-│  │ Alice's     │  Creates                                                    │
-│  │ Smartphone  │ ─────────▶  did:key:z6MkhaXg... (Alice's DID)               │
-│  │             │         ┌─────────────────────────┐                        │
-│  └─────────────┘         │  Private Key (kept      │                        │
-│                          │  secret on phone)       │                        │
-│                          │  Public Key (shared     │                        │
-│                          │  with others)           │                        │
-│                          └─────────────────────────┘                        │
-│                                                                             │
-│  STEP 2: Receive Verifiable Credentials                                     │
-│  ─────────────────────────────────────                                      │
-│                                                                             │
-│  ┌──────────────┐      Issue Credential      ┌──────────────┐              │
-│  │  University  │ ──────────────────────────▶│  Alice's     │              │
-│  │  (Issuer)    │   "Bachelor of Science     │  DID Wallet  │              │
-│  │  did:web:    │    in Computer Science"    │              │              │
-│  │  uni.edu     │   Signed with uni's key    │  ✅ Stored   │              │
-│  └──────────────┘                            └──────────────┘              │
-│                                                                             │
-│  ┌──────────────┐      Issue Credential      ┌──────────────┐              │
-│  │  Previous    │ ──────────────────────────▶│  Alice's     │              │
-│  │  Employer    │   "3 Years Experience      │  DID Wallet  │              │
-│  │  (Issuer)    │    Certificate"            │              │              │
-│  └──────────────┘                            └──────────────┘              │
-│                                                                             │
-│  STEP 3: Apply for Job                                                      │
-│  ───────────────────                                                        │
-│                                                                             │
-│  ┌──────────────┐      Scan QR Code          ┌──────────────┐              │
-│  │  TechCorp    │ ◀──────────────────────────│  Alice's     │              │
-│  │  (Employer)  │   "We need your degree     │  Smartphone  │              │
-│  │              │    and experience proof"   │              │              │
-│  └──────────────┘                            └──────────────┘              │
-│                                                                             │
-│  STEP 4: Selective Disclosure                                               │
-│  ───────────────────────────                                                │
-│                                                                             │
-│  Alice reviews the request and chooses what to share:                       │
-│  ☑️ University Degree (Bachelor of Science)                                 │
-│  ☑️ Years of Experience (3 years)                                           │
-│  ☐ Home Address (not shared)                                                │
-│  ☐ Date of Birth (not shared)                                               │
-│                                                                             │
-│  STEP 5: Present Credentials                                                │
-│  ─────────────────────────                                                  │
-│                                                                             │
-│  Alice's wallet creates a presentation:                                     │
-│  ┌─────────────────────────────────────────────────────────┐               │
-│  │  Verifiable Presentation                                │               │
-│  │  ─────────────────────                                  │               │
-│  │  Holder: did:key:z6MkhaXg... (Alice's DID)              │               │
-│  │                                                         │               │
-│  │  Credentials:                                           │               │
-│  │  1. University Degree (signed by uni.edu)               │               │
-│  │  2. Experience Certificate (signed by prev-employer)    │               │
-│  │                                                         │               │
-│  │  Proof: Alice's digital signature                       │               │
-│  └─────────────────────────────────────────────────────────┘               │
-│                                                                             │
-│  STEP 6: Employer Verification                                              │
-│  ───────────────────────────                                                │
-│                                                                             │
-│  TechCorp's system automatically verifies:                                  │
-│  1. ✅ University signature is valid (uni.edu is a recognized institution)  │
-│  2. ✅ Previous employer signature is valid                                 │
-│  3. ✅ Alice's presentation signature proves she controls the DID           │
-│  4. ✅ Credentials have not been tampered with                              │
-│  5. ✅ Credentials are not expired or revoked                               │
-│                                                                             │
-│  Result: Alice gets the interview! 🎉                                       │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-#### ⚠️ Important Clarification: DID vs Verifiable Credentials
-
+###### ⚠️ Important Clarification: DID vs Verifiable Credentials
 **The DID Document does NOT contain the credentials!** Here's the correct relationship:
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│           Relationship: DID Document vs Verifiable Credentials              │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                    ALICE'S DID DOCUMENT                              │   │
-│  │                    (Stored in DID Registry)                          │   │
-│  │                                                                      │   │
-│  │  {                                                                   │   │
-│  │    "id": "did:key:z6MkhaXg...",      ◄── Alice's DID                │   │
-│  │    "verificationMethod": [{                                          │   │
-│  │      "id": "#key-1",                                                │   │
-│  │      "type": "Ed25519VerificationKey2020",                          │   │
-│  │      "publicKeyMultibase": "z6MkhaXg..."  ◄── Alice's Public Key    │   │
-│  │    }],                                                               │   │
-│  │    "authentication": ["#key-1"]      ◄── Key for proving control    │   │
-│  │  }                                                                   │   │
-│  │                                                                      │   │
-│  │  Contains: Cryptographic keys ONLY                                   │   │
-│  │  Does NOT contain: Degrees, experience, personal data                │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                    ▲                                        │
-│                                    │                                        │
-│                    DID is referenced in credentials                         │
-│                                    │                                        │
-│  ┌─────────────────────────────────┴─────────────────────────────────────┐ │
-│  │              ALICE'S VERIFIABLE CREDENTIALS (Stored in Wallet)        │ │
-│  │                                                                       │ │
-│  │  ┌─────────────────────────────────────────────────────────────────┐  │ │
-│  │  │  CREDENTIAL 1: University Degree                                 │  │ │
-│  │  │  ─────────────────────────────                                   │  │ │
-│  │  │  {                                                               │  │ │
-│  │  │    "@context": ["https://www.w3.org/2018/credentials/v1"],       │  │ │
-│  │  │    "id": "urn:uuid:1234...",                                     │  │ │
-│  │  │    "type": ["VerifiableCredential", "DegreeCredential"],         │  │ │
-│  │  │    "issuer": "did:web:uni.edu",      ◄── University's DID       │  │ │
-│  │  │    "credentialSubject": {                                        │  │ │
-│  │  │      "id": "did:key:z6MkhaXg...",    ◄── Alice's DID (subject)  │  │ │
-│  │  │      "degree": "Bachelor of Science",                            │  │ │
-│  │  │      "field": "Computer Science",                                │  │ │
-│  │  │      "graduationDate": "2023-05-15"                              │  │ │
-│  │  │    },                                                            │  │ │
-│  │  │    "proof": {                                                    │  │ │
-│  │  │      "type": "Ed25519Signature2020",                             │  │ │
-│  │  │      "created": "2023-05-15T10:00:00Z",                          │  │ │
-│  │  │      "proofValue": "z58DAdF..."    ◄── University's Signature   │  │ │
-│  │  │    }                                                             │  │ │
-│  │  │  }                                                               │  │ │
-│  │  └─────────────────────────────────────────────────────────────────┘  │ │
-│  │                                                                       │ │
-│  │  ┌─────────────────────────────────────────────────────────────────┐  │ │
-│  │  │  CREDENTIAL 2: Experience Certificate                            │  │ │
-│  │  │  ─────────────────────────────────                               │  │ │
-│  │  │  {                                                               │  │ │
-│  │  │    "issuer": "did:web:prev-employer.com",                        │  │ │
-│  │  │    "credentialSubject": {                                        │  │ │
-│  │  │      "id": "did:key:z6MkhaXg...",    ◄── Alice's DID (subject)  │  │ │
-│  │  │      "position": "Software Engineer",                            │  │ │
-│  │  │      "years": 3                                                  │  │ │
-│  │  │    },                                                            │  │ │
-│  │  │    "proof": { ... }                ◄── Employer's Signature     │  │ │
-│  │  │  }                                                               │  │ │
-│  │  └─────────────────────────────────────────────────────────────────┘  │ │
-│  │                                                                       │ │
-│  │  Credentials are signed by issuers and stored in Alice's wallet       │ │
-│  └───────────────────────────────────────────────────────────────────────┘ │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
 **How Each Component Works:**
-
 | Component | What It Contains | Who Creates It | Where It's Stored |
-|-----------|------------------|----------------|-------------------|
+| :--- | :--- | :--- | :--- |
 | **DID Document** | Public keys for verification | Alice (or method-specific process) | DID Registry (blockchain, web server, etc.) |
 | **Verifiable Credential** | Claims about Alice (degree, experience) | Issuer (University, Employer) | Alice's wallet (credential holder) |
 | **Private Key** | Secret key for signing | Alice's wallet | Securely on Alice's device only |
 
+
 **How Verification Works:**
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         Verification Process                                 │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  1. ISSUER SIGNS CREDENTIAL                                                  │
-│  ─────────────────────────                                                   │
-│  University creates credential with Alice's DID as subject                   │
-│  University signs with its private key                                       │
-│                                                                             │
-│  ┌─────────────┐         Sign with           ┌──────────────────────┐       │
-│  │  University │ ────▶  University's  ────▶  │ Signed Credential    │       │
-│  │  Private Key│         Private Key         │ (given to Alice)     │       │
-│  └─────────────┘                             └──────────────────────┘       │
-│                                                                             │
-│  2. ALICE PRESENTS CREDENTIAL                                                │
-│  ────────────────────────────                                                │
-│  Alice creates presentation with her private key                             │
-│                                                                             │
-│  ┌─────────────┐         Sign with           ┌──────────────────────┐       │
-│  │  Alice's    │ ────▶  Alice's      ────▶  │ Verifiable           │       │
-│  │  Private Key│         Private Key         │ Presentation         │       │
-│  └─────────────┘                             └──────────────────────┘       │
-│                                                                             │
-│  3. EMPLOYER VERIFIES                                                        │
-│  ───────────────────                                                         │
-│  Employer checks both signatures using public DIDs                           │
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐    │
-│  │  a) Resolve University's DID ────▶ Get University's Public Key      │    │
-│  │  b) Verify credential signature ────▶ ✅ Valid                      │    │
-│  │                                                                      │    │
-│  │  c) Resolve Alice's DID ────▶ Get Alice's Public Key                │    │
-│  │  d) Verify presentation signature ────▶ ✅ Valid                    │    │
-│  │                                                                      │    │
-│  │  Result: Both signatures valid ✅ Alice is the legitimate holder    │    │
-│  └─────────────────────────────────────────────────────────────────────┘    │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-**Key Points:**
-
-1. **DID Document = Keys Only** - Contains public keys for cryptographic verification
-2. **Credentials = Claims + Signatures** - Contain actual data (degree, experience) signed by issuers
-3. **Subject Binding** - Each credential references Alice's DID in the `credentialSubject.id` field
-4. **Issuer Verification** - Anyone can verify by resolving the issuer's DID to get their public key
-5. **Holder Binding** - Alice proves she's the legitimate holder by signing the presentation with her private key
+1. **DID Document = Keys Only** - Contains public keys for cryptographic verification.
+2. **Credentials = Claims + Signatures** - Contain actual data (degree, experience) signed by issuers.
+3. **Subject Binding** - Each credential references Alice's DID in the credentialSubject.id field.
+4. **Issuer Verification** - Anyone can verify by resolving the issuer's DID to get their public key.
+5. **Holder Binding** - Alice proves she's the legitimate holder by signing the presentation with her private key.
 
 **Simple Summary: One DID, Many Credentials**
+* ✅ **One DID** = One identity identifier (stored on registry).
+* ✅ **Many VCs** = Multiple credentials all reference the same DID (stored in wallet).
+* ✅ **One-to-Many Relationship** = Single DID : Multiple Verifiable Credentials.
 
-```
-                    ONE DID (Alice's Identity)
-                         did:key:z6Mk...
-                              │
-                              │  Stored in DID Registry
-                              │  (contains only public keys)
-                              │
-              ┌───────────────┼───────────────┐
-              │               │               │
-              ▼               ▼               ▼
-    ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-    │   VC #1         │ │   VC #2         │ │   VC #3         │
-    │   University    │ │   Employer      │ │   Government    │
-    │   Degree        │ │   Certificate   │ │   ID Card       │
-    │                 │ │                 │ │                 │
-    │  Subject:       │ │  Subject:       │ │  Subject:       │
-    │  did:key:z6Mk.. │ │  did:key:z6Mk.. │ │  did:key:z6Mk.. │
-    └─────────────────┘ └─────────────────┘ └─────────────────┘
-              │               │               │
-              └───────────────┴───────────────┘
-                              │
-                    Stored in Alice's Wallet
-                    (multiple credentials connect
-                     to one DID)
-```
-
-**In Short:**
-- ✅ **One DID** = One identity identifier (stored on registry)
-- ✅ **Many VCs** = Multiple credentials all reference the same DID (stored in wallet)
-- ✅ **One-to-Many Relationship** = Single DID : Multiple Verifiable Credentials
-
----
-
-#### Why Verify Alice is the Holder? (Even When We Trust the University)
-
+###### Why Verify Alice is the Holder? (Even When We Trust the University)
 **The Critical Security Problem:**
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    The Stolen Credential Attack                             │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  SCENARIO: What if someone steals Alice's credentials?                       │
-│                                                                             │
-│  WITHOUT HOLDER VERIFICATION (Vulnerable):                                   │
-│  ─────────────────────────────────────────                                   │
-│                                                                             │
-│  1. University issues degree to Alice                                        │
-│     ┌──────────────┐         Issue VC         ┌──────────────┐             │
-│     │  University  │ ────────────────────────▶│    Alice     │             │
-│     │  (Trusted)   │   "Degree for Alice"     │   (Hacker    │             │
-│     └──────────────┘                          │   steals it) │             │
-│                                                └──────────────┘             │
-│                                                                             │
-│  2. Hacker applies for job with stolen credential                            │
-│     ┌──────────────┐         Present VC        ┌──────────────┐             │
-│     │    Hacker    │ ────────────────────────▶│   TechCorp   │             │
-│     │  (Impostor)  │   "Here's my degree"      │  (Employer)  │             │
-│     └──────────────┘                          └──────────────┘             │
-│                                                                             │
-│  3. TechCorp verifies ONLY the university signature                          │
-│     ✅ University signature valid                                            │
-│     ✅ Credential not revoked                                                │
-│     ❌ BUT: Is this really Alice presenting it?                              │
-│                                                                             │
-│  4. Result: Hacker gets the job! 🚨 FRAUD!                                   │
-│                                                                             │
-│  PROBLEM: Anyone with a copy of the credential can impersonate Alice!        │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
 **The Solution: Holder Binding Verification**
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    Secure Verification WITH Holder Binding                  │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  WITH HOLDER VERIFICATION (Secure):                                          │
-│  ───────────────────────────────────                                         │
-│                                                                             │
-│  1. University issues degree to Alice's DID                                  │
-│     ┌──────────────┐         Issue VC         ┌──────────────┐             │
-│     │  University  │ ────────────────────────▶│    Alice     │             │
-│     │  (Trusted)   │   "Degree for DID:       │  (Controls   │             │
-│     └──────────────┘    did:key:z6Mk..."      │   private    │             │
-│                                                │   key)       │             │
-│                                                └──────────────┘             │
-│                                                                             │
-│  2. Hacker steals the credential (but NOT the private key)                   │
-│     ┌──────────────┐                                                        │
-│     │    Hacker    │   Has: VC (public data)                                │
-│     │  (Impostor)  │   Does NOT have: Private key to sign                   │
-│     └──────────────┘                                                        │
-│                                                                             │
-│  3. TechCorp requires proof of control                                       │
-│     ┌──────────────┐         Challenge         ┌──────────────┐             │
-│     │   TechCorp   │ ────────────────────────▶│    Hacker    │             │
-│     │  (Employer)  │   "Sign this nonce with  │  (Cannot     │             │
-│     └──────────────┘    your DID's key"        │   sign!)     │             │
-│                                                └──────────────┘             │
-│                                                                             │
-│  4. Hacker cannot provide valid proof                                        │
-│     ❌ Hacker doesn't have Alice's private key                               │
-│     ❌ Cannot create valid signature                                         │
-│     ❌ VERIFICATION FAILS                                                    │
-│                                                                             │
-│  5. Legitimate Alice applies                                                 │
-│     ┌──────────────┐         Challenge         ┌──────────────┐             │
-│     │   TechCorp   │ ────────────────────────▶│    Alice     │             │
-│     │  (Employer)  │   "Sign this nonce"       │  (Has        │             │
-│     └──────────────┘                          │   private    │             │
-│              │                                │   key)       │             │
-│              │         Signed Proof            └──────────────┘             │
-│              │◄────────────────────────────────────────┤                    │
-│              │                                         │                    │
-│              │         ✅ Signature valid!             │                    │
-│              │         ✅ Only Alice could sign!       │                    │
-│              │                                         │                    │
-│              ▼                                         │                    │
-│     ┌──────────────┐                                   │                    │
-│     │  ✅ Alice    │◄──────────────────────────────────┘                    │
-│     │  gets job!   │                                                        │
-│     └──────────────┘                                                        │
-│                                                                             │
-│  SECURITY GUARANTEE: Only the person with the private key                    │
-│  (the legitimate holder) can present the credential!                         │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
 **The Two-Layer Verification:**
-
 | Layer | What We Verify | Why It Matters | Who We Trust |
-|-------|----------------|----------------|--------------|
+| :--- | :--- | :--- | :--- |
 | **Layer 1: Issuer** | University's signature on the credential | The degree is authentic and was really issued by the university | University as an institution |
 | **Layer 2: Holder** | Alice's signature with her DID's private key | The person presenting the credential is the legitimate owner | Mathematics (cryptography) |
 
+
 **Real-World Analogy:**
-
-```
-Traditional Physical Document:
-┌─────────────────────────────────────────────────────────────────┐
-│  University Degree Certificate                                  │
-│                                                                 │
-│  ┌─────────────┐                                                │
-│  │  University │  Issues paper degree                           │
-│  │   Seal      │  (hard to forge)                               │
-│  └─────────────┘                                                │
-│                                                                 │
-│  Problem: Anyone who steals the paper can claim it's theirs!    │
-│  No way to prove they're the legitimate holder.                 │
-└─────────────────────────────────────────────────────────────────┘
-
-DID-Based Digital Credential:
-┌─────────────────────────────────────────────────────────────────┐
-│  Verifiable Credential + Holder Proof                           │
-│                                                                 │
-│  ┌─────────────┐     ┌─────────────────────────────────────┐   │
-│  │  University │     │  Alice's Digital Signature          │   │
-│  │  Signature  │  +  │  (impossible to forge without       │   │
-│  │  (Layer 1)  │     │   Alice's private key)              │   │
-│  └─────────────┘     └─────────────────────────────────────┘   │
-│                                                                 │
-│  Security: Even if you steal the credential file, you cannot    │
-│  prove you're the holder without Alice's private key!           │
-└─────────────────────────────────────────────────────────────────┘
-```
-
 **Key Insight:**
-
-- **Trusting the issuer** = We believe the credential content is true (Alice really has a degree)
-- **Verifying the holder** = We believe the person presenting it is the real Alice (not an impostor)
-- **Both are necessary** for secure identity verification!
+Trusting the issuer means we believe the credential content is true, while verifying the holder means we believe the person presenting it is the real owner; both are necessary for secure identity verification.
 
 **Simple Summary of Responsibilities:**
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    Who Guarantees What?                                      │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  UNIVERSITY (Issuer)                    ALICE (Holder)                      │
-│  ───────────────────                    ───────────────                     │
-│                                                                             │
-│  ✅ "This degree is real"               ✅ "I am the real Alice"            │
-│  ✅ "Alice completed CS degree"         ✅ "I own this credential"          │
-│  ✅ "Graduated 2023"                    ✅ "I have the private key"         │
-│                                                                             │
-│  ↓                                      ↓                                   │
-│  Signs VC with university's key         Signs presentation with Alice's key │
-│  ↓                                      ↓                                   │
-│  Verifier checks:                       Verifier checks:                    │
-│  "Is this really from University?"      "Is this really Alice?"             │
-│                                                                             │
-│  ╔═══════════════════════════════════════════════════════════════════════╗  │
-│  ║                                                                       ║  │
-│  ║   University ensures:    THE CREDENTIAL IS TRUE                       ║  │
-│  ║                                                                       ║  │
-│  ║   Alice proves:          SHE IS THE ONE THE DEGREE BELONGS TO         ║  │
-│  ║                                                                       ║  │
-│  ╚═══════════════════════════════════════════════════════════════════════╝  │
-│                                                                             │
-│  Without Alice's proof:                                                     │
-│  ❌ Anyone with a copy of the credential could claim to be Alice            │
-│                                                                             │
-│  With Alice's proof:                                                        │
-│  ✅ Only the person with the private key (Alice) can use the credential     │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
 **One-Sentence Summary:**
-> The university **attests** that Alice has a degree, but Alice must **prove** she is the person that degree was issued to.
+The university **attests** that Alice has a degree, but Alice must **prove** she is the person that degree was issued to.
 
----
-
-#### How Alice's Signature Proves Her Identity (Cryptographic Proof)
-
+###### How Alice's Signature Proves Her Identity (Cryptographic Proof)
 When Alice presents her credentials to the employer, she signs a **Verifiable Presentation** with her private key. The verifier then uses Alice's public key (from her DID document) to verify the signature.
 
 **The Math Behind It:**
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                                                                     │
-│   Alice's Private Key ───Sign───▶ Signature ───▶ VP.proof.proofValue │
-│          │                                                          │
-│          │ (mathematically linked)                                   │
-│          ▼                                                          │
-│   Alice's Public Key ───Verify──▶ ✅ Valid / ❌ Invalid               │
-│       (in DID doc)                                                  │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
 **Why This Proves Alice's Identity:**
-
 | What Alice Has | What Verifier Has | Mathematical Property |
-|---------------|-------------------|----------------------|
+| :--- | :--- | :--- |
 | Private key (secret) | Public key (from DID document) | Only private key can create signatures that public key can verify |
 
-The verifier knows:
-- Alice's DID is `did:key:z6MkhaXg...`
-- Her DID document contains her public key
-- **Anyone** can get that public key (it's public)
-- **Only Alice** has the corresponding private key
 
+The verifier knows Alice's DID, her DID document contains her public key, anyone can get that public key, and only Alice has the corresponding private key.
 **Verification Flow:**
-
-```
-Employer (Verifier)                     Alice's DID Document
-─────────────────────────────────────────────────────────────────
-1. Receive VP from Alice
-   │
-   ▼
-2. Extract holder DID from VP
-   "holder": "did:key:z6MkhaXg..."
-   │
-   ▼
-3. Resolve Alice's DID ───────────────▶ did:key:z6MkhaXg...
-                                       │
-                                       ▼
-4. Get Alice's public key ◀─────────── {
-                                         verificationMethod: [{
-                                           publicKeyMultibase: "z6Mk..."
-                                         }]
-                                       }
-   │
-   ▼
-5. Verify signature
-   VP.proof.proofValue + Alice's public key
-   │
-   ▼
-   ✅ Signature valid = Only Alice could have signed!
-```
-
 **What This Prevents (Stolen Credential Attack):**
-
-```
-Without Alice's signature:
-┌──────────────┐      Stolen VC       ┌──────────────┐
-│   Hacker     │ ────────────────────▶ │   Employer   │
-│  (Has VC)    │   "Here's my degree"  │              │
-└──────────────┘                       └──────────────┘
-       ✅ Employer: "University signature valid!"
-       ❌ BUT: Is this really Alice?
-
-With Alice's signature:
-┌──────────────┐      VP (signed)      ┌──────────────┐
-│   Hacker     │ ────────────────────▶ │   Employer   │
-│  (No private │   "Here's my degree"  │              │
-│      key)    │                       │              │
-└──────────────┘                       └──────────────┘
-       ❌ Employer: "Sign this challenge"
-       ❌ Hacker: Can't! (no private key)
-       ❌ VERIFICATION FAILS
-```
-
 **Key insight:** The VC proves *"University says Alice has a degree"*, but Alice's signature on the VP proves *"I am the real Alice presenting this credential."*
 
----
-
-##### The Challenge (Nonce): Preventing Replay Attacks
-
+###### The Challenge (Nonce): Preventing Replay Attacks
 The **challenge (nonce)** in the presentation proof prevents replay attacks:
-
 **Replay Attack Without Challenge:**
-
-```
-┌──────────────┐                    ┌──────────────┐
-│   Hacker     │                    │   Employer   │
-└──────┬───────┘                    └──────┬───────┘
-       │                                   │
-       │ 1. Record Alice's VP + signature  │
-       │◀──────────────────────────────────│ (legitimate session)
-       │                                   │
-       │ 2. Wait...                        │
-       │                                   │
-       │ 3. Replay same VP to Employer #2  │
-       │──────────────────────────────────▶│ (new session)
-       │   "Here's my degree"              │
-       │                                   │
-       │                    ❌ EMPLOYER #2 ACCEPTS!
-       │                    (same signature is valid)
-```
-
 **With Challenge (Nonce) - Replay Prevented:**
-
-```
-SESSION 1 (Legitimate):
-┌──────────────┐                    ┌──────────────┐
-│    Alice     │                    │   Employer   │
-└──────┬───────┘                    └──────┬───────┘
-       │                                   │
-       │◀──── "Challenge: abc123"         │
-       │                                   │
-       │────▶ "Signed: abc123"            │
-       │     (signature over "abc123")     │
-       │                                   │
-       │◀──── "✅ Verified!"              │
-       │                                   │
-
-SESSION 2 (Hacker Replay):
-┌──────────────┐                    ┌──────────────┐
-│   Hacker     │                    │  Employer #2 │
-└──────┬───────┘                    └──────┬───────┘
-       │                                   │
-       │◀──── "Challenge: xyz789"          │  ← DIFFERENT nonce!
-       │                                   │
-       │────▶ "Signed: abc123" (replay)    │
-       │     (signature over OLD "abc123") │
-       │                                   │
-       │◀──── "❌ INVALID! Signature       │
-       │      doesn't match challenge"     │
-```
-
 **Why It Works:**
-
 | Mechanism | Purpose |
-|-----------|---------|
+| :--- | :--- |
 | **Challenge = Random nonce** | Unique per session |
 | **Alice signs the challenge** | Proves she's participating NOW |
 | **Verifier checks signed challenge** | Ensures signature is fresh |
 
 The challenge binds the signature to **this specific session**, making replayed signatures invalid for any other session.
 
----
-
-#### DID vs Traditional Digital Certificate: Proving Ownership
-
-You've identified a key advantage of DID! Here's the comparison:
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│         Traditional Digital Certificate (e.g., DigiCert) vs DID             │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  TRADITIONAL DIGITAL CERTIFICATE                                            │
-│  ─────────────────────────────────                                          │
-│                                                                             │
-│  ┌──────────────┐          Issue Cert          ┌──────────────┐            │
-│  │     CA       │ ────────────────────────────▶│    Alice     │            │
-│  │  (DigiCert)  │   "Certificate for alice@    │              │            │
-│  └──────────────┘    example.com"              └──────────────┘            │
-│                                                        │                    │
-│                                                        ▼                    │
-│                                               ┌──────────────┐              │
-│                                               │  Alice wants │              │
-│                                               │  to use cert │              │
-│                                               └──────────────┘              │
-│                                                        │                    │
-│  To prove ownership:                                   ▼                    │
-│  ❌ Certificate alone doesn't prove Alice's identity                        │
-│                                                                             │
-│  ┌──────────────┐         Show Physical ID      ┌──────────────┐            │
-│  │   Verifier   │ ◀────────────────────────────│    Alice     │            │
-│  │              │   "Show me your passport/     │              │            │
-│  │              │    driver's license"          │  Passport    │            │
-│  └──────────────┘                               └──────────────┘            │
-│                                                                             │
-│  Problems:                                                                  │
-│  • Physical ID can be forged                                                │
-│  • Manual verification process                                              │
-│  • Privacy concerns (showing unnecessary info)                              │
-│  • No cryptographic binding between cert and identity                       │
-│                                                                             │
-│  ═══════════════════════════════════════════════════════════════════════   │
-│                                                                             │
-│  DID-BASED VERIFIABLE CREDENTIAL                                            │
-│  ─────────────────────────────────                                          │
-│                                                                             │
-│  ┌──────────────┐          Issue VC            ┌──────────────┐            │
-│  │  University  │ ────────────────────────────▶│    Alice     │            │
-│  │  (Issuer)    │   "Degree for DID:           │  (Controls   │            │
-│  └──────────────┘    did:key:z6Mk..."          │   private    │            │
-│                                                │   key)       │            │
-│                                                └──────────────┘            │
-│                                                        │                    │
-│                                                        ▼                    │
-│                                               ┌──────────────┐              │
-│                                               │  Alice wants │              │
-│                                               │  to use VC   │              │
-│                                               └──────────────┘              │
-│                                                        │                    │
-│  To prove ownership:                                   ▼                    │
-│  ✅ Cryptographic proof - NO physical ID needed!                            │
-│                                                                             │
-│  ┌──────────────┐         Digital Challenge     ┌──────────────┐            │
-│  │   Verifier   │ ────────────────────────────▶│    Alice     │            │
-│  │              │   "Sign this with your DID"   │              │            │
-│  └──────────────┘                               └──────────────┘            │
-│         │                                              │                    │
-│         │         Return Signed Proof                  │                    │
-│         │◀─────────────────────────────────────────────┘                    │
-│         │                                                                    │
-│         ▼                                                                    │
-│  ┌──────────────┐                                                            │
-│  │  Verify with │   "Signature valid!"                                         │
-│  │  Alice's DID │   "Only holder of private key could sign"                    │
-│  │  public key  │   "✅ Alice proven as legitimate holder"                     │
-│  └──────────────┘                                                            │
-│                                                                             │
-│  Advantages:                                                                │
-│  • Cryptographically impossible to forge                                    │
-│  • Automatic verification (no manual checking)                              │
-│  • Privacy-preserving (selective disclosure)                                │
-│  • Strong cryptographic binding between VC and identity                     │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
+###### DID vs Traditional Digital Certificate: Proving Ownership
 **Key Difference:**
-
 | Aspect | Traditional Certificate | DID-Based VC |
-|--------|------------------------|--------------|
+| :--- | :--- | :--- |
 | **Proof of ownership** | Physical ID (passport, driver's license) | Cryptographic signature |
 | **Verification method** | Manual visual inspection | Automatic cryptographic verification |
 | **Security** | Can be forged | Mathematically impossible to forge |
@@ -709,812 +91,70 @@ You've identified a key advantage of DID! Here's the comparison:
 | **Binding strength** | Weak (separate systems) | Strong (cryptographically linked) |
 | **Convenience** | In-person or scanned documents | Digital, instant, remote |
 
+
 **Your Understanding is Correct:**
+For DigiCert, a CA issues a cert and Alice shows physical ID to prove ownership; for a DID, a University issues a VC and Alice uses a DID signature to prove ownership. The DID replaces the need for physical ID verification with cryptographic proof!
 
-> For DigiCert: CA issues cert → Alice shows **physical ID** to prove ownership
-> 
-> For DID: University issues VC → Alice uses **DID signature** to prove ownership
-
-The DID replaces the need for physical ID verification with cryptographic proof!
-
----
-
-#### How Alice Chooses Which Credentials to Share (Selective Disclosure)
-
+###### How Alice Chooses Which Credentials to Share (Selective Disclosure)
 One of the powerful privacy features of DID/VC is that Alice can choose exactly which credentials to share and which to keep private.
 
 **Scenario: Alice has 7 credentials but only wants to show 3**
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    Alice's Wallet: 7 Credentials                            │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ALICE'S DIGITAL WALLET                                                      │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                                                                     │   │
-│  │  📚 CREDENTIAL #1: University Degree (Computer Science)             │   │
-│  │     Issuer: MIT (did:web:mit.edu)                                  │   │
-│  │     Status: ✅ Available                                           │   │
-│  │                                                                     │   │
-│  │  📜 CREDENTIAL #2: Master's Degree (Data Science)                   │   │
-│  │     Issuer: Stanford (did:web:stanford.edu)                        │   │
-│  │     Status: ✅ Available                                           │   │
-│  │                                                                     │   │
-│  │  💼 CREDENTIAL #3: Employment Certificate (Google)                  │   │
-│  │     Issuer: Google HR (did:web:google.com)                         │   │
-│  │     Status: ✅ Available                                           │   │
-│  │                                                                     │   │
-│  │  🏆 CREDENTIAL #4: AWS Certification                                │   │
-│  │     Issuer: Amazon Web Services (did:web:aws.amazon.com)           │   │
-│  │     Status: ✅ Available                                           │   │
-│  │                                                                     │   │
-│  │  🎫 CREDENTIAL #5: Conference Speaker Badge (Blockchain Expo)       │   │
-│  │     Issuer: Expo Org (did:web:blockchainexpo.com)                  │   │
-│  │     Status: ✅ Available                                           │   │
-│  │                                                                     │   │
-│  │  🏥 CREDENTIAL #6: Health Insurance Card                            │   │
-│  │     Issuer: BlueCross (did:web:bluecross.com)                      │   │
-│  │     Status: 🔒 Private (not sharing)                               │   │
-│  │                                                                     │   │
-│  │  🆔 CREDENTIAL #7: Government ID (Passport)                         │   │
-│  │     Issuer: Gov Agency (did:web:gov.agency)                        │   │
-│  │     Status: 🔒 Private (not sharing)                               │   │
-│  │                                                                     │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
 **Step 1: Employer Sends Request**
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    Step 1: Employer Requests Specific Credentials           │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  TechCorp sends a "Credential Request" to Alice's wallet:                    │
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  CREDENTIAL REQUEST                                                 │   │
-│  │  From: TechCorp (did:web:techcorp.com)                              │   │
-│  │                                                                     │   │
-│  │  "Please provide credentials that prove:"                           │   │
-│  │                                                                     │   │
-│  │  ☑️ 1. You have a degree in Computer Science or related field       │   │
-│  │  ☑️ 2. You have at least 2 years of work experience                 │   │
-│  │  ☐ 3. AWS certification (optional, preferred)                       │   │
-│  │                                                                     │   │
-│  │  We do NOT need:                                                    │   │
-│  │  ☐ Your Master's degree details                                     │   │
-│  │  ☐ Your health insurance information                                │   │
-│  │  ☐ Your government ID                                               │   │
-│  │                                                                     │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
 **Step 2: Alice Reviews and Selects**
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    Step 2: Alice Chooses What to Share                      │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  Alice's wallet shows a selection screen:                                    │
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  SELECT CREDENTIALS TO SHARE                                        │   │
-│  │  Request from: TechCorp                                             │   │
-│  │                                                                     │   │
-│  │  ✅ SELECTED (Will Share):                                          │   │
-│  │  ☑️ [Credential #1] MIT Degree - Computer Science                   │   │
-│  │      └─> Meets requirement: "Degree in CS or related field"         │   │
-│  │                                                                     │   │
-│  │  ☑️ [Credential #3] Google Employment Certificate                   │   │
-│  │      └─> Meets requirement: "2+ years work experience"              │   │
-│  │                                                                     │   │
-│  │  ☑️ [Credential #4] AWS Certification                               │   │
-│  │      └─> Optional but strengthens application                       │   │
-│  │                                                                     │   │
-│  │  ─────────────────────────────────────────────────────────────────  │   │
-│  │                                                                     │   │
-│  │  ❌ NOT SELECTED (Will NOT Share):                                  │   │
-│  │  ☐ [Credential #2] Stanford Master's Degree                         │   │
-│  │      └─> Not needed (already showing MIT degree)                    │   │
-│  │                                                                     │   │
-│  │  ☐ [Credential #5] Conference Speaker Badge                         │   │
-│  │      └─> Not relevant to job requirements                           │   │
-│  │                                                                     │   │
-│  │  🔒 PRIVATE (Never Share):                                          │   │
-│  │  ☐ [Credential #6] Health Insurance                                 │   │
-│  │      └─> Sensitive health data - not sharing                        │   │
-│  │                                                                     │   │
-│  │  ☐ [Credential #7] Government ID/Passport                           │   │
-│  │      └─> Too much personal info - not needed                        │   │
-│  │                                                                     │   │
-│  │  ─────────────────────────────────────────────────────────────────  │   │
-│  │                                                                     │   │
-│  │  [ ✅ Confirm: Share 3 Selected Credentials ]                       │   │
-│  │  [ ❌ Cancel: Don't share anything ]                                │   │
-│  │                                                                     │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                                                             │
-│  Alice's choice: Share credentials #1, #3, and #4                          │
-│  Keep private: credentials #2, #5, #6, #7                                  │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
 **Step 3: Alice Creates Verifiable Presentation**
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    Step 3: Create Verifiable Presentation                   │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  Alice's wallet creates a presentation containing ONLY the 3 selected VCs:   │
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  VERIFIABLE PRESENTATION                                            │   │
-│  │  Holder: did:key:z6MkhaXg... (Alice's DID)                          │   │
-│  │                                                                     │   │
-│  │  ┌───────────────────────────────────────────────────────────────┐  │   │
-│  │  │ CREDENTIAL 1: MIT Degree (Computer Science)                   │  │   │
-│  │  │ - Included ✅                                                 │  │   │
-│  │  └───────────────────────────────────────────────────────────────┘  │   │
-│  │                                                                     │   │
-│  │  ┌───────────────────────────────────────────────────────────────┐  │   │
-│  │  │ CREDENTIAL 2: Google Employment (3 years)                     │  │   │
-│  │  │ - Included ✅                                                 │  │   │
-│  │  └───────────────────────────────────────────────────────────────┘  │   │
-│  │                                                                     │   │
-│  │  ┌───────────────────────────────────────────────────────────────┐  │   │
-│  │  │ CREDENTIAL 3: AWS Certification                               │  │   │
-│  │  │ - Included ✅                                                 │  │   │
-│  │  └───────────────────────────────────────────────────────────────┘  │   │
-│  │                                                                     │   │
-│  │  ┌───────────────────────────────────────────────────────────────┐  │   │
-│  │  │ CREDENTIALS 4-7: NOT INCLUDED                                  │  │   │
-│  │  │ - Stanford Master's ❌                                        │  │   │
-│  │  │ - Conference Badge ❌                                         │  │   │
-│  │  │ - Health Insurance ❌                                         │  │   │
-│  │  │ - Government ID ❌                                            │  │   │
-│  │  └───────────────────────────────────────────────────────────────┘  │   │
-│  │                                                                     │   │
-│  │  PROOF: Alice's digital signature (proves she controls the DID)    │   │
-│  │                                                                     │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                                                             │
-│  Result: Only 3 credentials shared, 4 remain private                        │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
 **Technical Implementation:**
-
-```json
-{
-  "@context": ["https://www.w3.org/2018/credentials/v1"],
-  "type": "VerifiablePresentation",
-  "holder": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
-  
-  "verifiableCredential": [
-    // ONLY the 3 selected credentials included
-    { "id": "urn:uuid:mit-degree-001", ... },
-    { "id": "urn:uuid:google-employment-002", ... },
-    { "id": "urn:uuid:aws-cert-003", ... }
-    // Credentials 4-7 are NOT here - Alice chose not to share them
-  ],
-  
-  "proof": {
-    "type": "Ed25519Signature2020",
-    "created": "2024-01-15T10:30:00Z",
-    "proofPurpose": "authentication",
-    "verificationMethod": "did:key:z6MkhaXg...#z6MkhaXg...",
-    "proofValue": "z7sN8K..."
-  }
-}
-```
-
 **Key Points:**
-
 | Feature | How It Works | Benefit |
-|---------|--------------|---------|
+| :--- | :--- | :--- |
 | **Holder Control** | Alice decides what to share | Privacy protection |
 | **Selective Disclosure** | Choose specific credentials from wallet | Share only what's needed |
 | **No Revealing** | Unselected credentials never leave wallet | Complete privacy for unshared data |
 | **Contextual Sharing** | Different presentations for different situations | Right data for right context |
 
+
 **Real-World Example:**
-
-```
-Job Application to TechCorp:
-- Share: MIT Degree, Google Experience, AWS Cert
-- Don't share: Health Insurance, Government ID
-
-Doctor Visit to Hospital:
-- Share: Health Insurance, Government ID
-- Don't share: Employment history, AWS Cert
-
-Bank Loan Application:
-- Share: Government ID, Employment, Degree
-- Don't share: Health Insurance, Conference badges
-```
-
 **Step 4: Verifier Extracts and Verifies the VCs**
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    Step 4: Verifier Processes the Presentation              │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  TechCorp receives the Verifiable Presentation from Alice:                   │
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  RECEIVED: VerifiablePresentation.json                              │   │
-│  │                                                                     │   │
-│  │  TechCorp's Verification System starts processing...                │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                        │
-│                                    ▼                                        │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  STEP 4.1: Extract VCs from Presentation                            │   │
-│  │  ─────────────────────────────────────                              │   │
-│  │                                                                     │   │
-│  │  Presentation.verifiableCredential[0] ────▶ MIT Degree VC           │   │
-│  │  Presentation.verifiableCredential[1] ────▶ Google Employment VC    │   │
-│  │  Presentation.verifiableCredential[2] ────▶ AWS Certification VC    │   │
-│  │                                                                     │   │
-│  │  ✅ Extracted 3 VCs from presentation                               │   │
-│  │                                                                     │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                        │
-│                                    ▼                                        │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  STEP 4.2: Verify Holder Binding (Alice's Identity)                 │   │
-│  │  ─────────────────────────────────────────────────                  │   │
-│  │                                                                     │   │
-│  │  Check: Presentation.proof                                          │   │
-│  │    ↓                                                                │   │
-│  │  Extract verificationMethod: did:key:z6MkhaXg...#z6MkhaXg...        │   │
-│  │    ↓                                                                │   │
-│  │  Resolve Alice's DID ────▶ Get Alice's public key                   │   │
-│  │    ↓                                                                │   │
-│  │  Verify signature on presentation                                   │   │
-│  │    ↓                                                                │   │
-│  │  ✅ VALID - Only Alice could have signed this presentation          │   │
-│  │                                                                     │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                        │
-│                                    ▼                                        │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  STEP 4.3: Verify Each VC (Issuer Authenticity)                     │   │
-│  │  ─────────────────────────────────────────────                      │   │
-│  │                                                                     │   │
-│  │  FOR EACH extracted VC:                                             │   │
-│  │                                                                     │   │
-│  │  VC #1: MIT Degree                                                  │   │
-│  │    ├─ Extract issuer: did:web:mit.edu                               │   │
-│  │    ├─ Resolve MIT's DID ────▶ Get MIT's public key                  │   │
-│  │    ├─ Verify VC signature with MIT's key                            │   │
-│  │    ├─ Check revocation status                                       │   │
-│  │    └─ ✅ VALID - MIT really issued this degree                      │   │
-│  │                                                                     │   │
-│  │  VC #2: Google Employment                                           │   │
-│  │    ├─ Extract issuer: did:web:google.com                            │   │
-│  │    ├─ Resolve Google's DID ────▶ Get Google's public key            │   │
-│  │    ├─ Verify VC signature with Google's key                         │   │
-│  │    ├─ Check revocation status                                       │   │
-│  │    └─ ✅ VALID - Google really issued this certificate              │   │
-│  │                                                                     │   │
-│  │  VC #3: AWS Certification                                           │   │
-│  │    ├─ Extract issuer: did:web:aws.amazon.com                        │   │
-│  │    ├─ Resolve AWS's DID ────▶ Get AWS's public key                  │   │
-│  │    ├─ Verify VC signature with AWS's key                            │   │
-│  │    ├─ Check revocation status                                       │   │
-│  │    └─ ✅ VALID - AWS really issued this certification               │   │
-│  │                                                                     │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                        │
-│                                    ▼                                        │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  STEP 4.4: Verify Subject Binding (VCs belong to Alice)             │   │
-│  │  ─────────────────────────────────────────────────────              │   │
-│  │                                                                     │   │
-│  │  FOR EACH VC:                                                       │   │
-│  │    Check: VC.credentialSubject.id == Alice's DID?                   │   │
-│  │                                                                     │   │
-│  │    MIT Degree.subject.id: did:key:z6MkhaXg... == Alice's DID? ✅    │   │
-│  │    Google Cert.subject.id: did:key:z6MkhaXg... == Alice's DID? ✅   │   │
-│  │    AWS Cert.subject.id: did:key:z6MkhaXg... == Alice's DID? ✅      │   │
-│  │                                                                     │   │
-│  │    ✅ All VCs were issued TO Alice (not to someone else)            │   │
-│  │                                                                     │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                        │
-│                                    ▼                                        │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                                                                     │   │
-│  │  ╔═════════════════════════════════════════════════════════════════╗│   │
-│  │  ║  ✅ ALL VERIFICATIONS PASSED                                    ║│   │
-│  │  ║                                                                 ║│   │
-│  │  ║  1. Presentation signed by Alice ✅                             ║│   │
-│  │  ║  2. MIT degree is authentic ✅                                  ║│   │
-│  │  ║  3. Google employment is authentic ✅                           ║│   │
-│  │  ║  4. AWS certification is authentic ✅                           ║│   │
-│  │  ║  5. All VCs belong to Alice ✅                                  ║│   │
-│  │  ║  6. No credentials revoked ✅                                   ║│   │
-│  │  ║                                                                 ║│   │
-│  │  ║  RESULT: Alice is legitimate! 🎉                                ║│   │
-│  │  ╚═════════════════════════════════════════════════════════════════╝│   │
-│  │                                                                     │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
 **Verification Summary Table:**
-
 | Step | What Verifier Does | What It Proves |
-|------|-------------------|----------------|
-| **Extract VCs** | Parse `verifiableCredential` array from presentation | Gets the 3 credentials Alice shared |
+| :--- | :--- | :--- |
+| **Extract VCs** | Parse verifiableCredential array from presentation | Gets the 3 credentials Alice shared |
 | **Verify Holder** | Check presentation signature with Alice's public key | Alice is the one presenting (not stolen) |
 | **Verify Issuer #1** | Check MIT's signature on degree VC | MIT really issued this degree |
 | **Verify Issuer #2** | Check Google's signature on employment VC | Google really issued this certificate |
 | **Verify Issuer #3** | Check AWS's signature on certification VC | AWS really issued this certification |
-| **Verify Subject** | Check `credentialSubject.id` matches Alice's DID | All VCs belong to Alice (not someone else) |
+| **Verify Subject** | Check credentialSubject.id matches Alice's DID | All VCs belong to Alice (not someone else) |
+
 
 **Answer to Your Question:**
-
-> **Yes!** The verifier:
-> 1. **Extracts** the 3 VCs from `presentation.verifiableCredential` array
-> 2. **Verifies** Alice's signature on the presentation (holder proof)
-> 3. **Verifies** each VC's issuer signature (MIT, Google, AWS)
-> 4. **Verifies** all VCs belong to Alice (subject binding)
-
+**Yes!** The verifier extracts the 3 VCs, verifies Alice's signature, verifies each VC's issuer signature, and verifies all VCs belong to Alice.
 **One-Sentence Summary:**
-> The Verifiable Presentation is like an envelope containing 3 VCs. The verifier opens the envelope (extracts VCs), checks Alice signed the envelope (holder proof), and checks each VC is authentic (issuer signatures).
+The Verifiable Presentation is like an envelope containing 3 VCs; the verifier opens the envelope, checks Alice signed the envelope, and checks each VC is authentic.
 
 ---
 
-### How DID/DID Document and VC Are Generated and Issued
-
-#### Part 1: DID and DID Document Generation
-
+### 2. How DID/DID Document and VC Are Generated and Issued
+###### Part 1: DID and DID Document Generation
 **Who Generates the DID/DID Document?**
-
-The answer depends on the DID method:
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    Who Generates DID/DID Document?                          │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  METHOD 1: Self-Generated (did:key)                                         │
-│  ──────────────────────────────────                                         │
-│                                                                             │
-│  Alice (User) generates everything herself:                                  │
-│                                                                             │
-│  Alice's Device                                                              │
-│  ┌─────────────────────────────────────────┐                                 │
-│  │  1. Generate Key Pair                   │                                 │
-│  │     - Private Key (kept secret)         │                                 │
-│  │     - Public Key                        │                                 │
-│  │                                         │                                 │
-│  │  2. Construct DID from Public Key       │                                 │
-│  │     did:key:z6Mk...                     │                                 │
-│  │                                         │                                 │
-│  │  3. Generate DID Document               │                                 │
-│  │     (deterministic algorithm)           │                                 │
-│  │                                         │                                 │
-│  │  ❌ NO external service provider        │                                 │
-│  │  ❌ NO registration needed              │                                 │
-│  │  ✅ Alice has complete control          │                                 │
-│  └─────────────────────────────────────────┘                                 │
-│                                                                             │
-│  ─────────────────────────────────────────────────────────────────────────  │
-│                                                                             │
-│  METHOD 2: Domain-Based (did:web)                                           │
-│  ─────────────────────────────────                                          │
-│                                                                             │
-│  Organization generates and hosts DID document:                              │
-│                                                                             │
-│  Organization's IT Team                                                      │
-│  ┌─────────────────────────────────────────┐                                 │
-│  │  1. Generate Key Pair                   │                                 │
-│  │                                         │                                 │
-│  │  2. Create DID from domain              │                                 │
-│  │     did:web:example.com                 │                                 │
-│  │                                         │                                 │
-│  │  3. Create DID Document                 │                                 │
-│  │                                         │                                 │
-│  │  4. Host on web server                  │                                 │
-│  │     /.well-known/did.json               │                                 │
-│  │                                         │                                 │
-│  │  ✅ Organization controls               │                                 │
-│  │  ✅ DNS/HTTPS provides authority        │                                 │
-│  └─────────────────────────────────────────┘                                 │
-│                                                                             │
-│  ─────────────────────────────────────────────────────────────────────────  │
-│                                                                             │
-│  METHOD 3: Blockchain-Based (did:ethr, did:ion)                             │
-│  ──────────────────────────────────────────────                             │
-│                                                                             │
-│  User generates keys, but DID document is resolved from blockchain:          │
-│                                                                             │
-│  Alice (User)                    Blockchain Network                          │
-│  ┌─────────────────────┐         ┌──────────────────────────────────────┐   │
-│  │ 1. Generate Key Pair│         │                                      │   │
-│  │                     │         │  Smart Contract (ERC-1056)           │   │
-│  │ 2. Create DID from  │         │  ┌────────────────────────────────┐  │   │
-│  │    Ethereum Address │         │  │ DID Document stored/resolved   │  │   │
-│  │                     │────────▶│  │ from blockchain events         │  │   │
-│  │ 3. Sign transactions│         │  └────────────────────────────────┘  │   │
-│  │    (if updating)    │         │                                      │   │
-│  └─────────────────────┘         └──────────────────────────────────────┘   │
-│                                                                             │
-│  ✅ Alice controls keys (self-sovereign)                                    │
-│  ✅ Blockchain provides decentralized registry                              │
-│  ✅ No single service provider controls the DID                             │
-│                                                                             │
-│  ─────────────────────────────────────────────────────────────────────────  │
-│                                                                             │
-│  METHOD 4: Service Provider Assisted (BSN-DID, etc.)                        │
-│  ───────────────────────────────────────────────────                        │
-│                                                                             │
-│  In some enterprise/government scenarios:                                    │
-│                                                                             │
-│  Alice + BSN Service Provider                                                │
-│  ┌─────────────────────────────────────────┐                                 │
-│  │  1. Alice requests DID creation         │                                 │
-│  │     (provides identity proof)           │                                 │
-│  │                                         │                                 │
-│  │  2. Service Provider verifies identity  │                                 │
-│  │     (e.g., real-name authentication)    │                                 │
-│  │                                         │                                 │
-│  │  3. Service Provider generates DID      │                                 │
-│  │     and DID Document                    │                                 │
-│  │                                         │                                 │
-│  │  4. Alice receives private keys         │                                 │
-│  │     (or key is secured for Alice)       │                                 │
-│  │                                         │                                 │
-│  │  ✅ Alice gets verified DID             │                                 │
-│  │  ✅ Service provider guarantees         │                                 │
-│  │     real-world identity                 │                                 │
-│  └─────────────────────────────────────────┘                                 │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
 **Summary Table: Who Does What**
-
 | DID Method | Key Generation | DID Creation | DID Document Creation | Storage/Registry | Service Provider Role |
-|------------|----------------|--------------|----------------------|------------------|----------------------|
+| :--- | :--- | :--- | :--- | :--- | :--- |
 | **did:key** | User | User (algorithmic) | User (deterministic) | None (self-contained) | None - fully self-sovereign |
 | **did:web** | Organization | Organization | Organization | Web server (DNS-based) | Organization IT hosts document |
 | **did:ethr** | User | User (from address) | Smart contract / Default | Ethereum blockchain | Blockchain network provides registry |
 | **did:ion** | User | User (from public key) | Sidetree nodes aggregate | Bitcoin blockchain | ION network nodes help batch/anchor |
 | **BSN-DID** | Service Provider | Service Provider | Service Provider | BSN blockchain | BSN provides verified, real-name DID |
 
+
 **Key Insight:**
+Self-Sovereign Methods (did:key, did:ethr, did:ion) mean the user generates everything. Organization Methods (did:web) mean the organization generates and controls the identity. Assisted Methods (BSN-DID) mean a service provider helps generate, but the user still controls keys.
 
-- **Self-Sovereign Methods (did:key, did:ethr, did:ion)**: User generates everything. No service provider needed. True "self-sovereign identity."
-- **Organization Methods (did:web)**: Organization generates and controls. Good for corporate/institutional identities.
-- **Assisted Methods (BSN-DID)**: Service provider helps generate, but user still controls keys (in most designs). Bridges real-world identity with decentralized identity.
-
----
-
-The process varies depending on the DID method. Here are three common examples:
-
-##### Method A: did:key (Self-Generated)
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    did:key Generation Process (Self-Generated)              │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  STEP 1: Generate Cryptographic Key Pair                                     │
-│  ─────────────────────────────────────                                       │
-│                                                                             │
-│  Alice's Wallet App:                                                         │
-│  ┌─────────────────────────────────────────┐                                 │
-│  │  Generate Ed25519 Key Pair              │                                 │
-│  │                                         │                                 │
-│  │  Private Key (sk) ──────▶ Keep Secret   │                                 │
-│  │     ↓                                   │                                 │
-│  │  Public Key (pk) ───────▶ Used for DID  │                                 │
-│  └─────────────────────────────────────────┘                                 │
-│                                                                             │
-│  STEP 2: Encode Public Key                                                   │
-│  ─────────────────────────                                                   │
-│                                                                             │
-│  Raw Public Key: 0x279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959...  │
-│       ↓                                                                      │
-│  Multicodec Prefix: 0xed (for Ed25519)                                       │
-│       ↓                                                                      │
-│  Multibase Base58-btc Encoding: z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnn   │
-│                                                                             │
-│  STEP 3: Construct DID                                                       │
-│  ────────────────────                                                        │
-│                                                                             │
-│  did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK                   │
-│  │      │                                                  │                  │
-│  │      │                                                  └── Method-Specific │
-│  │      │                                                      ID (encoded pk)│
-│  │      └── Method Name                                        │              │
-│  └── Scheme                                                    │              │
-│                                                                             │
-│  STEP 4: Generate DID Document (Deterministic)                               │
-│  ─────────────────────────────────────────────                               │
-│                                                                             │
-│  The DID document is automatically generated from the public key:            │
-│  ┌─────────────────────────────────────────────────────────────────────┐    │
-│  │  {                                                                  │    │
-│  │    "@context": ["https://www.w3.org/ns/did/v1"],                   │    │
-│  │    "id": "did:key:z6MkhaXg...",                                    │    │
-│  │    "verificationMethod": [{                                         │    │
-│  │      "id": "did:key:z6MkhaXg...#z6MkhaXg...",                      │    │
-│  │      "type": "Ed25519VerificationKey2020",                         │    │
-│  │      "controller": "did:key:z6MkhaXg...",                          │    │
-│  │      "publicKeyMultibase": "z6MkhaXg..."                           │    │
-│  │    }],                                                              │    │
-│  │    "authentication": ["#z6MkhaXg..."]                              │    │
-│  │  }                                                                  │    │
-│  └─────────────────────────────────────────────────────────────────────┘    │
-│                                                                             │
-│  STEP 5: Store Private Key                                                   │
-│  ───────────────────────                                                     │
-│                                                                             │
-│  ❌ NO REGISTRY NEEDED for did:key                                           │
-│  ✅ Private key stored securely in Alice's wallet                            │
-│  ✅ DID document can be regenerated anytime from the public key              │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-##### Method B: did:web (Domain-Based)
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    did:web Generation Process (Domain-Based)                │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  STEP 1: Own a Domain                                                        │
-│  ────────────────────                                                        │
-│  Alice's organization owns: example.com                                      │
-│                                                                             │
-│  STEP 2: Generate Key Pair                                                   │
-│  ───────────────────────                                                     │
-│  Generate cryptographic keys (same as did:key)                               │
-│                                                                             │
-│  STEP 3: Create DID                                                          │
-│  ────────────────                                                            │
-│                                                                             │
-│  did:web:example.com                                                         │
-│  │      │           │                                                        │
-│  │      │           └── Domain name (must own DNS)                          │
-│  │      └── Method Name                                                      │
-│  └── Scheme                                                                  │
-│                                                                             │
-│  STEP 4: Create and Host DID Document                                        │
-│  ───────────────────────────────────                                         │
-│                                                                             │
-│  Create did.json file:                                                       │
-│  ┌─────────────────────────────────────────────────────────────────────┐    │
-│  │  {                                                                  │    │
-│  │    "@context": ["https://www.w3.org/ns/did/v1"],                   │    │
-│  │    "id": "did:web:example.com",                                    │    │
-│  │    "verificationMethod": [{                                         │    │
-│  │      "id": "did:web:example.com#key-1",                            │    │
-│  │      "type": "JsonWebKey2020",                                     │    │
-│  │      "controller": "did:web:example.com",                          │    │
-│  │      "publicKeyJwk": { "kty": "OKP", "crv": "Ed25519", ... }       │    │
-│  │    }],                                                              │    │
-│  │    "authentication": ["did:web:example.com#key-1"]                  │    │
-│  │  }                                                                  │    │
-│  └─────────────────────────────────────────────────────────────────────┘    │
-│                                                                             │
-│  Host at: https://example.com/.well-known/did.json                           │
-│                                                                             │
-│  STEP 5: DNS Resolution                                                      │
-│  ───────────────────                                                         │
-│                                                                             │
-│  When someone resolves did:web:example.com:                                  │
-│  1. Extract domain: example.com                                              │
-│  2. DNS lookup → resolves to web server IP                                   │
-│  3. HTTPS GET: https://example.com/.well-known/did.json                      │
-│  4. Return DID document                                                      │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-##### Method C: did:ethr (Blockchain-Based)
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                 did:ethr Generation Process (Ethereum-Based)                │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  STEP 1: Generate Ethereum Key Pair                                          │
-│  ─────────────────────────────────                                           │
-│                                                                             │
-│  Private Key ────▶ Public Key (64 hex chars) ────▶ Ethereum Address (40)    │
-│       │                                               │                      │
-│       │                                               ▼                      │
-│       │                                        0xb9c5714089478a327f...      │
-│       │                                               │                      │
-│       └───────────────────────────────────────────────┘                      │
-│                    Used to control the DID                                   │
-│                                                                             │
-│  STEP 2: Construct DID                                                       │
-│  ────────────────────                                                        │
-│                                                                             │
-│  did:ethr:0xb9c5714089478a327f09197987f16f9e5d936e8a                        │
-│  │      │  │                                          │                      │
-│  │      │  │                                          └── Ethereum Address   │
-│  │      │  └── Network identifier (optional, defaults to mainnet)            │
-│  │      └── Method Name                                                      │
-│  └── Scheme                                                                  │
-│                                                                             │
-│  STEP 3: Default DID Document (No Registration Required)                     │
-│  ───────────────────────────────────────────────────────                     │
-│                                                                             │
-│  Even without blockchain transaction, a default DID document exists:         │
-│  ┌─────────────────────────────────────────────────────────────────────┐    │
-│  │  {                                                                  │    │
-│  │    "id": "did:ethr:0xb9c5...",                                     │    │
-│  │    "verificationMethod": [{                                         │    │
-│  │      "id": "did:ethr:0xb9c5...#controller",                        │    │
-│  │      "type": "EcdsaSecp256k1RecoveryMethod2020",                   │    │
-│  │      "controller": "did:ethr:0xb9c5...",                           │    │
-│  │      "blockchainAccountId": "eip155:1:0xb9c5..."                   │    │
-│  │    }],                                                              │    │
-│  │    "authentication": ["#controller"]                                │    │
-│  │  }                                                                  │    │
-│  └─────────────────────────────────────────────────────────────────────┘    │
-│                                                                             │
-│  STEP 4: Optional - Register on ERC-1056 Smart Contract                      │
-│  ───────────────────────────────────────────────────────                     │
-│                                                                             │
-│  To add services or delegate keys, submit Ethereum transaction:              │
-│  ┌─────────────────────────────────────────────────────────────────────┐    │
-│  │  Transaction to: 0xdca7ef03e98e0dc2b855be647c39abe984fcf21b         │    │
-│  │  Function: changeOwnerDelegated() or setAttribute()                  │    │
-│  │  Cost: Gas fees (ETH)                                                │    │
-│  └─────────────────────────────────────────────────────────────────────┘    │
-│                                                                             │
-│  STEP 5: Resolution                                                          │
-│  ────────────                                                                │
-│                                                                             │
-│  When resolving did:ethr:0xb9c5...:                                          │
-│  1. Query ERC-1056 smart contract on Ethereum                                │
-│  2. Read events: DIDOwnerChanged, DIDDelegateChanged, DIDAttributeChanged   │
-│  3. Build DID document from event history                                    │
-│  4. Return complete DID document                                             │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-#### Part 2: Verifiable Credential Generation and Issuance
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│              Verifiable Credential Generation and Issuance Process          │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ACTORS:                                                                     │
-│  ┌──────────────┐         ┌──────────────┐         ┌──────────────┐        │
-│  │   University │         │    Alice     │         │   Employer   │        │
-│  │   (Issuer)   │         │   (Holder)   │         │  (Verifier)  │        │
-│  └──────┬───────┘         └──────┬───────┘         └──────┬───────┘        │
-│         │                        │                        │                │
-└─────────┼────────────────────────┼────────────────────────┼────────────────┘
-          │                        │                        │
-          ▼                        │                        │
-┌─────────────────────┐            │                        │
-│ STEP 1: University  │            │                        │
-│ Prepares Credential │            │                        │
-│ ─────────────────── │            │                        │
-│                     │            │                        │
-│  {                  │            │                        │
-│    "@context": [    │            │                        │
-│      "https://www.w3.org/2018/credentials/v1",          │
-│      "https://www.w3.org/2018/credentials/examples/v1"  │
-│    ],               │            │                        │
-│    "id": "urn:uuid:12345678-1234-1234-1234-123456789abc"│
-│    "type": ["VerifiableCredential", "DegreeCredential"],│
-│    "issuer": {      │            │                        │
-│      "id": "did:web:uni.edu",  ◄── University's DID     │
-│      "name": "Example University"                       │
-│    },               │            │                        │
-│    "issuanceDate": "2023-05-15T10:00:00Z",              │
-│    "credentialSubject": {        ◄── Claims about Alice  │
-│      "id": "did:key:z6MkhaXg...", ◄── Alice's DID        │
-│      "degree": {                                     │
-│        "type": "BachelorDegree",                       │
-│        "name": "Bachelor of Science",                  │
-│        "field": "Computer Science"                     │
-│      },                                                │
-│      "graduationDate": "2023-05-15"                    │
-│    }                                                   │
-│  }                                                     │
-└─────────┬──────────────────────────────────────────────┘
-          │
-          ▼
-┌─────────────────────┐
-│ STEP 2: University  │
-│ Signs Credential    │
-│ ─────────────────   │
-│                     │
-│  Canonicalization:  │
-│  Normalize JSON-LD  │
-│       ↓             │
-│  Hash (SHA-256):    │
-│  0x8a3f2b1c...      │
-│       ↓             │
-│  Sign with          │
-│  University's       │
-│  Private Key        │
-│       ↓             │
-│  Signature:         │
-│  z58DAdF7HV...      │
-└─────────┬───────────┘
-          │
-          ▼
-┌─────────────────────┐
-│ STEP 3: Complete    │
-│ Signed Credential   │
-│ ─────────────────   │
-│                     │
-│  {                  │
-│    ...credential data...                               │
-│    "proof": {       │
-│      "type": "Ed25519Signature2020",                   │
-│      "created": "2023-05-15T10:00:00Z",                │
-│      "proofPurpose": "assertionMethod",                │
-│      "verificationMethod": "did:web:uni.edu#key-1",   │
-│      "proofValue": "z58DAdF7HV..."  ◄── Signature     │
-│    }                                                   │
-│  }                                                     │
-└─────────┬──────────────────────────────────────────────┘
-          │
-          │ Issue to Alice
-          ▼
-┌─────────────────────┐            ┌─────────────────────┐
-│ STEP 4: Alice       │            │ STEP 5: Alice Stores│
-│ Receives Credential │───────────▶│ Credential in Wallet│
-│ ─────────────────── │            │ ─────────────────── │
-└─────────────────────┘            └─────────────────────┘
-                                              │
-          ┌───────────────────────────────────┼───────────────────────────┐
-          │                                   │                           │
-          ▼                                   ▼                           ▼
-┌─────────────────────┐            ┌─────────────────────┐   ┌─────────────────────┐
-│ STEP 6: Employer    │            │ STEP 7: Alice Creates│   │ STEP 8: Employer    │
-│ Requests Proof      │◄───────────│ Verifiable          │   │ Verifies            │
-│ ─────────────────   │  Scan QR   │ Presentation        │──▶│ ───────────         │
-│                     │  Code      │ ──────────────────  │   │                     │
-│ "Please prove your  │            │                     │   │ 1. Resolve Uni DID  │
-│  degree and         │            │ {                   │   │ 2. Verify signature │
-│  experience"        │            │   "@context": [...],│   │ 3. Resolve Alice DID│
-│                     │            │   "type": "VerifiablePresentation",          │
-│                     │            │   "verifiableCredential": [cred1, cred2],    │
-│                     │            │   "holder": "did:key:z6MkhaXg...",            │
-│                     │            │   "proof": {        │   │ 4. Verify Alice sig │
-│                     │            │     "type": "Ed25519Signature2020",          │
-│                     │            │     "proofPurpose": "authentication",        │
-│                     │            │     "proofValue": "z7sN8K..." ◄── Alice sig │
-│                     │            │   }                                                │
-│                     │            │ }                   │   │ ✅ All verified!    │
-└─────────────────────┘            └─────────────────────┘   └─────────────────────┘
-```
-
-#### Summary Table: DID vs VC Generation
-
+###### Method A: did:key (Self-Generated)
+###### Method B: did:web (Domain-Based)
+###### Method C: did:ethr (Blockchain-Based)
+###### Part 2: Verifiable Credential Generation and Issuance
+###### Summary Table: DID vs VC Generation
 | Aspect | DID/DID Document | Verifiable Credential |
-|--------|------------------|----------------------|
+| :--- | :--- | :--- |
 | **Who generates** | User (or user's wallet/app) | Issuer (University, Employer, Government) |
 | **Who signs** | N/A (DID doc contains public keys) | Issuer signs with their private key |
 | **Storage location** | DID Registry (blockchain, web server, etc.) | Holder's wallet |
@@ -1524,357 +164,64 @@ The process varies depending on the DID method. Here are three common examples:
 | **Creation cost** | Varies (free for did:key, gas fees for did:ethr) | Free (issuer pays any blockchain fees) |
 | **Updateable** | Depends on method (did:key: no, did:ethr: yes) | No (immutable once issued, can be revoked) |
 
+
+###### Signature Schemes: DID Authentication vs VC Signing
+**Important Clarification: BBS is NOT part of the core DID specification** - it's a cryptographic signature scheme used for **Verifiable Credentials (VCs)** that are linked to DIDs.
+| Layer | Traditional | Privacy-Enhanced Alternative | Purpose |
+| :--- | :--- | :--- | :--- |
+| **DID Authentication** | ECDSA, Ed25519 | Same (ECDSA/Ed25519) | Prove control of DID |
+| **Verifiable Credentials** | ECDSA, Ed25519 | **BBS** | Sign credentials with unlinkability |
+
+
+###### Two Different Layers
+**DID Layer (Still ECDSA/Ed25519)** DID documents contain verification methods that use traditional signatures (did:ethr uses ECDSA, did:key uses Ed25519/ECDSA, did:web uses ECDSA/Ed25519).
+**VC Layer (ECDSA → BBS Option)** This is where BBS comes in as an alternative:
+###### Why Use BBS for VCs?
+| Feature | Traditional (ECDSA/Ed25519) | BBS Signatures | Benefit |
+| :--- | :--- | :--- | :--- |
+| **Unlinkability** | ❌ Same signature reused | ✅ Fresh proof each time | Prevent tracking across presentations |
+| **Selective Disclosure** | ❌ Reveal all or nothing | ✅ Reveal only chosen attributes | Privacy-preserving data sharing |
+| **Predicate Proofs** | ❌ Not possible | ✅ Prove statements (e.g., age > 18) without revealing exact value | Minimal disclosure |
+
+
+###### Example: Alice's Job Application
+**Traditional ECDSA:**
+**BBS Signatures:**
+###### Summary
+| Use Case | Algorithm | Why |
+| :--- | :--- | :--- |
+| DID creation/control | ECDSA, Ed25519 | Hardware support, simplicity |
+| DID authentication | ECDSA, Ed25519 | Standard algorithms |
+| VC signing (traditional) | ECDSA, Ed25519 | Wide compatibility |
+| **VC signing (privacy-focused)** | **BBS** | **Unlinkability, selective disclosure** |
+
+**Key Point:** BBS is an **alternative for VC signatures**, enhancing the privacy layer of the DID ecosystem while the DID itself remains a simple identifier.
+
 ---
 
-### How Authorities of DID and VC Are Guaranteed
-
-The authority and trustworthiness of DIDs and VCs are guaranteed through multiple layers of cryptographic security, decentralized verification, and trust frameworks.
-
-#### 1. Cryptographic Security Foundation
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    Cryptographic Security Layers                            │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  LAYER 1: Public Key Infrastructure (PKI)                                    │
-│  ─────────────────────────────────────────                                   │
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  Asymmetric Cryptography (Ed25519, secp256k1, etc.)                 │   │
-│  │                                                                     │   │
-│  │   Private Key ──────Sign──────▶ Signature                           │   │
-│  │      │                                                            │   │
-│  │      │ Derive                                                    │   │
-│  │      ▼                                                            │   │
-│  │   Public Key ────Verify──────▶ ✅ Valid / ❌ Invalid                │   │
-│  │                                                                     │   │
-│  │  Mathematical guarantee: Only private key holder can create         │   │
-│  │  valid signatures; anyone with public key can verify                │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                    ▲                                        │
-│                                    │                                        │
-│  LAYER 2: DID Document Binding     │                                        │
-│  ─────────────────────────────     │                                        │
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  DID Document contains public keys for verification                 │   │
-│  │                                                                     │   │
-│  │  did:example:123 ────Resolves───▶ {                                 │   │
-│  │    "verificationMethod": [{                                        │   │
-│  │      "publicKeyMultibase": "z6Mk..."  ◄── Public key               │   │
-│  │    }]                                                               │   │
-│  │  }                                                                  │   │
-│  │                                                                     │   │
-│  │  Anyone can resolve DID to get the public key for verification     │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                    ▲                                        │
-│                                    │                                        │
-│  LAYER 3: Verifiable Credentials   │                                        │
-│  ───────────────────────────────── │                                        │
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  VC contains:                                                       │   │
-│  │  1. Claims about subject                                            │   │
-│  │  2. Issuer's DID reference                                          │   │
-│  │  3. Issuer's digital signature                                      │   │
-│  │                                                                     │   │
-│  │  Verification:                                                      │   │
-│  │  1. Resolve issuer's DID ────▶ Get issuer's public key              │   │
-│  │  2. Verify signature on VC ──▶ Confirm issuer signed it             │   │
-│  │  3. Verify VC not tampered ──▶ Check hash matches                   │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-#### 2. DID Authority Guarantees
-
-##### 2.1 Control Proof (Authentication)
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    Proving Control Over a DID                               │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  CHALLENGE-RESPONSE PROTOCOL                                                │
-│  ───────────────────────────                                                │
-│                                                                             │
-│  Verifier                          Prover (DID Controller)                  │
-│  ────────                          ───────────────────────                  │
-│                                                                             │
-│  Step 1: Send Challenge                                                      │
-│  ┌──────────────┐                                                          │
-│  │  "Prove you  │                                                          │
-│  │   control    │──────────▶                                              │
-│  │   did:ex:123 │                                                          │
-│  └──────────────┘                                                          │
-│                                                                             │
-│  Step 2: Create Proof                                                      │
-│                               ┌──────────────────────┐                     │
-│                               │  1. Generate nonce   │                     │
-│                               │  2. Sign with        │                     │
-│                               │     private key      │                     │
-│                               │  3. Create proof     │                     │
-│                               │     document         │                     │
-│                               └──────────┬───────────┘                     │
-│                                          │                                  │
-│  Step 3: Verify Proof                    │                                  │
-│  ┌──────────────┐                        │                                  │
-│  │  Resolve DID │◄───────────────────────┘                                  │
-│  │  Get public  │  Send proof + signature                                   │
-│  │  key         │                                                           │
-│  └──────┬───────┘                                                           │
-│         │                                                                   │
-│         ▼                                                                   │
-│  ┌──────────────┐                                                           │
-│  │  Verify      │                                                           │
-│  │  signature   │                                                           │
-│  │  with public │                                                           │
-│  │  key         │                                                           │
-│  └──────┬───────┘                                                           │
-│         │                                                                   │
-│         ▼                                                                   │
-│  ┌──────────────┐                                                           │
-│  │  ✅ Valid    │  Only holder of private key could create valid signature  │
-│  │     OR       │                                                           │
-│  │  ❌ Invalid  │  Proof of control established!                             │
-│  └──────────────┘                                                           │
-│                                                                             │
-│  GUARANTEE: Mathematical certainty that prover controls the DID             │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-##### 2.2 DID Method-Specific Authority
-
+### 3. How Authorities of DID and VC Are Guaranteed
+###### 1. Cryptographic Security Foundation
+###### 2. DID Authority Guarantees
+###### 2.1 Control Proof (Authentication)
+###### 2.2 DID Method-Specific Authority
 | DID Method | Authority Mechanism | Security Guarantee |
-|------------|---------------------|-------------------|
+| :--- | :--- | :--- |
 | **did:key** | Self-generated from key pair | Control = possession of private key |
 | **did:web** | Domain ownership via DNS + TLS | Control = DNS record + HTTPS server control |
 | **did:ethr** | Ethereum address control | Control = possession of Ethereum private key |
 | **did:ion** | Bitcoin anchoring + Sidetree | Control = possession of operation signing keys |
 | **did:sov** | Hyperledger Indy consensus | Control = consensus of validator nodes |
 
-#### 3. Verifiable Credential Authority Guarantees
 
-##### 3.1 Issuer Authentication
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    Verifying VC Issuer Authority                            │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  VERIFICATION STEPS:                                                         │
-│                                                                             │
-│  Step 1: Extract Issuer DID from VC                                          │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  {                                                                  │   │
-│  │    "issuer": "did:web:uni.edu",  ◄── Extract issuer DID            │   │
-│  │    ...                                                              │   │
-│  │    "proof": {                                                       │   │
-│  │      "verificationMethod": "did:web:uni.edu#key-1"                 │   │
-│  │    }                                                                │   │
-│  │  }                                                                  │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                        │
-│                                    ▼                                        │
-│  Step 2: Resolve Issuer's DID                                               │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  did:web:uni.edu ────Resolve───▶ {                                  │   │
-│  │    "verificationMethod": [{                                        │   │
-│  │      "id": "did:web:uni.edu#key-1",                                │   │
-│  │      "publicKeyJwk": { "x": "0-e2i2...", ... }  ◄── Public key     │   │
-│  │    }]                                                               │   │
-│  │  }                                                                  │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                        │
-│                                    ▼                                        │
-│  Step 3: Verify VC Signature                                                │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                                                                     │   │
-│  │  VC Document (without proof) ────Hash───▶ Hash Value                │   │
-│  │                                                                     │   │
-│  │  Signature from VC proof ────────▶ Verify against hash              │   │
-│  │         │                            using issuer's public key      │   │
-│  │         ▼                                                           │   │
-│  │    ✅ Valid Signature                                               │   │
-│  │       = Issuer really did sign this VC                              │   │
-│  │                                                                     │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                                                             │
-│  GUARANTEE: Cryptographic proof that specific issuer created the VC         │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-##### 3.2 Trust Frameworks
-
+###### 3. Verifiable Credential Authority Guarantees
+###### 3.1 Issuer Authentication
+###### 3.2 Trust Frameworks
 Beyond cryptography, real-world trust is established through:
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    Trust Framework Layers                                   │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  LAYER 1: Cryptographic Trust (Base Layer)                                  │
-│  ─────────────────────────────────────────                                  │
-│  • Mathematical guarantees of signatures                                    │
-│  • Decentralized verification (no central authority needed)                 │
-│  • Tamper-evident (any modification breaks signature)                       │
-│                                                                             │
-│  LAYER 2: Institutional Trust                                               │
-│  ────────────────────────────                                               │
-│  • University is accredited and recognized                                  │
-│  • Government ID is legally valid                                           │
-│  • Employer is registered business                                          │
-│  • Trust registries (eIDAS, etc.)                                           │
-│                                                                             │
-│  LAYER 3: Governance Trust                                                  │
-│  ─────────────────────────                                                  │
-│  • Legal frameworks (eIDAS 2.0 in EU)                                       │
-│  • Industry standards (W3C VC Data Model)                                   │
-│  • Compliance requirements (GDPR, KYC/AML)                                  │
-│  • Audit trails and accountability                                          │
-│                                                                             │
-│  LAYER 4: Technical Trust                                                   │
-│  ─────────────────────                                                      │
-│  • DID method specifications                                                │
-│  • Revocation registries (if credential is revoked)                         │
-│  • Status lists (is credential still valid?)                                │
-│  • Schema validation (does data follow expected format?)                    │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-#### 4. Revocation and Status Checking
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    Credential Revocation Mechanisms                         │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  PROBLEM: What if a credential needs to be revoked?                          │
-│  (e.g., degree revoked due to academic misconduct, employee terminated)      │
-│                                                                             │
-│  SOLUTION 1: Revocation List                                                 │
-│  ───────────────────────────                                                 │
-│                                                                             │
-│  Issuer maintains a public revocation list:                                  │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  https://uni.edu/revoked-credentials.json                           │   │
-│  │                                                                     │   │
-│  │  {                                                                  │   │
-│  │    "revokedCredentials": [                                          │   │
-│  │      "urn:uuid:1234...",  ◄── Alice's degree revoked               │   │
-│  │      "urn:uuid:5678..."                                             │   │
-│  │    ]                                                                │   │
-│  │  }                                                                  │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                                                             │
-│  Verifier checks: Is credential ID in revocation list?                      │
-│                                                                             │
-│  ─────────────────────────────────────────────────────────────────────────  │
-│                                                                             │
-│  SOLUTION 2: Status List 2021 (Privacy-Preserving)                          │
-│  ────────────────────────────────────────────────                           │
-│                                                                             │
-│  Issuer publishes compressed bitstring:                                      │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  Status List: [0, 0, 1, 0, 0, 0, 1, 0, ...]  (1 = revoked)         │   │
-│  │                                                                     │   │
-│  │  Alice's credential index: 2 ────▶ Value = 1 (REVOKED)              │   │
-│  │  Bob's credential index: 0 ──────▶ Value = 0 (VALID)                │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                                                             │
-│  Advantages:                                                                 │
-│  • Verifier doesn't reveal which credential they're checking                 │
-│  • Efficient for large numbers of credentials                                │
-│  • Cryptographically signed by issuer                                        │
-│                                                                             │
-│  ─────────────────────────────────────────────────────────────────────────  │
-│                                                                             │
-│  SOLUTION 3: Blockchain Anchoring                                            │
-│  ────────────────────────────────                                            │
-│                                                                             │
-│  Issuer publishes revocation transaction:                                    │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  Ethereum Transaction                                               │   │
-│  │                                                                     │   │
-│  │  Function: revokeCredential(bytes32 credentialHash)                 │   │
-│  │  From: did:ethr:uni.edu                                             │   │
-│  │  Data: 0x8a3f2b1c... (hash of Alice's credential)                  │   │
-│  │  Status: ✅ Confirmed on blockchain                                 │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                                                             │
-│  Immutable, timestamped proof of revocation                                  │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-#### 5. Complete Authority Verification Flow
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│               Complete Authority Verification Example                       │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  SCENARIO: TechCorp verifies Alice's degree                                  │
-│                                                                             │
-│  ┌──────────────┐                              ┌──────────────┐            │
-│  │  TechCorp    │                              │  University  │            │
-│  │  (Verifier)  │                              │  (Issuer)    │            │
-│  └──────┬───────┘                              └──────┬───────┘            │
-│         │                                             │                     │
-│         │  1. Receive VC from Alice                   │                     │
-│         │◄────────────────────────────────────────────┤                     │
-│         │                                             │                     │
-│         │  2. Verify VC Structure                     │                     │
-│         │     ✅ Valid JSON-LD                        │                     │
-│         │     ✅ Required fields present              │                     │
-│         │     ✅ Not expired                          │                     │
-│         │                                             │                     │
-│         │  3. Resolve Issuer DID                      │                     │
-│         │     did:web:uni.edu ────▶ DNS lookup        │                     │
-│         │     DNS ────▶ 203.0.113.10                  │                     │
-│         │     HTTPS GET /.well-known/did.json         │                     │
-│         │     ✅ Retrieved DID document               │                     │
-│         │                                             │                     │
-│         │  4. Verify Issuer Signature                 │                     │
-│         │     Extract public key from DID doc         │                     │
-│         │     Verify signature on VC                  │                     │
-│         │     ✅ Signature valid                      │                     │
-│         │     ✅ Issuer authenticated                 │                     │
-│         │                                             │                     │
-│         │  5. Check Revocation Status                 │                     │
-│         │     Query: uni.edu/status/1234...           │                     │
-│         │     Response: { "revoked": false }          │                     │
-│         │     ✅ Credential not revoked               │                     │
-│         │                                             │                     │
-│         │  6. Verify Holder Binding                   │                     │
-│         │     VC.subject.id == Alice's DID?           │                     │
-│         │     ✅ Yes, issued to correct person        │                     │
-│         │                                             │                     │
-│         │  7. Verify Presentation (if applicable)     │                     │
-│         │     Alice signed presentation?              │                     │
-│         │     ✅ Yes, Alice controls her DID          │                     │
-│         │                                             │                     │
-│         │  ╔═══════════════════════════════════════╗  │                     │
-│         │  ║  ✅ ALL CHECKS PASSED                 ║  │                     │
-│         │  ║  • Cryptographically authentic        ║  │                     │
-│         │  ║  • Issuer verified (uni.edu)          ║  │                     │
-│         │  ║  • Not revoked                        ║  │                     │
-│         │  ║  • Issued to correct person           ║  │                     │
-│         │  ║  • Holder proved control              ║  │                     │
-│         │  ╚═══════════════════════════════════════╝  │                     │
-│         │                                             │                     │
-└─────────┴─────────────────────────────────────────────┴─────────────────────┘
-```
-
-#### 6. Security Properties Summary
-
+###### 4. Revocation and Status Checking
+###### 5. Complete Authority Verification Flow
+###### 6. Security Properties Summary
 | Security Property | How It's Guaranteed | Mechanism |
-|-------------------|---------------------|-----------|
+| :--- | :--- | :--- |
 | **Authenticity** | Digital signatures | Only private key holder can sign |
 | **Integrity** | Cryptographic hashing | Any tampering breaks signature |
 | **Non-repudiation** | Blockchain/ledger anchoring (optional) | Immutable record of issuance |
@@ -1883,12 +230,10 @@ Beyond cryptography, real-world trust is established through:
 | **Privacy** | Selective disclosure | Holder chooses what to reveal |
 | **Decentralization** | Distributed registries | No single point of failure/control |
 
----
 
-#### Key Benefits in This Scenario
-
+###### Key Benefits in This Scenario
 | Traditional Process | DID-Based Process |
-|---------------------|-------------------|
+| :--- | :--- |
 | Alice emails PDF resume | Alice shares cryptographically signed credentials |
 | Employer must contact university to verify degree | Employer verifies instantly using university's public DID |
 | Verification takes days/weeks | Verification takes seconds |
@@ -1896,10 +241,10 @@ Beyond cryptography, real-world trust is established through:
 | Risk of forged documents | Cryptographically impossible to forge |
 | Alice has no control over her data | Alice owns and controls her credentials |
 
-#### Other Real-World Use Cases
 
+###### Other Real-World Use Cases
 | Use Case | How DID Helps |
-|----------|---------------|
+| :--- | :--- |
 | **Healthcare** | Patients carry medical records between hospitals securely |
 | **Banking** | Instant KYC verification without sharing excessive personal data |
 | **Supply Chain** | Verify product authenticity from manufacturer to consumer |
@@ -1907,112 +252,51 @@ Beyond cryptography, real-world trust is established through:
 | **Education** | Students collect lifelong learning credentials from multiple institutions |
 | **IoT Devices** | Devices prove their identity and firmware authenticity |
 
+
 ---
 
-### DID Syntax
-
-#### Basic Structure
-
-A DID is a URI (Uniform Resource Identifier) consisting of three parts:
-
-```
-did:method:method-specific-id
-│    │      │
-│    │      └── Method-Specific Identifier (unique within the method)
-│    └───────── Method Name (identifies the DID method)
-└────────────── URI Scheme (always "did")
-```
-
-#### ABNF Grammar (Formal Definition)
-
+### 4. DID Syntax
+###### Basic Structure
+A DID is a URI consisting of three parts:
+###### ABNF Grammar (Formal Definition)
 According to W3C specification, the DID syntax is defined using ABNF (Augmented Backus-Naur Form):
-
-```abnf
-did                 = "did:" method-name ":" method-specific-id
-method-name         = 1*method-char
-method-char         = %x61-7A / DIGIT    ; lowercase letters a-z or digits 0-9
-method-specific-id  = *( *idchar ":" ) 1*idchar
-idchar              = ALPHA / DIGIT / "." / "-" / "_" / pct-encoded
-pct-encoded         = "%" HEXDIG HEXDIG   ; percent-encoded character
-```
-
-#### Syntax Components Explained
-
+###### Syntax Components Explained
 | Component | Description | Rules | Examples |
-|-----------|-------------|-------|----------|
-| **did** | URI scheme | Fixed string `"did:"` (lowercase) | `did:` |
-| **method-name** | DID method identifier | Lowercase letters (a-z) and digits (0-9) only; at least 1 character | `web`, `ethr`, `key`, `ion`, `sov` |
-| **method-specific-id** | Unique identifier within method | Letters, digits, `.`, `-`, `_`, and percent-encoded characters; can contain `:` as namespace separator | `123456`, `abc123`, `EiAnKD8-jfdd0MDcZUjAbRgaThBrMxPTFOxcnfJhI7dKgA` |
+| :--- | :--- | :--- | :--- |
+| **did** | URI scheme | Fixed string "did:" (lowercase) | did: |
+| **method-name** | DID method identifier | Lowercase letters (a-z) and digits (0-9) only; at least 1 character | web, ethr, key, ion, sov |
+| **method-specific-id** | Unique identifier within method | Letters, digits, ., -, _, and percent-encoded characters; can contain : as namespace separator | 123456, abc123, EiAnKD8... |
 
-#### Character Set Details
 
-**Allowed Characters in method-name:**
-```
-a b c d e f g h i j k l m n o p q r s t u v w x y z 0 1 2 3 4 5 6 7 8 9
-```
-- ✅ Lowercase letters (a-z)
-- ✅ Digits (0-9)
-- ❌ Uppercase letters (NOT allowed)
-- ❌ Special characters (NOT allowed)
-
+###### Character Set Details
+**Allowed Characters in method-name:** Lowercase letters and digits are allowed, but uppercase and special characters are not allowed.
 **Allowed Characters in method-specific-id:**
-```
-A B C D E F G H I J K L M N O P Q R S T U V W X Y Z (uppercase)
-a b c d e f g h i j k l m n o p q r s t u v w x y z (lowercase)
-0 1 2 3 4 5 6 7 8 9 (digits)
-. - _ (special characters)
-% XX (percent-encoded, where XX is hexadecimal)
-: (colon, for namespace separation)
-```
-
-#### Real-World Examples by Method
-
+###### Real-World Examples by Method
 | DID Method | Example DID | Explanation |
-|------------|-------------|-------------|
-| `did:web` | `did:web:example.com:user:alice` | Identity anchored to domain `example.com` |
-| `did:ethr` | `did:ethr:0xE6Fe788d8ca214A080b0f6aC7F48480b2AEfa9a6` | Identity on Ethereum blockchain |
-| `did:key` | `did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK` | Self-contained key-based identity |
-| `did:ion` | `did:ion:EiAnKD8-jfdd0MDcZUjAbRgaThBrMxPTFOxcnfJhI7dKgA` | Bitcoin-anchored identity (ION) |
-| `did:sov` | `did:sov:WRfXPg8dantKVubE3HX8pw` | Identity on Sovrin/Hyperledger Indy |
-| `did:peer` | `did:peer:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK` | Peer-to-peer private identity |
-| `did:jwk` | `did:jwk:eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2In0` | JSON Web Key based identity |
+| :--- | :--- | :--- |
+| did:web | did:web:example.com:user:alice | Identity anchored to domain example.com |
+| did:ethr | did:ethr:0xE6Fe... | Identity on Ethereum blockchain |
+| did:key | did:key:z6Mk... | Self-contained key-based identity |
+| did:ion | did:ion:EiAnKD... | Bitcoin-anchored identity (ION) |
+| did:sov | did:sov:WRfXP... | Identity on Sovrin/Hyperledger Indy |
+| did:peer | did:peer:z6Mk... | Peer-to-peer private identity |
+| did:jwk | did:jwk:eyJr... | JSON Web Key based identity |
 
-#### DID Methods Explained
 
-##### did:web - DNS-Based Decentralized Identifier
-
-**Overview:** `did:web` uses existing web infrastructure (DNS + HTTPS) to host DID documents, making it one of the simplest DID methods to implement.
-
+###### DID Methods Explained
+###### did:web - DNS-Based Decentralized Identifier
+**Overview:** did:web uses existing web infrastructure (DNS + HTTPS) to host DID documents.
 **How It Works:**
-```
-did:web:example.com:user:alice
-    │       │         │
-    │       │         └── Path: /user/alice/did.json
-    │       └──────────── Domain: example.com
-    └──────────────────── Method: web
-```
-
 **Resolution Process:**
-1. Parse the DID to extract domain and path
-2. Construct HTTPS URL: `https://example.com/user/alice/did.json`
-3. Fetch DID document via HTTPS with TLS verification
-4. Return the JSON document
-
+1. Parse the DID to extract domain and path.
+2. Construct HTTPS URL.
+3. Fetch DID document via HTTPS with TLS verification.
+4. Return the JSON document.
 **DID Document Storage:**
-- Stored at: `https://<domain>/.well-known/did.json` (for domain-level DID)
-- Or: `https://<domain>/<path>/did.json` (for path-based DIDs)
-
+* Stored at: https://<domain>/.well-known/did.json (for domain-level DID) or https://<domain>/<path>/did.json (for path-based DIDs).
 **Example:**
-```
-DID:  did:web:example.com
-URL:  https://example.com/.well-known/did.json
-
-DID:  did:web:example.com:user:alice
-URL:  https://example.com/user/alice/did.json
-```
-
 | Aspect | Description |
-|--------|-------------|
+| :--- | :--- |
 | **Decentralization** | ⚠️ Low - Depends on DNS (centralized) and web server |
 | **Cost** | ✅ Free - No blockchain fees |
 | **Setup** | ✅ Easy - Just host a JSON file |
@@ -2021,39 +305,20 @@ URL:  https://example.com/user/alice/did.json
 | **Best For** | Organizations, enterprises, domain-based identity |
 | **Limitations** | Depends on domain ownership; DNS can be seized |
 
----
 
-##### did:ethr - Ethereum-Based Decentralized Identifier
-
-**Overview:** `did:ethr` leverages Ethereum blockchain and smart contracts (ERC-1056) for identity management with no on-chain registration required.
-
+###### did:ethr - Ethereum-Based Decentralized Identifier
+**Overview:** did:ethr leverages Ethereum blockchain and smart contracts (ERC-1056) for identity management.
 **How It Works:**
-```
-did:ethr:0xE6Fe788d8ca214A080b0f6aC7F48480b2AEfa9a6
-    │      │
-    │      └── Ethereum address (identifier)
-    └───────── Method: ethr
-```
-
-**Key Features:**
-- Uses ERC-1056 smart contract for identity management
-- Any Ethereum address or secp256k1 public key can be a DID
-- No transaction needed to create a DID (implicit registration)
-- Supports key rotation, delegation, and service endpoints
-
+**Key Features:** Uses ERC-1056 smart contract, any Ethereum address can be a DID implicitly, supports key rotation and delegation.
 **Resolution Process:**
-1. Extract Ethereum address from DID
-2. Query ERC-1056 smart contract for identity owner
-3. Fetch events (DIDOwnerChanged, DIDDelegateChanged, DIDAttributeChanged)
-4. Build DID document from contract state and events
-
+1. Extract Ethereum address from DID.
+2. Query ERC-1056 smart contract for identity owner.
+3. Fetch events (DIDOwnerChanged, etc.).
+4. Build DID document from contract state and events.
 **Network Support:**
-- Ethereum Mainnet (default): `did:ethr:0x...` or `did:ethr:mainnet:0x...`
-- Goerli Testnet: `did:ethr:goerli:0x...`
-- Other EVM chains: `did:ethr:0x1:0x...` (chain ID)
-
+* Ethereum Mainnet, Goerli Testnet, Other EVM chains.
 | Aspect | Description |
-|--------|-------------|
+| :--- | :--- |
 | **Decentralization** | ✅ High - Uses Ethereum blockchain |
 | **Cost** | ⚠️ Gas fees for updates (free to create) |
 | **Setup** | ✅ Easy - Just generate an Ethereum key pair |
@@ -2062,42 +327,18 @@ did:ethr:0xE6Fe788d8ca214A080b0f6aC7F48480b2AEfa9a6
 | **Best For** | Web3 apps, DeFi, Ethereum ecosystem |
 | **Limitations** | Gas fees for updates; depends on Ethereum |
 
----
 
-##### did:key - Self-Contained Cryptographic Identifier
-
-**Overview:** `did:key` is a purely generative DID method where the DID and DID document are derived directly from a cryptographic public key. No registry or network required.
-
+###### did:key - Self-Contained Cryptographic Identifier
+**Overview:** did:key is a purely generative DID method derived directly from a cryptographic public key.
 **How It Works:**
-```
-did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK
-    │     │
-    │     └── Multibase-encoded public key
-    └──────── Method: key
-```
-
-**Generation Process:**
-1. Generate a cryptographic key pair (e.g., Ed25519)
-2. Encode public key with multicodec prefix
-3. Encode result with Multibase (base58-btc)
-4. DID = `did:key:<encoded-value>`
-
-**Supported Key Types:**
-| Key Type | Prefix | Example DID Start |
-|----------|--------|-------------------|
-| Ed25519 | `z6Mk` | `did:key:z6Mk...` |
-| X25519 | `z6LS` | `did:key:z6LS...` |
-| Secp256k1 | `zQ3s` | `did:key:zQ3s...` |
-| P-256 | `zDn` | `did:key:zDn...` |
-| P-384 | `z82` | `did:key:z82...` |
-
+**Generation Process:** Generate key pair, encode public key with multicodec prefix, encode result with Multibase, DID = did:key:<encoded-value>.
+**Supported Key Types:** Ed25519, X25519, Secp256k1, P-256, P-384.
 **Resolution Process:**
-1. Decode the multibase-encoded value
-2. Extract key type from multicodec prefix
-3. Generate DID document from the public key
-
+1. Decode the multibase-encoded value.
+2. Extract key type from multicodec prefix.
+3. Generate DID document from the public key.
 | Aspect | Description |
-|--------|-------------|
+| :--- | :--- |
 | **Decentralization** | ✅ Highest - No registry needed |
 | **Cost** | ✅ Free - No network calls |
 | **Setup** | ✅ Simplest - Just generate a key |
@@ -2106,55 +347,19 @@ did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK
 | **Best For** | Ephemeral identities, offline use, testing, temporary credentials |
 | **Limitations** | Cannot update or deactivate; compromised keys are permanent |
 
----
 
-##### did:ion - Bitcoin-Anchored Scalable Identifier
-
-**Overview:** `did:ion` (Identity Overlay Network) is a Layer 2 network built on Bitcoin using the Sidetree protocol, designed for high scalability without requiring special tokens.
-
+###### did:ion - Bitcoin-Anchored Scalable Identifier
+**Overview:** Layer 2 network built on Bitcoin using the Sidetree protocol for high scalability.
 **How It Works:**
-```
-did:ion:EiAnKD8-jfdd0MDcZUjAbRgaThBrMxPTFOxcnfJhI7dKgA
-    │     │
-    │     └── Sidetree-encoded identifier
-    └──────── Method: ion
-```
-
 **Architecture:**
-```
-┌─────────────────────────────────────────────────────┐
-│                    ION Network                       │
-│  ┌─────────────────────────────────────────────┐    │
-│  │           Sidetree Protocol                  │    │
-│  │  • Batch DID operations                      │    │
-│  │  • Content-addressable storage (IPFS)        │    │
-│  │  • Deterministic resolution                  │    │
-│  └─────────────────────────────────────────────┘    │
-│                        ▲                             │
-│                        │ Anchoring                   │
-│  ┌─────────────────────┴───────────────────────┐    │
-│  │           Bitcoin Blockchain                 │    │
-│  │  • Immutable timestamping                    │    │
-│  │  • Proof of existence                        │    │
-│  └─────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────┘
-```
-
-**Key Features:**
-- **Scalable:** Thousands of DID operations per second
-- **No token required:** Uses Bitcoin only for anchoring
-- **Batch operations:** Multiple DIDs in single Bitcoin transaction
-- **Censorship resistant:** DIDs can only be deactivated by owners
-
+**Key Features:** Scalable, no token required, batch operations, censorship resistant.
 **Resolution Process:**
-1. Decode the Sidetree identifier
-2. Find anchoring transaction on Bitcoin
-3. Fetch DID operation data from IPFS/content-addressable storage
-4. Apply operations in chronological order
-5. Return resulting DID document
-
+1. Decode Sidetree identifier.
+2. Find anchoring transaction on Bitcoin.
+3. Fetch DID operation data from IPFS.
+4. Apply operations in chronological order and return resulting DID document.
 | Aspect | Description |
-|--------|-------------|
+| :--- | :--- |
 | **Decentralization** | ✅ Very High - Bitcoin + distributed storage |
 | **Cost** | ⚠️ Low - Batch operations reduce Bitcoin fees |
 | **Setup** | ⚠️ Moderate - Requires ION node or resolver |
@@ -2163,33 +368,14 @@ did:ion:EiAnKD8-jfdd0MDcZUjAbRgaThBrMxPTFOxcnfJhI7dKgA
 | **Best For** | Large-scale public identity, enterprise SSI |
 | **Limitations** | More complex setup; depends on Bitcoin |
 
----
 
-##### did:sov - Hyperledger Indy-Based Identifier
-
-**Overview:** `did:sov` operates on Hyperledger Indy, a permissioned distributed ledger specifically designed for decentralized identity with built-in privacy features.
-
+###### did:sov - Hyperledger Indy-Based Identifier
+**Overview:** operates on Hyperledger Indy, a permissioned distributed ledger designed for decentralized identity.
 **How It Works:**
-```
-did:sov:WRfXPg8dantKVubE3HX8pw
-    │     │
-    │     └── Indy network identifier
-    └──────── Method: sov
-```
-
-**Key Features:**
-- Built-in governance framework
-- Privacy-preserving by design
-- Supports anonymous credentials (AnonCreds)
-- Purpose-built for identity use cases
-
-**Resolution Process:**
-1. Parse the DID
-2. Query the Indy ledger for the NYM transaction
-3. Build DID document from ledger state
-
+**Key Features:** Built-in governance, privacy-preserving, supports anonymous credentials.
+**Resolution Process:** Parse the DID, query the Indy ledger for the NYM transaction, build DID document.
 | Aspect | Description |
-|--------|-------------|
+| :--- | :--- |
 | **Decentralization** | ⚠️ Medium - Permissioned network |
 | **Cost** | ⚠️ Transaction fees (low) |
 | **Setup** | ⚠️ Moderate - Requires Indy network access |
@@ -2198,28 +384,13 @@ did:sov:WRfXPg8dantKVubE3HX8pw
 | **Best For** | Enterprise identity, regulated industries, governments |
 | **Limitations** | Permissioned network; less decentralized than public chains |
 
----
 
-##### did:peer - Private Peer-to-Peer Identifier
-
-**Overview:** `did:peer` is designed for private, pairwise relationships where DIDs don't need to be registered on any network. Perfect for direct peer-to-peer interactions.
-
+###### did:peer - Private Peer-to-Peer Identifier
+**Overview:** Designed for private, pairwise relationships where DIDs don't need to be registered on any network.
 **How It Works:**
-```
-did:peer:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK
-    │       │
-    │       └── Encoded genesis document
-    └────────── Method: peer
-```
-
-**Key Features:**
-- No registry required
-- Created and exchanged directly between peers
-- Supports key rotation through versioning
-- Ideal for private relationships
-
+**Key Features:** No registry required, created and exchanged directly between peers, supports key rotation.
 | Aspect | Description |
-|--------|-------------|
+| :--- | :--- |
 | **Decentralization** | ✅ Very High - No registry |
 | **Cost** | ✅ Free - No network calls |
 | **Setup** | ✅ Easy - Generate and share |
@@ -2228,27 +399,13 @@ did:peer:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK
 | **Best For** | Private relationships, agent-to-agent communication |
 | **Limitations** | Not resolvable publicly; requires secure exchange |
 
----
 
-##### did:jwk - JSON Web Key Identifier
-
-**Overview:** `did:jwk` encodes a JSON Web Key (JWK) directly in the DID, creating a self-contained identifier similar to `did:key` but using the standard JWK format.
-
+###### did:jwk - JSON Web Key Identifier
+**Overview:** encodes a JSON Web Key (JWK) directly in the DID.
 **How It Works:**
-```
-did:jwk:eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2In0
-    │     │
-    │     └── Base64url-encoded JWK
-    └──────── Method: jwk
-```
-
-**Resolution Process:**
-1. Decode the base64url-encoded value
-2. Parse as JWK (JSON Web Key)
-3. Generate DID document from JWK
-
+**Resolution Process:** Decode base64url-encoded value, parse as JWK, generate DID document.
 | Aspect | Description |
-|--------|-------------|
+| :--- | :--- |
 | **Decentralization** | ✅ High - No registry needed |
 | **Cost** | ✅ Free - No network calls |
 | **Setup** | ✅ Easy - Encode a JWK |
@@ -2257,12 +414,10 @@ did:jwk:eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2In0
 | **Best For** | Quick prototypes, testing, JWT/JWK ecosystems |
 | **Limitations** | Cannot update or deactivate; longer DIDs than did:key |
 
----
 
-#### Quick Comparison Table
-
+###### Quick Comparison Table
 | Method | Registry | Key Rotation | Deactivation | Cost | Best Use Case |
-|--------|----------|--------------|--------------|------|---------------|
+| :--- | :--- | :--- | :--- | :--- | :--- |
 | **did:web** | DNS/HTTPS | ✅ | ✅ | Free | Organizational identity |
 | **did:ethr** | Ethereum | ✅ | ✅ | Gas fees | Web3, DeFi |
 | **did:key** | None | ❌ | ❌ | Free | Ephemeral, offline |
@@ -2271,1216 +426,371 @@ did:jwk:eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2In0
 | **did:peer** | None | ✅ | ✅ | Free | Private P2P |
 | **did:jwk** | None | ❌ | ❌ | Free | Testing, JWK ecosystem |
 
-#### DID URL Syntax
 
-A DID URL extends the basic DID with path, query, and fragment components:
-
-```abnf
-did-url = did path-abempty [ "?" query ] [ "#" fragment ]
-```
-
-```
-did:example:123456/path/to/resource?versionId=1#public-key-1
-│              │                │           │
-│              │                │           └── Fragment: identifies sub-resource
-│              │                └────────────── Query: parameters
-│              └─────────────────────────────── Path: resource location
-└────────────────────────────────────────────── Base DID
-```
-
+###### DID URL Syntax
 **DID URL Components:**
-
 | Component | Symbol | Purpose | Example |
-|-----------|--------|---------|---------|
-| Path | `/` | Navigate to resources | `did:example:123/credentials` |
-| Query | `?` | Pass parameters | `did:example:123?versionId=1` |
-| Fragment | `#` | Reference sub-resource | `did:example:123#key-1` |
+| :--- | :--- | :--- | :--- |
+| Path | / | Navigate to resources | did:example:123/credentials |
+| Query | ? | Pass parameters | did:example:123?versionId=1 |
+| Fragment | # | Reference sub-resource | did:example:123#key-1 |
 
-#### Valid vs Invalid DIDs
 
+###### Valid vs Invalid DIDs
 | DID | Valid? | Reason |
-|-----|--------|--------|
-| `did:web:example.com` | ✅ Valid | Correct format |
-| `did:ethr:0x123abc` | ✅ Valid | Lowercase method name |
-| `did:Web:example.com` | ❌ Invalid | Uppercase in method name |
-| `did:web:` | ❌ Invalid | Missing method-specific-id |
-| `did::123` | ❌ Invalid | Empty method name |
-| `did:web:example.com#key-1` | ✅ Valid | DID URL with fragment |
-| `did:example:123:456:789` | ✅ Valid | Multiple colons allowed in method-specific-id |
-| `did:my-method:abc123` | ✅ Valid | Method name with hyphen |
-| `did:my_method:abc123` | ✅ Valid | Method name with underscore |
+| :--- | :--- | :--- |
+| did:web:example.com | ✅ Valid | Correct format |
+| did:ethr:0x123abc | ✅ Valid | Lowercase method name |
+| did:Web:example.com | ❌ Invalid | Uppercase in method name |
+| did:web: | ❌ Invalid | Missing method-specific-id |
+| did::123 | ❌ Invalid | Empty method name |
+| did:web:example.com#key-1 | ✅ Valid | DID URL with fragment |
+| did:example:123:456:789 | ✅ Valid | Multiple colons allowed in method-specific-id |
+| did:my-method:abc123 | ✅ Valid | Method name with hyphen |
+| did:my_method:abc123 | ✅ Valid | Method name with underscore |
 
-#### Percent-Encoding
 
-Special characters must be percent-encoded:
-
+###### Percent-Encoding
 | Character | Encoded | Example |
-|-----------|---------|---------|
-| Space | `%20` | `did:web:example.com:user%20name` |
-| `#` (in id) | `%23` | `did:example:tag%23value` |
-| `?` (in id) | `%3F` | `did:example:query%3Fparam` |
+| :--- | :--- | :--- |
+| Space | %20 | did:web:example.com:user%20name |
+| # (in id) | %23 | did:example:tag%23value |
+| ? (in id) | %3F | did:example:query%3Fparam |
 
-#### Namespace Hierarchy in method-specific-id
 
-The colon `:` within method-specific-id creates hierarchical namespaces:
-
-```
-did:example:namespace1:namespace2:identifier
-             │          │          │
-             │          │          └── Final identifier
-             │          └────────────── Sub-namespace
-             └───────────────────────── Root namespace
-```
-
+###### Namespace Hierarchy in method-specific-id
 Example:
-```
-did:web:example.com:users:alice
-         │         │     │
-         │         │     └── User identifier
-         │         └──────── Users namespace
-         └────────────────── Domain
-```
-
-#### Case Sensitivity
-
-- **Method name**: Case-insensitive (but MUST be lowercase)
-- **Method-specific-id**: Case-sensitive (depends on method specification)
-
-```
-did:web:example.com  ✅ Valid
-did:WEB:example.com  ❌ Invalid (uppercase method)
-did:web:Example.com  ✅ Valid (case-sensitive in method-specific-id)
-```
-
-### W3C Status
-
-DID 1.0 was approved as an official W3C Recommendation in June 2022, making it an open web standard.
+###### Case Sensitivity
+Method name is case-insensitive (but MUST be lowercase), and Method-specific-id is case-sensitive.
+##### W3C Status
+DID 1.0 was approved as an official W3C Recommendation in June 2022.
 
 ---
 
-## 2. Core Architecture
+### 5. Core Architecture
+##### 2.1 Architecture Overview
+##### 2.2 Core Components Explained
+###### DID Subject (被标识主体)
+**Definition:** The entity that the DID identifies (a person, organization, device, abstract entity, etc.).
+**Key Points:** The DID subject is what the DID refers to, does not necessarily control the DID, and can be the same as the controller.
 
-### 2.1 Architecture Overview
-
-The DID architecture consists of several interconnected components that work together to enable decentralized identity management. Here's a comprehensive view:
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        DID Ecosystem Architecture                            │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│    ┌──────────────┐                          ┌──────────────────────┐       │
-│    │ DID Subject  │◄────── identifies ──────│         DID          │       │
-│    │  (Entity)    │                          │  did:example:123     │       │
-│    └──────────────┘                          └──────────┬───────────┘       │
-│           │                                            │                    │
-│           │                                            │ resolves to        │
-│           │                                            ▼                    │
-│           │                               ┌──────────────────────┐           │
-│           │                               │    DID Document      │           │
-│           │                               │  ┌────────────────┐  │           │
-│           │                               │  │ id             │  │           │
-│           │                               │  │ controller     │  │           │
-│           │                               │  │ verification   │  │           │
-│           │                               │  │ authentication │  │           │
-│           │                               │  │ services       │  │           │
-│           │                               │  └────────────────┘  │           │
-│           │                               └──────────┬───────────┘           │
-│           │                                          │                        │
-│           │                                          │ stored in              │
-│           │                                          ▼                        │
-│    ┌──────┴─────────┐                   ┌──────────────────────┐             │
-│    │ DID Controller │◄── controls ──────│ Verifiable Data      │             │
-│    │  (Entity)      │                   │ Registry             │             │
-│    └────────────────┘                   │ (Blockchain/DB/etc)  │             │
-│                                         └──────────────────────┘             │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-### 2.2 Core Components Explained
-
-#### DID Subject (被标识主体)
-
-**Definition:** The entity that the DID identifies. This can be:
-- A person (individual)
-- An organization
-- A device (IoT, computer)
-- An abstract entity (concept, data model)
-- Any thing that needs to be identified
-
-**Key Points:**
-- The DID subject is what the DID refers to
-- The subject does NOT control the DID (that's the controller)
-- In many cases, the subject and controller are the same entity
-- Example: A person's digital identity, a company's organizational identity
-
-```
-DID Subject Examples:
-┌─────────────────────────────────────────────────────────┐
-│ Subject Type        │ Example DID                      │
-├─────────────────────┼──────────────────────────────────┤
-│ Person              │ did:web:alice.example.com        │
-│ Organization        │ did:web:company.com              │
-│ IoT Device          │ did:ion:EiAnKD8...device123      │
-│ Smart Contract      │ did:ethr:0x123abc...             │
-│ Data Model          │ did:example:dataset456           │
-└─────────────────────────────────────────────────────────┘
-```
-
----
-
-#### DID Controller (DID 控制者)
-
+###### DID Controller (DID 控制者)
 **Definition:** The entity that has the authority to make changes to the DID document.
+**Key Points:** Controls the DID document, owns private keys, can be the same as the subject, and a DID can have multiple controllers.
 
-**Key Points:**
-- Controls the DID document (update, delete operations)
-- Owns the private keys for the DID
-- Can be the same as the DID subject (self-controlled)
-- Can be different (guardianship, organizational control)
-- A DID can have multiple controllers
-
-```
-Controller Relationships:
-┌─────────────────────────────────────────────────────────┐
-│                                                         │
-│  Case 1: Self-Controlled (Subject = Controller)        │
-│  ┌─────────────┐                                       │
-│  │   Person    │── owns ──▶ DID ◀── controls ──┐      │
-│  │  (Alice)    │                              │      │
-│  └─────────────┘                              │      │
-│                                      (same entity)    │
-│                                                         │
-│  Case 2: Guardianship (Subject ≠ Controller)           │
-│  ┌─────────────┐                              │        │
-│  │   Parent    │── controls ──▶ DID ◀── identifies    │
-│  │             │                              │        │
-│  └─────────────┘                              │        │
-│                                      ┌───────┴───┐    │
-│                                      │   Child   │    │
-│                                      │ (Subject) │    │
-│                                      └───────────┘    │
-│                                                         │
-│  Case 3: Multi-Controller                              │
-│  ┌─────────────┐        ┌─────────────┐               │
-│  │ Controller 1│───────▶│     DID     │◀──────┐       │
-│  └─────────────┘        └─────────────┘       │       │
-│                                 │              │       │
-│                         ┌───────┴───────┐      │       │
-│                         │   Subject     │      │       │
-│                         │ (Organization)│      │       │
-│                         └───────────────┘      │       │
-│  ┌─────────────┐                               │       │
-│  │ Controller 2│───────────────────────────────┘       │
-│  └─────────────┘                                       │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
-```
-
----
-
-#### DID Document (DID 文档)
-
+###### DID Document (DID 文档)
 **Definition:** A JSON-LD document that contains information associated with a DID, including cryptographic material and service endpoints.
-
 **Structure:**
 
-```json
-{
-  "@context": "https://www.w3.org/ns/did/v1.1",
-  "id": "did:example:123456789abcdefghi",
-  "controller": "did:example:123456789abcdefghi",
-  "verificationMethod": [{
-    "id": "did:example:123456789abcdefghi#keys-1",
-    "type": "Multikey",
-    "controller": "did:example:123456789abcdefghi",
-    "publicKeyMultibase": "z6MkmM42vxfqZQsv4ehtTjFFxQ4sQKS2w6WR7emozFAn5cxu"
-  }],
-  "authentication": ["did:example:123456789abcdefghi#keys-1"],
-  "assertionMethod": ["did:example:123456789abcdefghi#keys-1"],
-  "keyAgreement": [{
-    "id": "did:example:123456789abcdefghi#keys-2",
-    "type": "X25519KeyAgreementKey2019",
-    "controller": "did:example:123456789abcdefghi",
-    "publicKeyMultibase": "z6LSj72tK8brWgZja8NLRwPigth2T9QRiG1uH9oKZuKjdh9p"
-  }],
-  "service": [{
-    "id": "did:example:123456789abcdefghi#hub",
-    "type": "IdentityHub",
-    "serviceEndpoint": "https://hub.example.com/"
-  }]
-}
-```
-
----
-
-#### Verifiable Data Registry (可验证数据注册表)
-
-**Definition:** A system (blockchain, distributed database, etc.) where DIDs and DID documents are stored and can be resolved from.
-
+###### Verifiable Data Registry (可验证数据注册表)
+**Definition:** A system where DIDs and DID documents are stored and can be resolved from.
 **Types of Registries:**
-
 | Registry Type | Examples | Characteristics |
-|---------------|----------|-----------------|
+| :--- | :--- | :--- |
 | **Blockchain** | Bitcoin, Ethereum, Hyperledger Indy | Immutable, decentralized, consensus-based |
 | **Distributed Database** | IPFS, Distributed Hash Tables | Content-addressable, peer-to-peer |
 | **Web Infrastructure** | DNS + HTTPS (did:web) | Existing infrastructure, centralized DNS |
 | **Self-Contained** | None (did:key, did:jwk) | No registry, derived from key |
 
-```
-Registry Architecture Examples:
-┌────────────────────────────────────────────────────────────────────┐
-│                                                                    │
-│  Blockchain-Based (did:ethr, did:ion, did:sov)                    │
-│  ┌──────────────────────────────────────────────────────────┐     │
-│  │                    Blockchain Network                     │     │
-│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐ │     │
-│  │  │  Node 1  │  │  Node 2  │  │  Node 3  │  │  Node N  │ │     │
-│  │  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘ │     │
-│  │       │             │             │             │        │     │
-│  │       └─────────────┴──────┬──────┴─────────────┘        │     │
-│  │                            │                             │     │
-│  │                    ┌───────┴───────┐                     │     │
-│  │                    │ DID Registry  │                     │     │
-│  │                    │   (on-chain)  │                     │     │
-│  │                    └───────────────┘                     │     │
-│  └──────────────────────────────────────────────────────────┘     │
-│                                                                    │
-│  Web-Based (did:web)                                              │
-│  ┌──────────────────────────────────────────────────────────┐     │
-│  │     DNS        ──────▶    Web Server                      │     │
-│  │  ┌─────────┐           ┌────────────────────┐            │     │
-│  │  │.com DNS │           │ example.com/did.json│            │     │
-│  │  └─────────┘           └────────────────────┘            │     │
-│  └──────────────────────────────────────────────────────────┘     │
-│                                                                    │
-│  Self-Contained (did:key)                                         │
-│  ┌──────────────────────────────────────────────────────────┐     │
-│  │                    No Registry Needed                     │     │
-│  │                                                          │     │
-│  │    DID ──────────────▶ DID Document                      │     │
-│  │    (derived from key)  (generated from key)              │     │
-│  └──────────────────────────────────────────────────────────┘     │
-│                                                                    │
-└────────────────────────────────────────────────────────────────────┘
-```
 
----
-
-### 2.3 DID Document Properties Deep Dive
-
-#### Property Categories
-
-```
-DID Document Properties
-├── Core Properties
-│   ├── id (required) ──────────── The DID itself
-│   ├── controller (optional) ──── Who can modify this document
-│   └── alsoKnownAs (optional) ─── Other identifiers for this subject
-│
-├── Verification Methods
-│   └── verificationMethod ─────── Cryptographic keys
-│
-├── Verification Relationships
-│   ├── authentication ─────────── Keys for proving control
-│   ├── assertionMethod ────────── Keys for issuing credentials
-│   ├── keyAgreement ───────────── Keys for encryption/key exchange
-│   ├── capabilityInvocation ───── Keys for invoking capabilities
-│   └── capabilityDelegation ───── Keys for delegating capabilities
-│
-└── Services
-    └── service ────────────────── Service endpoints
-```
-
-#### Verification Methods Explained
-
+##### 2.3 DID Document Properties Deep Dive
+###### Property Categories
+###### Verification Methods Explained
 **Definition:** Cryptographic material (public keys) that can be used to verify proofs.
-
-```json
-{
-  "verificationMethod": [{
-    "id": "did:example:123#key-1",
-    "type": "Multikey",
-    "controller": "did:example:123",
-    "publicKeyMultibase": "z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK"
-  }]
-}
-```
-
 **Verification Method Properties:**
-
 | Property | Required | Description |
-|----------|----------|-------------|
-| `id` | Yes | Unique identifier (DID URL) |
-| `type` | Yes | Key type (Multikey, JsonWebKey2020, etc.) |
-| `controller` | Yes | DID that controls this key |
-| `publicKeyMultibase` | No | Multibase-encoded public key |
-| `publicKeyJwk` | No | JWK format public key |
+| :--- | :--- | :--- |
+| id | Yes | Unique identifier (DID URL) |
+| type | Yes | Key type (Multikey, JsonWebKey2020, etc.) |
+| controller | Yes | DID that controls this key |
+| publicKeyMultibase | No | Multibase-encoded public key |
+| publicKeyJwk | No | JWK format public key |
+
 
 **Common Verification Method Types:**
-
 | Type | Algorithm | Use Case |
-|------|-----------|----------|
-| `Multikey` | Ed25519, secp256k1, etc. | General purpose |
-| `JsonWebKey2020` | RSA, EC (P-256, etc.) | JWT/JWS compatibility |
-| `Ed25519VerificationKey2020` | Ed25519 | Digital signatures |
-| `EcdsaSecp256k1VerificationKey2019` | secp256k1 | Ethereum, Bitcoin |
+| :--- | :--- | :--- |
+| Multikey | Ed25519, secp256k1, etc. | General purpose |
+| JsonWebKey2020 | RSA, EC (P-256, etc.) | JWT/JWS compatibility |
+| Ed25519VerificationKey2020 | Ed25519 | Digital signatures |
+| EcdsaSecp256k1VerificationKey2019 | secp256k1 | Ethereum, Bitcoin |
 
----
 
-#### Verification Relationships Explained
-
+###### Verification Relationships Explained
 **Definition:** Relationships between a DID subject and its verification methods, defining the purpose of each key.
-
-```
-Verification Relationships:
-┌─────────────────────────────────────────────────────────────────────┐
-│                                                                     │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │                    DID Document                              │   │
-│  │                                                              │   │
-│  │  verificationMethod:                                         │   │
-│  │    ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐      │   │
-│  │    │  Key 1  │  │  Key 2  │  │  Key 3  │  │  Key 4  │      │   │
-│  │    └────┬────┘  └────┬────┘  └────┬────┘  └────┬────┘      │   │
-│  │         │            │            │            │            │   │
-│  └─────────┼────────────┼────────────┼────────────┼────────────┘   │
-│            │            │            │            │                 │
-│            ▼            ▼            ▼            ▼                 │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │ authentication ────────────▶ Key 1, Key 2                   │   │
-│  │ assertionMethod ───────────▶ Key 1                          │   │
-│  │ keyAgreement ──────────────▶ Key 3                          │   │
-│  │ capabilityInvocation ──────▶ Key 2                          │   │
-│  │ capabilityDelegation ──────▶ Key 4                          │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
 **Detailed Purpose of Each Relationship:**
-
 | Relationship | Purpose | Example Use Case |
-|--------------|---------|------------------|
-| `authentication` | Prove control of DID | Login, access control |
-| `assertionMethod` | Issue Verifiable Credentials | University issuing diplomas |
-| `keyAgreement` | Encrypt/decrypt messages | Secure messaging, key exchange |
-| `capabilityInvocation` | Authorize actions | Smart contract calls, API access |
-| `capabilityDelegation` | Delegate authority | Authorizing another party to act |
+| :--- | :--- | :--- |
+| authentication | Prove control of DID | Login, access control |
+| assertionMethod | Issue Verifiable Credentials | University issuing diplomas |
+| keyAgreement | Encrypt/decrypt messages | Secure messaging, key exchange |
+| capabilityInvocation | Authorize actions | Smart contract calls, API access |
+| capabilityDelegation | Delegate authority | Authorizing another party to act |
 
----
 
-#### Service Endpoints Explained
-
+###### Service Endpoints Explained
 **Definition:** URLs where services related to the DID subject can be accessed.
-
-```json
-{
-  "service": [{
-    "id": "did:example:123#messaging",
-    "type": "DIDCommMessaging",
-    "serviceEndpoint": "https://example.com/message",
-    "accept": ["didcomm/v2"],
-    "routingKeys": ["z6MkhaXg..."]
-  }, {
-    "id": "did:example:123#hub",
-    "type": "IdentityHub",
-    "serviceEndpoint": ["https://hub1.example.com/", "https://hub2.example.com/"]
-  }]
-}
-```
-
 **Common Service Types:**
-
 | Service Type | Purpose |
-|--------------|---------|
-| `DIDCommMessaging` | Secure peer-to-peer messaging |
-| `IdentityHub` | Personal data storage |
-| `LinkedDomains` | Linked websites/domains |
-| `VerifiableCredentialService` | VC issuance/verification |
+| :--- | :--- |
+| DIDCommMessaging | Secure peer-to-peer messaging |
+| IdentityHub | Personal data storage |
+| LinkedDomains | Linked websites/domains |
+| VerifiableCredentialService | VC issuance/verification |
 
----
 
-### 2.4 How Components Work Together
+##### 2.4 How Components Work Together
+###### Complete DID Lifecycle Flow
+###### Authentication Flow Example
 
-#### Complete DID Lifecycle Flow
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        DID Lifecycle                                         │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  1. CREATE                                                                  │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                     │
-│  │ Generate    │───▶│ Create DID  │───▶│ Store DID   │                     │
-│  │ Key Pair    │    │ Document    │    │ Document    │                     │
-│  └─────────────┘    └─────────────┘    └──────┬──────┘                     │
-│                                                │                            │
-│                                                ▼                            │
-│                                       ┌─────────────────┐                   │
-│                                       │ Verifiable Data │                   │
-│                                       │    Registry     │                   │
-│                                       └─────────────────┘                   │
-│                                                                             │
-│  2. RESOLVE (Read)                                                          │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                     │
-│  │ Query DID   │───▶│ Lookup in   │───▶│ Return DID  │                     │
-│  │             │    │ Registry    │    │ Document    │                     │
-│  └─────────────┘    └─────────────┘    └─────────────┘                     │
-│                                                                             │
-│  3. UPDATE                                                                  │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                     │
-│  │ Authenticate│───▶│ Modify DID  │───▶│ Store New   │                     │
-│  │ (prove ctrl)│    │ Document    │    │ Version     │                     │
-│  └─────────────┘    └─────────────┘    └─────────────┘                     │
-│                                                                             │
-│  4. DEACTIVATE                                                              │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                     │
-│  │ Authenticate│───▶│ Mark DID as │───▶│ DID is No   │                     │
-│  │ (prove ctrl)│    │ Deactivated │    │ Longer Valid│                     │
-│  └─────────────┘    └─────────────┘    └─────────────┘                     │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-#### Authentication Flow Example
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    DID Authentication Flow                                   │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  Alice (DID Controller)                Verifier (e.g., Website)            │
-│  ┌─────────────────┐                   ┌─────────────────┐                  │
-│  │                 │                   │                 │                  │
-│  │  did:web:alice  │                   │    Service      │                  │
-│  │  Private Key    │                   │                 │                  │
-│  │                 │                   │                 │                  │
-│  └────────┬────────┘                   └────────┬────────┘                  │
-│           │                                     │                           │
-│           │  1. Request Access                  │                           │
-│           │ ◀───────────────────────────────────│                           │
-│           │                                     │                           │
-│           │  2. Challenge (nonce)               │                           │
-│           │ ◀───────────────────────────────────│                           │
-│           │                                     │                           │
-│           │  3. Resolve did:web:alice           │                           │
-│           │ ────────────────────────────────────▶                           │
-│           │                                     │                           │
-│           │  4. Return DID Document             │                           │
-│           │ ◀───────────────────────────────────│                           │
-│           │    (contains public key)            │                           │
-│           │                                     │                           │
-│           │  5. Sign challenge with private key │                           │
-│           │ ────────────────────────────────────▶                           │
-│           │                                     │                           │
-│           │  6. Verify signature with public key│                           │
-│           │    ✅ Authentication Successful!    │                           │
-│           │                                     │                           │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-### 2.5 Key Components Summary
-
+##### 2.5 Key Components Summary
 | Component | Description | Required? |
-|-----------|-------------|-----------|
-| `id` | The DID itself (identifier) | ✅ Yes |
-| `controller` | Who controls the DID document | No (defaults to self) |
-| `alsoKnownAs` | Other identifiers for this subject | No |
-| `verificationMethod` | Cryptographic public keys | No |
-| `authentication` | Keys for proving DID control | No |
-| `assertionMethod` | Keys for issuing credentials | No |
-| `keyAgreement` | Keys for encryption | No |
-| `capabilityInvocation` | Keys for invoking actions | No |
-| `capabilityDelegation` | Keys for delegating authority | No |
-| `service` | Service endpoints | No |
+| :--- | :--- | :--- |
+| id | The DID itself (identifier) | ✅ Yes |
+| controller | Who controls the DID document | No (defaults to self) |
+| alsoKnownAs | Other identifiers for this subject | No |
+| verificationMethod | Cryptographic public keys | No |
+| authentication | Keys for proving DID control | No |
+| assertionMethod | Keys for issuing credentials | No |
+| keyAgreement | Keys for encryption | No |
+| capabilityInvocation | Keys for invoking actions | No |
+| capabilityDelegation | Keys for delegating authority | No |
+| service | Service endpoints | No |
+
 
 ---
 
-## 3. How DID Works: Technical Deep Dive
-
-### 3.1 DID Operations Overview
-
-DIDs support four fundamental operations (CRUD):
-
+### 6. How DID Works: Technical Deep Dive
+##### 3.1 DID Operations Overview
 | Operation | Description | Key Point |
-|-----------|-------------|-----------|
+| :--- | :--- | :--- |
 | **Create** | Generate a new DID and DID document | Establishes control over the identifier |
 | **Read/Resolve** | Retrieve the DID document for a DID | Enables verification and interaction |
 | **Update** | Modify the DID document | Supports key rotation, service changes |
 | **Deactivate** | Permanently revoke the DID | Prevents future use of the identifier |
 
-Each DID method defines how these operations are implemented on its specific infrastructure.
 
----
-
-### 3.2 DID Resolution Process
-
-DID Resolution is the process of obtaining a DID document for a given DID. This is one of four required operations (Create, Read/Resolve, Update, Deactivate).
-
-#### Resolution Function
-
-```
-resolve(did, resolutionOptions) →
-   « didResolutionMetadata, didDocument, didDocumentMetadata »
-```
-
-#### Detailed Resolution Algorithm
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         DID Resolution Algorithm                             │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │ INPUT                                                               │   │
-│  │   - did: The DID to resolve (string)                                │   │
-│  │   - resolutionOptions: Optional parameters (map)                    │   │
-│  │     * accept: Preferred media type                                  │   │
-│  │     * expandRelativeUrls: Whether to expand relative URLs           │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                        │
-│                                    ▼                                        │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │ STEP 1: Validate DID Syntax                                         │   │
-│  │   - Check if DID matches ABNF grammar                               │   │
-│  │   - Verify: did:<method>:<method-specific-id>                       │   │
-│  │   - If invalid → Return error (invalidDid)                          │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                        │
-│                                    ▼                                        │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │ STEP 2: Identify DID Method                                         │   │
-│  │   - Extract method name from DID                                    │   │
-│  │   - Check if resolver supports this method                          │   │
-│  │   - If not supported → Return error (methodNotSupported)            │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                        │
-│                                    ▼                                        │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │ STEP 3: Execute Method-Specific Resolution                          │   │
-│  │   - did:web → Fetch from HTTPS URL                                  │   │
-│  │   - did:ethr → Query Ethereum smart contract                        │   │
-│  │   - did:key → Generate from public key in DID                       │   │
-│  │   - did:ion → Query Bitcoin + IPFS                                  │   │
-│  │   - ... (method-specific logic)                                     │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                        │
-│                                    ▼                                        │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │ STEP 4: Process Resolution Result                                   │   │
-│  │   - If successful:                                                  │   │
-│  │     * Build didDocument                                             │   │
-│  │     * Build didDocumentMetadata                                     │   │
-│  │     * Build didResolutionMetadata                                   │   │
-│  │   - If failed:                                                      │   │
-│  │     * Return appropriate error                                      │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                        │
-│                                    ▼                                        │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │ OUTPUT                                                              │   │
-│  │   - didResolutionMetadata: Process metadata                         │   │
-│  │   - didDocument: The resolved document (or null)                    │   │
-│  │   - didDocumentMetadata: Document metadata                          │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-#### Resolution Options
-
+##### 3.2 DID Resolution Process
+###### Resolution Function
+###### Detailed Resolution Algorithm
+###### Resolution Options
 | Option | Type | Description | Default |
-|--------|------|-------------|---------|
-| `accept` | string | Preferred media type (e.g., `application/did+json`) | method-specific |
-| `expandRelativeUrls` | boolean | Convert relative URLs to absolute | `false` |
-| `versionId` | string | Request specific version | latest |
-| `versionTime` | datetime | Request version at timestamp | latest |
+| :--- | :--- | :--- | :--- |
+| accept | string | Preferred media type (e.g., application/did+json) | method-specific |
+| expandRelativeUrls | boolean | Convert relative URLs to absolute | false |
+| versionId | string | Request specific version | latest |
+| versionTime | datetime | Request version at timestamp | latest |
 
-#### Resolution Outputs
 
+###### Resolution Outputs
 | Output | Description |
-|--------|-------------|
-| `didResolutionMetadata` | Metadata about the resolution process (contentType, error, etc.) |
-| `didDocument` | The resolved DID document (or null if error) |
-| `didDocumentMetadata` | Metadata about the DID document (created, updated, versionId, deactivated, etc.) |
+| :--- | :--- |
+| didResolutionMetadata | Metadata about the resolution process |
+| didDocument | The resolved DID document |
+| didDocumentMetadata | Metadata about the DID document |
 
-#### DID Resolution Metadata Properties
 
+###### DID Resolution Metadata Properties
 | Property | Type | Description |
-|----------|------|-------------|
-| `contentType` | string | Media type of the DID document representation |
-| `error` | string | Error code if resolution failed |
-| `retrieved` | datetime | When the document was retrieved |
+| :--- | :--- | :--- |
+| contentType | string | Media type of the DID document representation |
+| error | string | Error code if resolution failed |
+| retrieved | datetime | When the document was retrieved |
 
-#### DID Document Metadata Properties
 
+###### DID Document Metadata Properties
 | Property | Type | Description |
-|----------|------|-------------|
-| `created` | datetime | Timestamp when DID was created |
-| `updated` | datetime | Timestamp of last update |
-| `versionId` | string | Version identifier |
-| `deactivated` | boolean | Whether the DID is deactivated |
-| `nextUpdate` | datetime | When next update occurred (for historical queries) |
-| `nextVersionId` | string | Next version ID (for historical queries) |
-| `equivalentId` | array | Other DIDs referring to same subject |
-| `canonicalId` | string | Canonical DID for this subject |
+| :--- | :--- | :--- |
+| created | datetime | Timestamp when DID was created |
+| updated | datetime | Timestamp of last update |
+| versionId | string | Version identifier |
+| deactivated | boolean | Whether the DID is deactivated |
+| nextUpdate | datetime | When next update occurred |
+| nextVersionId | string | Next version ID |
+| equivalentId | array | Other DIDs referring to same subject |
+| canonicalId | string | Canonical DID for this subject |
 
----
 
-### 3.3 DID URL Dereferencing
+##### 3.3 DID URL Dereferencing
+###### Dereferencing Function
+###### DID URL Components
+###### Dereferencing Process
 
-DID URL Dereferencing retrieves a specific resource for a given DID URL (which may include path, query, and fragment).
-
-#### Dereferencing Function
-
-```
-dereference(didUrl, dereferenceOptions) →
-   « dereferencingMetadata, contentStream, contentMetadata »
-```
-
-#### DID URL Components
-
-```
-did:example:123456/path/to/resource?query=value#fragment
-│              │                │           │
-│              │                │           └── Fragment (identify sub-resource)
-│              │                └────────────── Query (parameters)
-│              └─────────────────────────────── Path (resource location)
-└────────────────────────────────────────────── DID (base identifier)
-```
-
-#### Dereferencing Process
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                      DID URL Dereferencing Process                           │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  Input: did:example:123/path?service=files&relativeRef=/doc.pdf#section1   │
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │ STEP 1: Parse DID URL                                               │   │
-│  │   - DID: did:example:123                                            │   │
-│  │   - Path: /path                                                     │   │
-│  │   - Query: service=files&relativeRef=/doc.pdf                       │   │
-│  │   - Fragment: #section1                                             │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                        │
-│                                    ▼                                        │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │ STEP 2: Resolve DID to DID Document                                 │   │
-│  │   - Call resolve("did:example:123")                                 │   │
-│  │   - Get DID document                                                │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                        │
-│                                    ▼                                        │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │ STEP 3: Dereference Resource                                        │   │
-│  │   - If path present: Handle path-based resource                     │   │
-│  │   - If service param: Select service endpoint                       │   │
-│  │   - If fragment present: Extract sub-resource                       │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                        │
-│                                    ▼                                        │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │ STEP 4: Return Resource                                             │   │
-│  │   - contentStream: The dereferenced resource                        │   │
-│  │   - contentMetadata: Metadata about the resource                    │   │
-│  │   - dereferencingMetadata: Process metadata                         │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-### 3.4 Common DID Parameters
-
+##### 3.4 Common DID Parameters
 | Parameter | Description | Example |
-|-----------|-------------|---------|
-| `service` | Select service by ID | `did:example:123?service=files` |
-| `serviceType` | Select service by type | `did:example:123?serviceType=LinkedDomains` |
-| `relativeRef` | Relative URI at service endpoint | `did:example:123?service=files&relativeRef=/doc.pdf` |
-| `versionId` | Specific DID document version | `did:example:123?versionId=1` |
-| `versionTime` | DID document at timestamp | `did:example:123?versionTime=2021-05-10T17:00:00Z` |
-| `hl` | Resource hash for integrity | `did:example:123?hl=zQmWvQx...` |
-| `transformKey` | Transform key format | `did:example:123?transformKey=JsonWebKey` |
+| :--- | :--- | :--- |
+| service | Select service by ID | did:example:123?service=files |
+| serviceType | Select service by type | did:example:123?serviceType=LinkedDomains |
+| relativeRef | Relative URI at service endpoint | did:example:123?service=files&relativeRef=/doc.pdf |
+| versionId | Specific DID document version | did:example:123?versionId=1 |
+| versionTime | DID document at timestamp | did:example:123?versionTime=2021-05-10T17:00:00Z |
+| hl | Resource hash for integrity | did:example:123?hl=zQmWvQx... |
+| transformKey | Transform key format | did:example:123?transformKey=JsonWebKey |
 
----
 
-### 3.5 DID Authentication Flow
-
-Authentication using DIDs involves proving control over the identifier through cryptographic signatures.
-
-#### Authentication Process
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        DID Authentication Flow                               │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ┌──────────────────┐                              ┌──────────────────┐    │
-│  │   DID Controller │                              │     Verifier     │    │
-│  │   (Prover)       │                              │   (Relying Party)│    │
-│  └────────┬─────────┘                              └────────┬─────────┘    │
-│           │                                                 │              │
-│           │  1. Authentication Request                      │              │
-│           │ ◀──────────────────────────────────────────────│              │
-│           │     (includes challenge/nonce)                  │              │
-│           │                                                 │              │
-│           │  2. Resolve DID                                 │              │
-│           │ ──────────────────────────────────────────────▶│              │
-│           │                                                 │              │
-│           │  3. Return DID Document                         │              │
-│           │ ◀──────────────────────────────────────────────│              │
-│           │     (contains public keys)                      │              │
-│           │                                                 │              │
-│           │  4. Sign Challenge                              │              │
-│           │     - Retrieve private key                      │              │
-│           │     - Sign challenge with authentication key    │              │
-│           │     - Create proof                              │              │
-│           │                                                 │              │
-│           │  5. Send Proof                                  │              │
-│           │ ──────────────────────────────────────────────▶│              │
-│           │     (signature + DID)                           │              │
-│           │                                                 │              │
-│           │                              6. Verify Proof    │              │
-│           │                              - Extract public key│             │
-│           │                              - Verify signature │              │
-│           │                              - Check key purpose│              │
-│           │                                                 │              │
-│           │  7. Authentication Result                       │              │
-│           │ ◀──────────────────────────────────────────────│              │
-│           │     ✅ Success / ❌ Failure                     │              │
-│           │                                                 │              │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-#### Cryptographic Proof Structure
-
-```json
-{
-  "type": "Ed25519Signature2020",
-  "created": "2024-01-15T10:30:00Z",
-  "verificationMethod": "did:example:123#key-1",
-  "proofPurpose": "authentication",
-  "challenge": "c0b53e5c-5b5e-4f5d-9f8e-1a2b3c4d5e6f",
-  "domain": "example.com",
-  "proofValue": "z58DAdFfa9SkqZMVPxAQpic7ndSaynfK6iV..."
-}
-```
-
-#### Proof Purposes
-
+##### 3.5 Authentication Flow
+###### Authentication Process
+###### Cryptographic Proof Structure
+###### Proof Purposes
 | Purpose | When to Use | Example |
-|---------|-------------|---------|
-| `authentication` | Prove DID control | Login, access control |
-| `assertionMethod` | Issue credentials | University diploma |
-| `keyAgreement` | Establish shared secret | Encrypted messaging |
-| `capabilityInvocation` | Perform authorized action | API call |
-| `capabilityDelegation` | Grant authority to another | Delegate signing |
+| :--- | :--- | :--- |
+| authentication | Prove DID control | Login, access control |
+| assertionMethod | Issue credentials | University diploma |
+| keyAgreement | Establish shared secret | Encrypted messaging |
+| capabilityInvocation | Perform authorized action | API call |
+| capabilityDelegation | Grant authority to another | Delegate signing |
 
----
 
-### 3.6 Error Handling
-
-#### Resolution Errors
-
+##### 3.6 Error Handling
+###### Resolution Errors
 | Error Code | Description | When It Occurs |
-|------------|-------------|----------------|
-| `invalidDid` | DID syntax is invalid | Malformed DID string |
-| `methodNotSupported` | Resolver doesn't support method | Unknown DID method |
-| `notFound` | DID document not found | DID doesn't exist |
-| `deactivated` | DID has been deactivated | DID was revoked |
-| `representationNotSupported` | Media type not supported | Invalid `accept` header |
+| :--- | :--- | :--- |
+| invalidDid | DID syntax is invalid | Malformed DID string |
+| methodNotSupported | Resolver doesn't support method | Unknown DID method |
+| notFound | DID document not found | DID doesn't exist |
+| deactivated | DID has been deactivated | DID was revoked |
+| representationNotSupported | Media type not supported | Invalid accept header |
 
-#### Dereferencing Errors
 
+###### Dereferencing Errors
 | Error Code | Description |
-|------------|-------------|
-| `invalidDidUrl` | DID URL syntax is invalid |
-| `notFound` | Resource not found |
-| `serviceNotFound` | Referenced service doesn't exist |
+| :--- | :--- |
+| invalidDidUrl | DID URL syntax is invalid |
+| notFound | Resource not found |
+| serviceNotFound | Referenced service doesn't exist |
 
----
 
-### 3.7 Method-Specific Resolution Examples
+##### 3.7 Method-Specific Resolution Examples
+###### did:web Resolution
+###### did:ethr Resolution
+###### did:key Resolution
+| updated | Timestamp of last update | | deactivated | Whether DID is deactivated (true/false) | | nextUpdate | Timestamp of next scheduled update | | versionId | Version identifier of DID document | | nextVersionId | Version identifier of next version | | equivalentId | Logically equivalent DIDs | | canonicalId | Canonical DID for the subject |
 
-#### did:web Resolution
 
-```
-DID: did:web:example.com:users:alice
-
-Resolution Steps:
-1. Extract domain: example.com
-2. Extract path: users:alice → /users/alice
-3. Construct URL: https://example.com/users/alice/did.json
-4. Fetch via HTTPS
-5. Return DID document
-```
-
-#### did:ethr Resolution
-
-```
-DID: did:ethr:0xE6Fe788d8ca214A080b0f6aC7F48480b2AEfa9a6
-
-Resolution Steps:
-1. Extract Ethereum address: 0xE6Fe...a6
-2. Query ERC-1056 contract on Ethereum
-3. Get identity owner
-4. Enumerate events (DIDOwnerChanged, DIDDelegateChanged, DIDAttributeChanged)
-5. Build DID document from contract state
-6. Return DID document
-```
-
-#### did:key Resolution
-
-```
-DID: did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK
-
-Resolution Steps:
-1. Extract multibase value: z6MkhaXg...
-2. Decode to get public key and key type
-3. Generate DID document deterministically
-4. Return DID document (no network call needed)
-```
-| `updated` | Timestamp of last update |
-| `deactivated` | Whether DID is deactivated (true/false) |
-| `nextUpdate` | Timestamp of next scheduled update |
-| `versionId` | Version identifier of DID document |
-| `nextVersionId` | Version identifier of next version |
-| `equivalentId` | Logically equivalent DIDs |
-| `canonicalId` | Canonical DID for the subject |
-
-### 3.5 Authentication Flow
-
-```
-┌──────────┐                              ┌──────────┐
-│  Holder  │                              │ Verifier │
-└────┬─────┘                              └────┬─────┘
-     │                                         │
-     │  1. Present DID + Signature             │
-     │────────────────────────────────────────▶│
-     │                                         │
-     │                        2. Resolve DID   │
-     │                           ◀─────────────│
-     │                                         │
-     │                    3. Get Public Key    │
-     │                       from DID Document │
-     │                           ◀─────────────│
-     │                                         │
-     │                    4. Verify Signature  │
-     │                       using Public Key  │
-     │                           ◀─────────────│
-     │                                         │
-     │  5. Authentication Result               │
-     │◀────────────────────────────────────────│
-     │                                         │
-```
-
-### 3.6 Verification Relationships
-
+##### 3.5 Authentication Flow
+##### 3.6 Verification Relationships
 | Relationship | Purpose |
-|--------------|---------|
-| `authentication` | Prove control of DID (login, authentication) |
-| `assertionMethod` | Issue Verifiable Credentials |
-| `keyAgreement` | Encrypt messages to DID subject |
-| `capabilityInvocation` | Authorize operations on behalf of DID subject |
-| `capabilityDelegation` | Delegate capabilities to another party |
+| :--- | :--- |
+| authentication | Prove control of DID (login, authentication) |
+| assertionMethod | Issue Verifiable Credentials |
+| keyAgreement | Encrypt messages to DID subject |
+| capabilityInvocation | Authorize operations on behalf of DID subject |
+| capabilityDelegation | Delegate capabilities to another party |
 
-### 3.7 DID Operations Lifecycle
 
-```
-                    ┌────────────┐
-                    │   CREATE   │
-                    │ (Generate) │
-                    └─────┬──────┘
-                          │
-                          ▼
-                    ┌────────────┐
-         ┌─────────│   ACTIVE   │──────────┐
-         │         │    DID     │          │
-         │         └─────┬──────┘          │
-         │               │                 │
-         ▼               ▼                 ▼
-   ┌──────────┐   ┌──────────┐      ┌───────────┐
-   │  UPDATE  │   │  RESOLVE │      │  ROTATE   │
-   │ (Modify) │   │  (Read)  │      │   Keys    │
-   └────┬─────┘   └──────────┘      └───────────┘
-        │
-        │ (if needed)
-        ▼
-   ┌────────────┐
-   │ DEACTIVATE │
-   │  (Revoke)  │
-   └────────────┘
-```
+##### 3.7 DID Operations Lifecycle
 
 ---
 
-## 4. Verifiable Credentials Integration
+### 7. Verifiable Credentials Integration & Use Cases
+##### Ecosystem Participants
+##### Verifiable Credential Structure
+##### Verifiable Credential Types
+* Educational credentials (degrees, certificates)
+* Professional certifications
+* Identity documents (passports, driver's licenses)
+* Health records
+* Supply chain attestations
+* Financial credentials
 
-### Ecosystem Participants
+#### 5. Industry Use Cases
+##### Healthcare
+* **Medical records management** - Secure sharing between providers
+* **Vaccination verification** - COVID-19 immunity passports
+* **Patient data portability** - Consent-controlled data sharing
+* **Prescription tracking** - Fraud prevention
+##### Supply Chain
+* **Product authenticity**, **Chain of custody**, **Cold chain verification**, **Supplier credentials**
+##### Government & Public Sector
+* **Digital ID for refugees**, **Permanent resident cards**, **Citizen services**, **Voting systems**
+##### Education
+* **Academic credentials**, **Professional development**, **Skill verification**, **Cross-institutional records**
+##### Finance
+* **KYC/AML compliance**, **Credit history**, **Cross-border payments**, **DeFi identity**
+##### Enterprise
+* **Employee credentials**, **B2B authentication**, **Audit trails**, **Vendor management**
 
-```
-┌─────────┐     issues      ┌─────────┐     presents    ┌──────────┐
-│ ISSUER  │ ──────────────▶ │ HOLDER  │ ──────────────▶ │ VERIFIER │
-└─────────┘                 └─────────┘                 └──────────┘
-    │                           │                           │
-    └── Signs with DID ─────────┘── Stores VC ──────────────┘── Verifies
-```
-
-### Verifiable Credential Structure
-
-```json
-{
-  "@context": ["https://www.w3.org/2018/credentials/v1"],
-  "id": "http://example.edu/credentials/3732",
-  "type": ["VerifiableCredential", "UniversityDegreeCredential"],
-  "issuer": {
-    "id": "did:example:issuer123",
-    "name": "Example University"
-  },
-  "issuanceDate": "2024-01-01T00:00:00Z",
-  "credentialSubject": {
-    "id": "did:example:holder456",
-    "degree": {
-      "type": "BachelorDegree",
-      "name": "Bachelor of Science"
-    }
-  },
-  "proof": {
-    "type": "Ed25519Signature2020",
-    "created": "2024-01-01T00:00:00Z",
-    "verificationMethod": "did:example:issuer123#keys-1",
-    "proofPurpose": "assertionMethod",
-    "proofValue": "z58DAdFfa9SkqZMVPxAQp..."
-  }
-}
-```
-
-### Verifiable Credential Types
-
-- Educational credentials (degrees, certificates)
-- Professional certifications
-- Identity documents (passports, driver's licenses)
-- Health records
-- Supply chain attestations
-- Financial credentials
-
----
-
-## 5. Industry Use Cases
-
-### Healthcare
-
-- **Medical records management** - Secure sharing between providers
-- **Vaccination verification** - COVID-19 immunity passports
-- **Patient data portability** - Consent-controlled data sharing
-- **Prescription tracking** - Fraud prevention
-
-### Supply Chain
-
-- **Product authenticity** - Anti-counterfeiting for luxury goods
-- **Chain of custody** - Track shipments across jurisdictions
-- **Cold chain verification** - Temperature-sensitive products
-- **Supplier credentials** - Verify "trusted supplier" status
-
-### Government & Public Sector
-
-- **Digital ID for refugees** - Identity for stateless persons
-- **Permanent resident cards** - eIDAS-compliant credentials
-- **Citizen services** - Access to government portals
-- **Voting systems** - Secure, verifiable elections
-
-### Education
-
-- **Academic credentials** - Fraud-proof diplomas
-- **Professional development** - Training certificates
-- **Skill verification** - Instant employer verification
-- **Cross-institutional records** - Portable transcripts
-
-### Finance
-
-- **KYC/AML compliance** - Reusable identity verification
-- **Credit history** - User-controlled financial data
-- **Cross-border payments** - Pseudonymous transactions
-- **DeFi identity** - Web3 authentication
-
-### Enterprise
-
-- **Employee credentials** - Role-based access
-- **B2B authentication** - Inter-organizational trust
-- **Audit trails** - Immutable compliance records
-- **Vendor management** - Supply chain trust
-
----
-
-## 6. Privacy & Security Considerations
-
-### Privacy by Design Principles
-
+#### 6. Privacy & Security Considerations
+##### Privacy by Design Principles
 1. **Pairwise-pseudonymous DIDs** - Different DIDs for each relationship
 2. **Off-chain private data** - Never store PII on public ledgers
 3. **Selective disclosure** - Share only necessary information
 4. **Zero-knowledge proofs** - Prove attributes without revealing data
-
-### Security Best Practices
-
-- Key rotation mechanisms
-- Multi-signature support
-- Delegation capabilities
-- Revocation registries
+##### Security Best Practices
+* Key rotation mechanisms, Multi-signature support, Delegation capabilities, Revocation registries.
 
 ---
 
-## 7. DID Development in China
-
-### 8.1 Overview
-
-China has been actively developing distributed digital identity infrastructure with strong government backing. The approach combines government-verified identity with distributed ledger technology.
-
-### 8.2 Key Players in China
-
-#### CTID (居民身份网络可信凭证)
-
-- **Operator:** 公安部第一研究所 (Ministry of Public Security First Research Institute)
-- **Type:** Software-based solution
-- **Features:**
-  - Real identity verification
-  - Network credential issuance
-  - Multi-factor authentication
-  - Based on ID card + biometric verification
-- **Scale:**
-  - 50+ billion data records
-  - 20,000+ requests per second capacity
-  - ~0.5 second average response time
-
-#### eID (网络电子身份标识)
-
-- **Operator:** 公安部第三研究所 (Ministry of Public Security Third Research Institute)
-- **Type:** Hardware-based solution
-- **Features:**
-  - Smart security chip as carrier
-  - Online and offline authentication
-  - Digital signature capabilities
-  - Loaded on financial IC cards, SIM cards, and smartphones
-- **Partnerships:**
-  - Major banks for eID-enabled cards
-  - Three telecom operators for SIM-based eID
-  - Smartphone manufacturers for built-in eID
-
-### 8.3 BSN (Blockchain Service Network)
-
-#### Overview
-
-BSN is a global blockchain public infrastructure initiated by:
-- 国家信息中心 (State Information Center) - Planning & Design
-- 中国移动 (China Mobile)
-- 中国银联 (China UnionPay)
-- 北京红枣科技 (Beijing Red Date Technology)
-
-#### BSN-DID Service
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    BSN-DID Architecture                     │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  ┌─────────────┐     ┌─────────────┐     ┌─────────────┐  │
-│  │   User      │────▶│   CTID      │────▶│   BSN       │  │
-│  │  Identity   │     │ Verification│     │ Yan'an Chain│  │
-│  └─────────────┘     └─────────────┘     └─────────────┘  │
-│                             │                    │          │
-│                             ▼                    ▼          │
-│                      ┌─────────────┐     ┌─────────────┐  │
-│                      │ Real-name   │     │ DID Document│  │
-│                      │ Attestation │     │ Storage     │  │
-│                      └─────────────┘     └─────────────┘  │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
-
-#### BSN Real-name DID Service Features
-
+### 8. DID Development in China
+##### 8.1 Overview
+China has been actively developing distributed digital identity infrastructure with strong government backing, combining government-verified identity with distributed ledger technology.
+##### 8.2 Key Players in China
+###### CTID (居民身份网络可信凭证)
+* **Operator:** Ministry of Public Security First Research Institute.
+* **Type:** Software-based solution.
+* **Features:** Real identity verification, multi-factor authentication, based on ID card + biometrics.
+* **Scale:** 50+ billion data records, 20,000+ requests per second capacity.
+###### eID (网络电子身份标识)
+* **Operator:** Ministry of Public Security Third Research Institute.
+* **Type:** Hardware-based solution.
+* **Features:** Smart security chip, online/offline auth, digital signature capabilities loaded on financial IC/SIM cards and smartphones.
+##### 8.3 BSN (Blockchain Service Network)
+###### Overview
+BSN is a global blockchain public infrastructure initiated by the State Information Center, China Mobile, China UnionPay, and Beijing Red Date Technology.
+###### BSN-DID Service
+###### BSN Real-name DID Service Features
 | Feature | Description |
-|---------|-------------|
+| :--- | :--- |
 | Real-name Verification | Based on CTID system (ID + name or ID + name + face recognition) |
 | Unified DID | Same person gets same DID across different applications |
 | Key Management | Different public keys for different applications |
 | Private Key Storage | Held by user or application provider |
 | Chain | BSN Yan'an Chain (延安链) |
 
-#### BSN Official Services
 
+###### BSN Official Services
 | Service | Description |
-|---------|-------------|
+| :--- | :--- |
 | **BSN实名DID服务** | Real-name verified DID issuance |
 | **全网分布式域名服务** | Distributed domain name system across all chains |
 | **可信区块链运行监测** | Trusted blockchain monitoring platform |
 | **BSN官方DDC服务** | Official DDC/NFT contract service |
 | **私钥托管服务** | Private key escrow service (with ID recovery) |
 
-### 8.4 DIDA (分布式数字身份产业联盟)
 
-#### Overview
-
-DIDA (DID-Alliance) is China's first distributed digital identity industry alliance, formed to promote DID technology standards and applications.
-
-#### Key Information
-
+##### 8.4 DIDA (分布式数字身份产业联盟)
+###### Overview
+DIDA is China's first distributed digital identity industry alliance, formed to promote DID technology standards and applications.
+###### Key Information
 | Aspect | Details |
-|--------|---------|
+| :--- | :--- |
 | Founded | August 2020 |
 | White Paper | First comprehensive DID white paper in China |
 | Members | 12 founding council members |
 | Focus | Technology standards, industry applications, legal compliance |
 
-#### DIDA's Four Major Tasks
 
-1. **Technical Standards** - Establish distributed identity technical specifications
-2. **Infrastructure** - Build distributed identity infrastructure
-3. **Application Scenarios** - Explore and promote use cases
-4. **International Cooperation** - Align with international standards
+###### DIDA's Four Major Tasks
+1. **Technical Standards**, 2. **Infrastructure**, 3. **Application Scenarios**, 4. **International Cooperation**.
+###### Expert Advisors
+Cai Jiren, Chen Jing, Li Jingchun, Liu Duo, Ma Zhitao, Zhan Banghua, Xu Ke.
 
-#### Expert Advisors
-
-- 蔡吉人 (Cai Jiren) - Academician, Chinese Academy of Engineering
-- 陈静 (Chen Jing) - Former Director, PBOC Technology Department
-- 李京春 (Li Jingchun) - TC260 Security Assessment Group Leader
-- 刘多 (Liu Duo) - President, CAICT
-- 马智涛 (Ma Zhitao) - VP & CIO, WeBank
-- 詹榜华 (Zhan Banghua) - Chairman, Beijing Certificate Authority
-- 徐恪 (Xu Ke) - Deputy Head, Tsinghua CS Department
-
-### 8.5 National Standards
-
-#### Standard: 区块链和分布式记账技术分布式身份管理系统概述
-
+##### 8.5 National Standards
+###### Standard: 区块链和分布式记账技术分布式身份管理系统概述
 | Aspect | Details |
-|--------|---------|
+| :--- | :--- |
 | Standard ID | ISO/TR 23249:2022 (adopted) |
 | Committee | TC590 (National Blockchain Standardization Committee) |
 | Authority | Ministry of Industry and Information Technology |
 | Drafter | China Electronics Standardization Institute |
 | Status | Under development |
 
-#### Scope
 
-- Classification of distributed identity management systems
-- Basic functions and components
-- International mainstream system analysis
-- Participant roles and responsibilities
-- Framework definitions
-
-### 8.6 China vs International Comparison
-
+###### Scope
+Classification of distributed identity management systems, basic functions, mainstream system analysis, participant roles, framework definitions.
+##### 8.6 China vs International Comparison
 | Aspect | China | International (EU/US) |
-|--------|-------|----------------------|
+| :--- | :--- | :--- |
 | **Approach** | Government-led, real-name verified | Market-driven, self-sovereign |
 | **Identity Source** | CTID/eID (government) | Multiple issuers |
 | **Blockchain** | BSN (national infrastructure) | Various (Ethereum, Hyperledger, etc.) |
@@ -3488,39 +798,19 @@ DIDA (DID-Alliance) is China's first distributed digital identity industry allia
 | **Standardization** | Adopting ISO standards | W3C, DIF standards |
 | **Key Projects** | BSN-DID, DIDA | eIDAS, NIST guidelines |
 
-### 8.7 Application Areas in China
 
-#### Government Services
-
-- Digital identity for citizens
-- Cross-department data sharing
-- Administrative service authentication
-- Social security integration
-
-#### Financial Services
-
-- Bank account opening (KYC)
-- Insurance claims
-- Securities trading
-- Cross-border payments
-
-#### Healthcare
-
-- Patient identity management
-- Medical record sharing
-- Prescription verification
-- Health certificate issuance
-
-#### Cross-border Applications
-
-- International travel credentials
-- Cross-border trade verification
-- International education credentials
-
-### 8.8 Challenges in China
-
+##### 8.7 Application Areas in China
+###### Government Services
+Digital identity for citizens, Cross-department data sharing, Administrative service authentication, Social security integration.
+###### Financial Services
+Bank account opening (KYC), Insurance claims, Securities trading, Cross-border payments.
+###### Healthcare
+Patient identity management, Medical record sharing, Prescription verification, Health certificate issuance.
+###### Cross-border Applications
+International travel credentials, Cross-border trade verification, International education credentials.
+##### 8.8 Challenges in China
 | Challenge | Description |
-|-----------|-------------|
+| :--- | :--- |
 | **Adoption** | CTID and eID not yet widely adopted |
 | **Privacy Balance** | Balancing real-name requirements with privacy protection |
 | **KYC Limitations** | Financial institutions cannot access detailed identity info |
@@ -3528,21 +818,13 @@ DIDA (DID-Alliance) is China's first distributed digital identity industry allia
 | **Hardware Dependency** | eID relies on hardware carriers that can be lost |
 | **Cross-platform** | Linking CTID identities with business ecosystems |
 
-### 8.9 Future Outlook
 
-1. **Standardization** - National standards alignment with ISO
-2. **Infrastructure** - Expansion of BSN network capabilities
-3. **Applications** - More government and enterprise use cases
-4. **International** - Cross-border identity recognition
-5. **Privacy Enhancement** - Zero-knowledge proof integration
-6. **Digital Yuan Integration** - CBDC identity verification
+##### 8.9 Future Outlook
+1. **Standardization**, 2. **Infrastructure**, 3. **Applications**, 4. **International**, 5. **Privacy Enhancement**, 6. **Digital Yuan Integration**.
 
----
-
-## 8. Key Standards & Resources
-
+#### 8. Key Standards & Resources
 | Resource | URL |
-|----------|-----|
+| :--- | :--- |
 | W3C DID Specification | https://www.w3.org/TR/did-1.1/ |
 | W3C DID Resolution | https://www.w3.org/TR/did-resolution/ |
 | W3C DID Use Cases | https://www.w3.org/TR/did-use-cases/ |
@@ -3553,29 +835,28 @@ DIDA (DID-Alliance) is China's first distributed digital identity industry allia
 | BSN-DID Service | https://did.bsnbase.com/ |
 | DIDA White Paper | https://dl.brop.cn/wechat/DIDA/DIDA白皮书.pdf |
 
+
 ---
 
-## 9. Design Goals (W3C Specification)
-
+### 9. Design Goals & Data Models
+#### 9. Design Goals (W3C Specification)
 | Goal | Description |
-|------|-------------|
-| Decentralization | Eliminate the requirement for centralized authorities or single points of failure in identifier management |
-| Control | Give entities the power to directly control their digital identifiers without relying on external authorities |
-| Privacy | Enable entities to control the privacy of their information, including minimal, selective, and progressive disclosure |
-| Security | Enable sufficient security for requesting parties to depend on DID documents for their required level of assurance |
-| Proof-based | Enable DID controllers to provide cryptographic proof when interacting with other entities |
-| Discoverability | Make it possible for entities to discover DIDs for other entities |
-| Interoperability | Use interoperable standards so DID infrastructure can make use of existing tools and software libraries |
-| Portability | Be system- and network-independent and enable entities to use their digital identifiers with any system that supports DIDs |
-| Simplicity | Favor a reduced set of simple features to make the technology easier to understand, implement, and deploy |
-| Extensibility | Enable extensibility provided it does not greatly hinder interoperability, portability, or simplicity |
+| :--- | :--- |
+| Decentralization | Eliminate the requirement for centralized authorities |
+| Control | Give entities the power to directly control their digital identifiers |
+| Privacy | Enable entities to control the privacy of their information |
+| Security | Enable sufficient security for requesting parties |
+| Proof-based | Enable DID controllers to provide cryptographic proof |
+| Discoverability | Make it possible to discover DIDs for other entities |
+| Interoperability | Use interoperable standards |
+| Portability | Be system- and network-independent |
+| Simplicity | Favor a reduced set of simple features |
+| Extensibility | Enable extensibility provided it does not hinder interoperability |
 
----
 
-## 10. Data Model Types
-
+#### 10. Data Model Types
 | Data Type | Description |
-|-----------|-------------|
+| :--- | :--- |
 | map | A finite ordered sequence of key/value pairs |
 | list | A finite ordered sequence of items |
 | set | A finite ordered sequence of items that does not contain the same item twice |
@@ -3586,35 +867,78 @@ DIDA (DID-Alliance) is China's first distributed digital identity industry allia
 | boolean | A value that is either true or false |
 | null | A value used to indicate the lack of a value |
 
----
 
-## 11. Summary: Key Takeaways
-
-### Technical Understanding
-
-1. **DID Resolution** is the core process - transforming a DID string into a usable DID document
-2. **DID Methods** define how DIDs work on specific infrastructures (blockchain, web, etc.)
-3. **Verification Relationships** define what actions a key can perform
-4. **DID URLs** extend DIDs with paths, queries, and fragments for resource access
-
-### China's Approach
-
-1. **Government-Led** - CTID and eID backed by Ministry of Public Security
-2. **Real-Name Foundation** - Identity verified against national ID system
-3. **BSN Infrastructure** - National blockchain network for DID services
-4. **DIDA Alliance** - Industry coordination and standardization
-5. **Standards Alignment** - Adopting ISO standards while developing national specifications
-
-### Global Comparison
-
+#### 11. Summary: Key Takeaways
+##### Technical Understanding
+1. **DID Resolution** is the core process.
+2. **DID Methods** define how DIDs work on specific infrastructures.
+3. **Verification Relationships** define what actions a key can perform.
+4. **DID URLs** extend DIDs with paths, queries, and fragments.
+##### China's Approach
+1. **Government-Led** - CTID and eID backed by Ministry of Public Security.
+2. **Real-Name Foundation** - Identity verified against national ID system.
+3. **BSN Infrastructure** - National blockchain network for DID services.
+4. **DIDA Alliance** - Industry coordination and standardization.
+5. **Standards Alignment** - Adopting ISO standards.
+##### Global Comparison
 | Factor | Western Approach | China Approach |
-|--------|-----------------|----------------|
+| :--- | :--- | :--- |
 | Philosophy | Self-sovereign identity | Government-verified identity |
 | Privacy | Pseudonymous by default | Real-name with privacy controls |
 | Infrastructure | Decentralized networks | BSN national infrastructure |
 | Adoption Driver | Market demand | Government policy |
 
+
 ---
 
-*Research compiled on 2026-03-04*
-*Last updated with China DID development details*
+### 10. Advanced Cryptography (Bilinear Pairing & BBS+)
+**Bilinear Pairing** is a special mathematical function that acts as a "bridge" between two different cryptographic groups, enabling advanced privacy features.
+
+##### 1. The Basic Concept: Three Groups
+* **Group 1 ($G_1$)**: Points on an elliptic curve (addition).
+* **Group 2 ($G_2$)**: Another curve group (addition).
+* **Target Group ($G_T$)**: A set of numbers in a finite field (multiplication).
+A Bilinear Pairing is $e: G_1 \times G_2 \rightarrow G_T$.
+
+##### 2. The "Magic" Property: Bilinearity
+It allows you to move multiplication into the exponent: $e(aP, bQ) = e(P, Q)^{ab}$. Both sides give you the exact same value in $G_T$.
+
+##### 3. Why is this useful? (The "One-Way Bridge")
+It allows you to verify relationships between hidden numbers without knowing the numbers themselves.
+###### Example Scenario:
+If Party A knows $a$ and publishes $A = aP$, and Party B publishes $B = bQ$, they can prove they know $ab$ using pairings ($e(A, B) = e(P, Q)^{ab}$). The verifier confirms the relationship but never learns what $a$ or $b$ are, creating the foundation of **Zero-Knowledge Proofs**.
+
+##### 4. How it enables BBS+ Selective Disclosure
+The pairing allows the verifier to check that the "hidden part" balances the equation against the "revealed part" and public key. The verifier can see the result match perfectly without reversing the pairing to calculate hidden messages.
+
+##### 5. Common Curves Used
+* **BLS12-381**: The most popular choice today.
+* **BN254**: An older standard.
+* **KZG Commitments**: Rely heavily on pairings.
+##### Summary Analogy
+Think of it as a special glass box where the glow changes predictably based on keys inside, but observers cannot see through the glass to find out what the keys actually are.
+
+##### **1. Setup: The Cryptographic Building Blocks**
+Requires pairing-friendly curves, a bilinear pairing, public generators ($g_0, g_1, ..., g_k, h$), and public key $w = x \cdot g_2$.
+##### **2. Key Generation**
+* **Secret Key ($sk$)**: random scalar $x$.
+* **Public Key ($pk$)**: $w = x \cdot g_2$.
+##### **3. Signing a Message Vector**
+To sign $k$ messages, pick randomness $e$ and $s$, compute signature core $A = \left( g_0 \cdot g_1^{m_1} \cdot g_2^{m_2} \cdots g_k^{m_k} \cdot h^s \right)^{\frac{1}{e + x}}$, output $\sigma = (A, e, s)$.
+##### **4. Verification (Full Disclosure)**
+Recompute LHS ($e(A, w \cdot g_2^e)$) and RHS ($e(g_0 \cdot g_1^{m_1} \cdots g_k^{m_k} \cdot h^s, g_2)$) and check equality.
+##### **5. Selective Disclosure: The Magic Step**
+###### **Step 1: Randomize the Signature**
+Compute $A' = r \cdot A$ to blind the signature.
+###### **Step 2: Generate a Zero-Knowledge Proof (ZKP)**
+The holder creates a proof that they know hidden messages and randomness.
+###### **How the ZKP Works (Simplified)**
+Commit to hidden values, prove consistency, and reveal only plaintext values.
+###### **Step 3: Verifier Checks**
+Checks the ZKP to ensure the pairing equation holds, the holder knows the values, and no information is leaked.
+##### **6. Why This Works: The Role of Pairings**
+Binding messages, hiding via exponents, blinding, and zero-knowledge.
+##### **Example Use Case: Age Verification**
+You can prove you are over 18 to a bar by randomizing the signature and revealing only your age.
+##### **Key Takeaways**
+Multi-Message Signatures, Selective Disclosure, Unlinkability, Privacy, and Efficiency.
