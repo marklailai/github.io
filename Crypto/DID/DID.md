@@ -3164,52 +3164,125 @@ Resolution Steps:
 - Financial credentials
 
 #### 5. Industry Use Cases
-##### Healthcare
-* **Medical records management** - Secure sharing between providers
-* **Vaccination verification** - COVID-19 immunity passports
-* **Patient data portability** - Consent-controlled data sharing
-* **Prescription tracking** - Fraud prevention
+### Healthcare
 
-##### Supply Chain
-* **Product authenticity**, **Chain of custody**, **Cold chain verification**, **Supplier credentials**
+- **Medical records management** - Secure sharing between providers
+- **Vaccination verification** - COVID-19 immunity passports
+- **Patient data portability** - Consent-controlled data sharing
+- **Prescription tracking** - Fraud prevention
 
-##### Government & Public Sector
-* **Digital ID for refugees**, **Permanent resident cards**, **Citizen services**, **Voting systems**
-##### Education
-* **Academic credentials**, **Professional development**, **Skill verification**, **Cross-institutional records**
-##### Finance
-* **KYC/AML compliance**, **Credit history**, **Cross-border payments**, **DeFi identity**
-##### Enterprise
-* **Employee credentials**, **B2B authentication**, **Audit trails**, **Vendor management**
+### Supply Chain
+
+- **Product authenticity** - Anti-counterfeiting for luxury goods
+- **Chain of custody** - Track shipments across jurisdictions
+- **Cold chain verification** - Temperature-sensitive products
+- **Supplier credentials** - Verify "trusted supplier" status
+
+### Government & Public Sector
+
+- **Digital ID for refugees** - Identity for stateless persons
+- **Permanent resident cards** - eIDAS-compliant credentials
+- **Citizen services** - Access to government portals
+- **Voting systems** - Secure, verifiable elections
+
+### Education
+
+- **Academic credentials** - Fraud-proof diplomas
+- **Professional development** - Training certificates
+- **Skill verification** - Instant employer verification
+- **Cross-institutional records** - Portable transcripts
+
+### Finance
+
+- **KYC/AML compliance** - Reusable identity verification
+- **Credit history** - User-controlled financial data
+- **Cross-border payments** - Pseudonymous transactions
+- **DeFi identity** - Web3 authentication
+
+### Enterprise
+
+- **Employee credentials** - Role-based access
+- **B2B authentication** - Inter-organizational trust
+- **Audit trails** - Immutable compliance records
+- **Vendor management** - Supply chain trust
 
 #### 6. Privacy & Security Considerations
-##### Privacy by Design Principles
+### Privacy by Design Principles
+
 1. **Pairwise-pseudonymous DIDs** - Different DIDs for each relationship
 2. **Off-chain private data** - Never store PII on public ledgers
 3. **Selective disclosure** - Share only necessary information
 4. **Zero-knowledge proofs** - Prove attributes without revealing data
-##### Security Best Practices
-* Key rotation mechanisms, Multi-signature support, Delegation capabilities, Revocation registries.
+
+### Security Best Practices
+
+- Key rotation mechanisms
+- Multi-signature support
+- Delegation capabilities
+- Revocation registries
 
 ---
 
 ### 8. DID Development in China
 ##### 8.1 Overview
 China has been actively developing distributed digital identity infrastructure with strong government backing, combining government-verified identity with distributed ledger technology.
+
 ##### 8.2 Key Players in China
 ###### CTID (居民身份网络可信凭证)
-* **Operator:** Ministry of Public Security First Research Institute.
-* **Type:** Software-based solution.
-* **Features:** Real identity verification, multi-factor authentication, based on ID card + biometrics.
-* **Scale:** 50+ billion data records, 20,000+ requests per second capacity.
-###### eID (网络电子身份标识)
-* **Operator:** Ministry of Public Security Third Research Institute.
-* **Type:** Hardware-based solution.
-* **Features:** Smart security chip, online/offline auth, digital signature capabilities loaded on financial IC/SIM cards and smartphones.
+- **Operator:** 公安部第一研究所 (Ministry of Public Security First Research Institute)
+- **Type:** Software-based solution
+- **Features:**
+  - Real identity verification
+  - Network credential issuance
+  - Multi-factor authentication
+  - Based on ID card + biometric verification
+- **Scale:**
+  - 50+ billion data records
+  - 20,000+ requests per second capacity
+  - ~0.5 second average response time
+
+#### eID (网络电子身份标识)
+
+- **Operator:** 公安部第三研究所 (Ministry of Public Security Third Research Institute)
+- **Type:** Hardware-based solution
+- **Features:**
+  - Smart security chip as carrier
+  - Online and offline authentication
+  - Digital signature capabilities
+  - Loaded on financial IC cards, SIM cards, and smartphones
+- **Partnerships:**
+  - Major banks for eID-enabled cards
+  - Three telecom operators for SIM-based eID
+  - Smartphone manufacturers for built-in eID
+
 ##### 8.3 BSN (Blockchain Service Network)
 ###### Overview
 BSN is a global blockchain public infrastructure initiated by the State Information Center, China Mobile, China UnionPay, and Beijing Red Date Technology.
+- 国家信息中心 (State Information Center) - Planning & Design
+- 中国移动 (China Mobile)
+- 中国银联 (China UnionPay)
+- 北京红枣科技 (Beijing Red Date Technology)
+
 ###### BSN-DID Service
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    BSN-DID Architecture                     │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌─────────────┐     ┌─────────────┐     ┌─────────────┐    │
+│  │   User      │────>│   CTID      │────>│   BSN       │    │
+│  │  Identity   │     │ Verification│     │ Yan'an Chain│    │
+│  └─────────────┘     └─────────────┘     └─────────────┘    │
+│                             │                    │          │
+│                             ▼                    ▼          │
+│                      ┌─────────────┐     ┌─────────────┐    │
+│                      │ Real-name   │     │ DID Document│    │
+│                      │ Attestation │     │ Storage     │    │
+│                      └─────────────┘     └─────────────┘    │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
 ###### BSN Real-name DID Service Features
 | Feature | Description |
 | :--- | :--- |
@@ -3233,6 +3306,7 @@ BSN is a global blockchain public infrastructure initiated by the State Informat
 ##### 8.4 DIDA (分布式数字身份产业联盟)
 ###### Overview
 DIDA is China's first distributed digital identity industry alliance, formed to promote DID technology standards and applications.
+
 ###### Key Information
 | Aspect | Details |
 | :--- | :--- |
@@ -3241,11 +3315,20 @@ DIDA is China's first distributed digital identity industry alliance, formed to 
 | Members | 12 founding council members |
 | Focus | Technology standards, industry applications, legal compliance |
 
-
 ###### DIDA's Four Major Tasks
-1. **Technical Standards**, 2. **Infrastructure**, 3. **Application Scenarios**, 4. **International Cooperation**.
-###### Expert Advisors
-Cai Jiren, Chen Jing, Li Jingchun, Liu Duo, Ma Zhitao, Zhan Banghua, Xu Ke.
+1. **Technical Standards** - Establish distributed identity technical specifications
+2. **Infrastructure** - Build distributed identity infrastructure
+3. **Application Scenarios** - Explore and promote use cases
+4. **International Cooperation** - Align with international standards
+
+#### Expert Advisors
+- 蔡吉人 (Cai Jiren) - Academician, Chinese Academy of Engineering
+- 陈静 (Chen Jing) - Former Director, PBOC Technology Department
+- 李京春 (Li Jingchun) - TC260 Security Assessment Group Leader
+- 刘多 (Liu Duo) - President, CAICT
+- 马智涛 (Ma Zhitao) - VP & CIO, WeBank
+- 詹榜华 (Zhan Banghua) - Chairman, Beijing Certificate Authority
+- 徐恪 (Xu Ke) - Deputy Head, Tsinghua CS Department
 
 ##### 8.5 National Standards
 ###### Standard: 区块链和分布式记账技术分布式身份管理系统概述
@@ -3272,14 +3355,33 @@ Classification of distributed identity management systems, basic functions, main
 
 
 ##### 8.7 Application Areas in China
-###### Government Services
-Digital identity for citizens, Cross-department data sharing, Administrative service authentication, Social security integration.
-###### Financial Services
-Bank account opening (KYC), Insurance claims, Securities trading, Cross-border payments.
-###### Healthcare
-Patient identity management, Medical record sharing, Prescription verification, Health certificate issuance.
-###### Cross-border Applications
-International travel credentials, Cross-border trade verification, International education credentials.
+#### Government Services
+
+- Digital identity for citizens
+- Cross-department data sharing
+- Administrative service authentication
+- Social security integration
+
+#### Financial Services
+
+- Bank account opening (KYC)
+- Insurance claims
+- Securities trading
+- Cross-border payments
+
+#### Healthcare
+
+- Patient identity management
+- Medical record sharing
+- Prescription verification
+- Health certificate issuance
+
+#### Cross-border Applications
+
+- International travel credentials
+- Cross-border trade verification
+- International education credentials
+
 ##### 8.8 Challenges in China
 | Challenge | Description |
 | :--- | :--- |
@@ -3292,7 +3394,12 @@ International travel credentials, Cross-border trade verification, International
 
 
 ##### 8.9 Future Outlook
-1. **Standardization**, 2. **Infrastructure**, 3. **Applications**, 4. **International**, 5. **Privacy Enhancement**, 6. **Digital Yuan Integration**.
+1. **Standardization** - National standards alignment with ISO
+2. **Infrastructure** - Expansion of BSN network capabilities
+3. **Applications** - More government and enterprise use cases
+4. **International** - Cross-border identity recognition
+5. **Privacy Enhancement** - Zero-knowledge proof integration
+6. **Digital Yuan Integration** - CBDC identity verification
 
 #### 8. Key Standards & Resources
 | Resource | URL |
@@ -3364,53 +3471,197 @@ International travel credentials, Cross-border trade verification, International
 ---
 
 ### 10. Advanced Cryptography (Bilinear Pairing & BBS+)
-**Bilinear Pairing** is a special mathematical function that acts as a "bridge" between two different cryptographic groups, enabling advanced privacy features.
+**Bilinear Pairing** (双线性配对) is a special mathematical function that acts as a "bridge" between two different cryptographic groups. It is the core engine that enables advanced privacy features like those in BBS+, Identity-Based Encryption, and Zero-Knowledge Proofs.
 
-##### 1. The Basic Concept: Three Groups
-* **Group 1 ($G_1$)**: Points on an elliptic curve (addition).
-* **Group 2 ($G_2$)**: Another curve group (addition).
-* **Target Group ($G_T$)**: A set of numbers in a finite field (multiplication).
-A Bilinear Pairing is $e: G_1 \times G_2 \rightarrow G_T$.
+Here is a simple breakdown of what it is, how it works, and why it's magical for cryptography.
 
-##### 2. The "Magic" Property: Bilinearity
-It allows you to move multiplication into the exponent: $e(aP, bQ) = e(P, Q)^{ab}$. Both sides give you the exact same value in $G_T$.
+### 1. The Basic Concept: Three Groups
+Imagine three distinct clubs (mathematical groups):
+*   **Group 1 ($G_1$)**: A club where members are points on an elliptic curve. The operation here is **addition** (e.g., $P + P = 2P$).
+*   **Group 2 ($G_2$)**: Another club, often similar to $G_1$ (also elliptic curve points), also using **addition**.
+*   **Target Group ($G_T$)**: A completely different club, usually a set of numbers in a finite field, where the operation is **multiplication** (e.g., $x \cdot x = x^2$).
 
-##### 3. Why is this useful? (The "One-Way Bridge")
-It allows you to verify relationships between hidden numbers without knowing the numbers themselves.
-###### Example Scenario:
-If Party A knows $a$ and publishes $A = aP$, and Party B publishes $B = bQ$, they can prove they know $ab$ using pairings ($e(A, B) = e(P, Q)^{ab}$). The verifier confirms the relationship but never learns what $a$ or $b$ are, creating the foundation of **Zero-Knowledge Proofs**.
+A **Bilinear Pairing** is a function, denoted as $e$, that takes one member from $G_1$ and one from $G_2$ and produces a member in $G_T$:
+$$ e: G_1 \times G_2 \rightarrow G_T $$
 
-##### 4. How it enables BBS+ Selective Disclosure
-The pairing allows the verifier to check that the "hidden part" balances the equation against the "revealed part" and public key. The verifier can see the result match perfectly without reversing the pairing to calculate hidden messages.
+### 2. The "Magic" Property: Bilinearity
+The reason this function is so powerful is its **bilinear property**. It allows you to "move" multiplication from the inputs into the exponent of the output.
 
-##### 5. Common Curves Used
-* **BLS12-381**: The most popular choice today.
-* **BN254**: An older standard.
-* **KZG Commitments**: Rely heavily on pairings.
-##### Summary Analogy
-Think of it as a special glass box where the glow changes predictably based on keys inside, but observers cannot see through the glass to find out what the keys actually are.
+Mathematically, for any points $P \in G_1$, $Q \in G_2$ and any integers (scalars) $a$ and $b$:
+$$ e(aP, bQ) = e(P, Q)^{ab} $$
 
-##### **1. Setup: The Cryptographic Building Blocks**
-Requires pairing-friendly curves, a bilinear pairing, public generators ($g_0, g_1, ..., g_k, h$), and public key $w = x \cdot g_2$.
-##### **2. Key Generation**
-* **Secret Key ($sk$)**: random scalar $x$.
-* **Public Key ($pk$)**: $w = x \cdot g_2$.
-##### **3. Signing a Message Vector**
-To sign $k$ messages, pick randomness $e$ and $s$, compute signature core $A = \left( g_0 \cdot g_1^{m_1} \cdot g_2^{m_2} \cdots g_k^{m_k} \cdot h^s \right)^{\frac{1}{e + x}}$, output $\sigma = (A, e, s)$.
-##### **4. Verification (Full Disclosure)**
-Recompute LHS ($e(A, w \cdot g_2^e)$) and RHS ($e(g_0 \cdot g_1^{m_1} \cdots g_k^{m_k} \cdot h^s, g_2)$) and check equality.
-##### **5. Selective Disclosure: The Magic Step**
-###### **Step 1: Randomize the Signature**
-Compute $A' = r \cdot A$ to blind the signature.
-###### **Step 2: Generate a Zero-Knowledge Proof (ZKP)**
-The holder creates a proof that they know hidden messages and randomness.
-###### **How the ZKP Works (Simplified)**
-Commit to hidden values, prove consistency, and reveal only plaintext values.
-###### **Step 3: Verifier Checks**
-Checks the ZKP to ensure the pairing equation holds, the holder knows the values, and no information is leaked.
-##### **6. Why This Works: The Role of Pairings**
-Binding messages, hiding via exponents, blinding, and zero-knowledge.
-##### **Example Use Case: Age Verification**
-You can prove you are over 18 to a bar by randomizing the signature and revealing only your age.
-##### **Key Takeaways**
-Multi-Message Signatures, Selective Disclosure, Unlinkability, Privacy, and Efficiency.
+**Let's break that down in plain English:**
+*   **Left Side**: You take point $P$, add it to itself $a$ times ($aP$). You take point $Q$, add it to itself $b$ times ($bQ$). Then you feed these two resulting points into the pairing function.
+*   **Right Side**: You feed the original points $P$ and $Q$ into the pairing function first, get a result, and then raise that result to the power of $a \times b$.
+*   **The Result**: Both sides give you the **exact same value** in $G_T$.
+
+### 3. Why is this useful? (The "One-Way Bridge")
+This property creates a unique cryptographic capability: **It allows you to verify relationships between hidden numbers without knowing the numbers themselves.**
+
+#### Example Scenario:
+Imagine $a$ and $b$ are secret keys known only to two different parties.
+*   Party A knows $a$ and publishes $A = aP$ (hiding $a$ inside the point).
+*   Party B knows $b$ and publishes $B = bQ$ (hiding $b$ inside the point).
+*   They want to prove they both know the product $ab$ without revealing $a$ or $b$.
+
+Using the pairing:
+1.  Anyone can compute $e(A, B) = e(aP, bQ)$.
+2.  Thanks to bilinearity, this equals $e(P, Q)^{ab}$.
+3.  If someone claims "I know the secret $k = ab$", they can generate a value based on $e(P, Q)^k$.
+4.  The verifier checks if this matches $e(A, B)$.
+
+**Crucially**: The verifier confirms that $A$ and $B$ were generated using secrets that multiply to $k$, **but the verifier never learns what $a$ or $b$ actually are**. This is the foundation of **Zero-Knowledge Proofs**.
+
+### 4. How it enables BBS+ Selective Disclosure
+Recall the BBS+ signature equation simplified:
+$$ \text{Signature} \propto (g_0 \cdot g_1^{m_1} \cdot g_2^{m_2})^{\frac{1}{secret}} $$
+
+When you want to hide $m_2$:
+1.  You cannot simply remove $g_2^{m_2}$ because the signature would become invalid.
+2.  Instead, you create a proof using pairings. You construct an equation where the term containing $m_2$ is on one side, and your randomized signature is on the other.
+3.  The **bilinear pairing** allows the verifier to check that the "hidden part" mathematically balances the equation against the "revealed part" ($m_1$) and the public key.
+4.  Because the discrete logarithm problem is hard, the verifier can see the *result* of the pairing match perfectly, proving $m_2$ exists and is valid, but cannot reverse the pairing to calculate $m_2$.
+
+### 5. Common Curves Used
+Not all elliptic curves support efficient bilinear pairings. Special "pairing-friendly" curves are required:
+*   **BLS12-381**: The most popular choice today (used in Ethereum 2.0, Zcash, and many DID systems). It offers a good balance of security (128-bit) and speed.
+*   **BN254**: An older standard, slightly faster but considered to have slightly lower security margins now.
+*   **KZG Commitments**: Also rely heavily on pairings (often on BLS12-381).
+
+### Summary Analogy
+Think of Bilinear Pairing as a **special glass box**:
+*   You can put two locked boxes (inputs from $G_1$ and $G_2$) into the glass box.
+*   The glass box glows with a specific color (output in $G_T$) that depends on the combination of keys inside the locked boxes.
+*   **The Magic**: If you multiply the keys inside the locked boxes by certain numbers, the glow changes in a predictable mathematical way ($ab$).
+*   **The Privacy**: Observers can see the glow and verify the relationship between the keys, but they **cannot see through the glass** to find out what the keys actually are.
+
+This ability to "compute on encrypted/hidden data" and verify the result is what makes BBS+ and modern privacy-preserving cryptography possible.
+
+
+Let’s dive into the **BBS+ Signature Algorithm** step-by-step. We’ll break down the math, the flow, and how it achieves **selective disclosure** using bilinear pairings.
+
+---
+
+### **1. Setup: The Cryptographic Building Blocks**
+Before signing, we need:
+- **Pairing-friendly elliptic curves**: Two groups $G_1$ and $G_2$ (additive notation) and a target group $G_T$ (multiplicative).
+- **Bilinear pairing**: $e: G_1 \times G_2 \rightarrow G_T$ with the property $e(aP, bQ) = e(P, Q)^{ab}$.
+- **Generators**: 
+  - $g_0, g_1, ..., g_k \in G_1$ (public generators for messages).
+  - $h \in G_1$ (a helper generator).
+  - $w = x \cdot g_2 \in G_2$ (public key, where $x$ is the secret key and $g_2 \in G_2$).
+
+---
+
+### **2. Key Generation**
+The signer generates their keys:
+- **Secret Key ($sk$)**: A random scalar $x \in \mathbb{Z}_p$.
+- **Public Key ($pk$)**: $w = x \cdot g_2 \in G_2$.
+
+---
+
+### **3. Signing a Message Vector**
+To sign $k$ messages $(m_1, m_2, ..., m_k)$:
+1. **Choose randomness**: 
+   - Pick a random scalar $e \in \mathbb{Z}_p$ (prevents signature reuse).
+   - Pick a random scalar $s \in \mathbb{Z}_p$ (blinds the messages).
+2. **Compute the signature core**:
+   $$
+   A = \left( g_0 \cdot g_1^{m_1} \cdot g_2^{m_2} \cdots g_k^{m_k} \cdot h^s \right)^{\frac{1}{e + x}} \in G_1
+   $$
+   - Here, $g_i^{m_i}$ means adding $g_i$ to itself $m_i$ times (scalar multiplication in $G_1$).
+   - The exponent $\frac{1}{e+x}$ is computed modulo the group order (using modular inverse).
+3. **Output the signature**: $\sigma = (A, e, s)$.
+
+---
+
+### **4. Verification (Full Disclosure)**
+To verify $\sigma = (A, e, s)$ on messages $(m_1, ..., m_k)$:
+1. **Recompute the left-hand side (LHS)**:
+   $$
+   \text{LHS} = e(A, w \cdot g_2^e) \in G_T
+   $$
+   - Since $w = x \cdot g_2$, this becomes $e(A, (x + e) \cdot g_2)$.
+2. **Recompute the right-hand side (RHS)**:
+   $$
+   \text{RHS} = e\left( g_0 \cdot g_1^{m_1} \cdots g_k^{m_k} \cdot h^s, g_2 \right) \in G_T
+   $$
+3. **Check equality**:
+   $$
+   \text{LHS} \stackrel{?}{=} \text{RHS}
+   $$
+   - If true, the signature is valid. This works because:
+     $$
+     e(A, (x+e)g_2) = e\left( \left( \prod g_i^{m_i} \cdot h^s \right)^{\frac{1}{x+e}}, (x+e)g_2 \right) = e\left( \prod g_i^{m_i} \cdot h^s, g_2 \right)
+     $$
+     (Bilinearity cancels out the $\frac{1}{x+e}$ and $(x+e)$ terms.)
+
+---
+
+### **5. Selective Disclosure: The Magic Step**
+Now, the holder wants to prove they know a valid signature but only reveal a subset of messages (e.g., $m_1$ and $m_3$, hiding $m_2$).
+
+#### **Step 1: Randomize the Signature**
+The holder picks a random scalar $r \in \mathbb{Z}_p$ and computes:
+$$
+A' = r \cdot A \in G_1
+$$
+This "blinds" the signature, making it unlinkable to the original $\sigma$.
+
+#### **Step 2: Generate a Zero-Knowledge Proof (ZKP)**
+The holder creates a proof that they know:
+- The hidden messages ($m_2$ in this case).
+- The original randomness $s$ and $e$.
+- The blinding factor $r$.
+
+Such that:
+$$
+e(A', w \cdot g_2^e) = e\left( g_0 \cdot g_1^{m_1} \cdot g_2^{m_2} \cdot g_3^{m_3} \cdot h^s, g_2 \right)
+$$
+But without revealing $m_2$, $s$, $e$, or $r$.
+
+#### **How the ZKP Works (Simplified)**
+1. **Commit to hidden values**: The holder creates cryptographic commitments to $m_2$, $s$, and $e$ (e.g., using Pedersen commitments).
+2. **Prove consistency**: Using a **Sigma Protocol** or **SNARK**, the holder proves:
+   - The committed $m_2$ satisfies the pairing equation above.
+   - They know the opening of the commitments (i.e., they know $m_2$, $s$, $e$).
+3. **Reveal only $m_1$ and $m_3$**: These are sent in plaintext.
+
+#### **Step 3: Verifier Checks**
+The verifier:
+1. Uses the revealed $m_1, m_3$.
+2. Uses the public key $w$.
+3. Checks the ZKP to ensure:
+   - The pairing equation holds for *some* valid $m_2$, $s$, $e$.
+   - The holder knows these values (soundness).
+   - No information about $m_2$ is leaked (zero-knowledge).
+
+---
+
+### **6. Why This Works: The Role of Pairings**
+- **Binding Messages**: The pairing equation ties all messages $(m_1, ..., m_k)$ together in a single check. You can’t alter one message without breaking the equation.
+- **Hiding via Exponents**: Messages are encoded as exponents ($g_i^{m_i}$). Due to the **Discrete Logarithm Problem**, no one can extract $m_i$ from $g_i^{m_i}$.
+- **Blinding**: Randomizing $A \to A'$ changes the signature’s appearance but preserves validity (since $e(rA, ...) = e(A, ...)^r$).
+- **Zero-Knowledge**: The ZKP proves knowledge of hidden values without revealing them, leveraging the pairing’s ability to verify relationships across groups.
+
+---
+
+### **Example Use Case: Age Verification**
+1. **Issuer** (e.g., government) signs your credentials: $(name, age, address)$.
+2. **You** want to prove you’re over 18 to a bar.
+3. **You**:
+   - Randomize the signature.
+   - Reveal only $age = 25$.
+   - Generate a ZKP that $age$ is part of the signed data, hiding $name$ and $address$.
+4. **Bar** verifies the ZKP and trusts the issuer’s public key. They learn nothing else about you.
+
+---
+
+### **Key Takeaways**
+- **Multi-Message Signatures**: One signature for many messages.
+- **Selective Disclosure**: Reveal only what’s needed.
+- **Unlinkability**: Randomization prevents tracking across uses.
+- **Privacy**: Zero-knowledge proofs hide sensitive data.
+- **Efficiency**: Signature size is constant, regardless of the number of messages.
+
+BBS+ is a cornerstone of **privacy-preserving systems** like decentralized identity (DID), anonymous credentials, and confidential transactions. Its power lies in combining bilinear pairings with zero-knowledge proofs to achieve what traditional signatures cannot.
