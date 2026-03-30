@@ -2985,6 +2985,7 @@ Authentication using DIDs involves proving control over the identifier through c
   "domain": "example.com",
   "proofValue": "z58DAdFfa9SkqZMVPxAQpic7ndSaynfK6iV..."
 }
+```
 
 ###### Proof Purposes
 | Purpose | When to Use | Example |
@@ -3052,7 +3053,14 @@ Resolution Steps:
 4. Return DID document (no network call needed)
 ```
 
-| updated | Timestamp of last update | | deactivated | Whether DID is deactivated (true/false) | | nextUpdate | Timestamp of next scheduled update | | versionId | Version identifier of DID document | | nextVersionId | Version identifier of next version | | equivalentId | Logically equivalent DIDs | | canonicalId | Canonical DID for the subject |
+| `updated` | Timestamp of last update |
+|-----------|--------------------------|
+| `deactivated` | Whether DID is deactivated (true/false) |
+| `nextUpdate` | Timestamp of next scheduled update |
+| `versionId` | Version identifier of DID document |
+| `nextVersionId` | Version identifier of next version |
+| `equivalentId` | Logically equivalent DIDs |
+| `canonicalId` | Canonical DID for the subject |
 
 
 ##### 3.5 Authentication Flow
@@ -3154,6 +3162,7 @@ Resolution Steps:
     "proofValue": "z58DAdFfa9SkqZMVPxAQp..."
   }
 }
+```
 
 ##### Verifiable Credential Types
 - Educational credentials (degrees, certificates)
